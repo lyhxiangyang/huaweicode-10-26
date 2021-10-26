@@ -63,7 +63,7 @@ def changeTimeColumns_process(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    spath = "tmp/tData-10-26/多机-E5-process-3KM"
+    spath = "tmp/tData-10-26/多机-Local-process-3KM"
     all_faulty_pd_dict = {}
     orginal_all_faulty_pd_dict = {}
     isSlideWin = True  # True代表这个step为1， False代表step为Win
