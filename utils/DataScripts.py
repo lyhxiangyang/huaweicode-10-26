@@ -6,6 +6,7 @@ import pandas as pd
 
 from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabels, subtractLastLineFromDataFrame
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, TIME_INTERVAL, CPU_FEATURE
+from utils.FeatureExtraction import featureExtractionUsingFeatures
 from utils.FileSaveRead import saveDFListToFiles, saveCoreDFToFiles, saveFaultyDict
 
 """
@@ -291,5 +292,19 @@ def standard_file_time_core_faultyDict(ftcPD, standardFeature, meanvalue, standa
     return resDict
 
 
-
-
+# 特征提取 file-time-core数据
+def FeaExtra_file_time_core(ftcDict, windowSize: int = 5, windowRealSize: int = 1,
+                            silidWindows: bool = True,
+                            extraFeature=None):
+    resDict = {}
+    fault_PDDict = {}
+    for filename, time_core_pdDict in ftcDict.items():
+        resDict[filename] = {}
+        for time, core_pdDict in time_core_pdDict.items():
+            resDict[filename][time] = {}
+            print("filename:{}-time:{}".format(filename, time))
+            for icore, tpd in core_pdDict.items():
+                fePD, fault_Dict = featureExtractionUsingFeatures(tpd, windowSize, windowRealSize, silidWindows, extraFeature)
+                resDict[filename][time][icore] = fePD
+                fault_PDDict = mergeTwoDF(fault_Dict, fault_PDDict)
+    return resDict, fault_PDDict

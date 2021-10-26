@@ -506,6 +506,11 @@ def featureExtraction_excludeAccumulation(featurePD: pd.DataFrame, windowSize: i
 """
 保证这个df的时间序列是连续的，并且可能包含多个错误类型
 保证带有time 和标签特征
+
+
+备注：
+在过渡阶段会进行判断，是否要继续还是如果windowRealSize=1那么将永远不会进行跳转
+在过渡阶段，小于windowsRealSize进行跳转
 """
 
 
