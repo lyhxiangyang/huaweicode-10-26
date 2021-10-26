@@ -206,8 +206,9 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
             tpd['cpu'] = tpd['user'] + tpd['system']
             tpd = PushLabelToEnd(tpd, FAULT_FLAG)
             subcorepds.append((icore, tpd))
-        #提取的指标多加一个'cpu'
-        process_features.append('cpu')
+        # 提取的指标多加一个'cpu'
+        if 'cpu' not in process_features:
+            process_features.insert(2, 'cpu')
 
         # tmp/{filename}/2.时间段划分集合文件详细信息/
         tcoresavepath = os.path.join(spath, "2.时间段划分集合文件详细信息", "{}.第{}时间段分割核心-减前一行".format(i, i).format(i))

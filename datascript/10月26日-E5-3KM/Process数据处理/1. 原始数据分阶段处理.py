@@ -100,6 +100,7 @@ if __name__ == "__main__":
         changeTimeColumns_process(processpd)
 
         # tmp/{filename}
+        print("{} 处理".format(filename).center(40, "*"))
         onefile_Faulty_PD_Dict, time_core_pdDict, time_core_faultDict = processOneProcessFile(
             spath=os.path.join(spath, "0.所有文件处理过程", filename), filepd=processpd, accumulationFeatures=accumulationFeatures, process_features=process_features)
         all_faulty_pd_dict = mergeTwoDF(onefile_Faulty_PD_Dict, all_faulty_pd_dict)
