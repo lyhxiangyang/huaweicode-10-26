@@ -8,7 +8,7 @@ from utils.DefineData import FAULT_FLAG
 
 trainNormalDataPath = [
     "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
-    "tmp/tData-10-18/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
 ]
 
 trainAbnormalDataPath = [
@@ -18,13 +18,13 @@ trainAbnormalDataPath = [
 ]
 
 testNormalDataPath = [
-    "tmp/tData-10-18/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
 ]
 
 testAbnormalDataPath = [
-    "tmp/tData-10-18/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/13.csv",
-    "tmp/tData-10-18/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/14.csv",
-    "tmp/tData-10-18/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/15.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/13.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/14.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/15.csv",
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
