@@ -90,7 +90,8 @@ if __name__ == "__main__":
 
 
     # 获得需要训练的特征
-    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array),prefix="load1_", suffix="_diff")
+    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
+
     # 使用平均值 最大值 和最小值
     # allfeatureload1_nosuffix = [
     #     "load1_mean",

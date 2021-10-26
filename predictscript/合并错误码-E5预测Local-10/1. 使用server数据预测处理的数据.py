@@ -51,7 +51,7 @@ def setPDfaultFlag(df: pd.DataFrame, ff: int) -> pd.DataFrame:
 """
 # 预测未处理数据
 if __name__ == "__main__":
-    spath = "tmp/E5多机预测红区-单特征load1-标准化特征提取-合并错误10_60"
+    spath = "tmp/E5多机预测Local-标准化特征提取-合并错误"
     # trainedPDList: list[Union[Union[TextFileReader, Series, DataFrame, None], Any]] = []
     # for i in trainDataPath:
     #     tpd = pd.read_csv(i)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
 
     # 获得需要训练的特征
-    allfeatureload1_nosuffix = get_List_nosuffix(list(allTrainedPD.columns.array), suffix="_diff")
+    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="load1", suffix="_diff")
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
     ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")
