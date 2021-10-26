@@ -49,7 +49,7 @@ def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%
 """
 
 
-def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None) -> pd.DataFrame:
+def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None, standardValue: int = 100) -> pd.DataFrame:
     if standardFeatures is None:
         standardFeatures = []
     nostandardDf = df.loc[:, standardFeatures]
@@ -58,7 +58,7 @@ def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=No
     if meanValue is None:
         meanValue = nostandardDf.mean()
     # 进行标准化
-    standardDf = (nostandardDf / meanValue * 100).astype("int64")
+    standardDf = (nostandardDf / meanValue * standardValue).astype("int64")
     if TIME_COLUMN_NAME in df.columns.array:
         standardDf[TIME_COLUMN_NAME] = df[TIME_COLUMN_NAME]
     if FAULT_FLAG in df.columns.array:
@@ -142,9 +142,12 @@ def SplitDFByCores(df: pd.DataFrame) -> List[Tuple[int, pd.DataFrame]]:
         coreList.append((icore, tpd))
     return coreList
 
+
 """
 提取一个文件中的所有错误
 """
+
+
 def abstractFaultPDDict(df: pd.DataFrame, extraFeature: List[str] = []) -> \
         Union[dict[int, dict], Any]:
     # 获得这个df中所有的错误码的类型
@@ -160,12 +163,15 @@ def abstractFaultPDDict(df: pd.DataFrame, extraFeature: List[str] = []) -> \
         resFaultDF[ifault] = fdf
     return resFaultDF
 
+
 """
 将一个process文件处理的过程
 主要目的是获得 time-core-pd以及time-core-pd-faulty
 """
 
-def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures: List[str], process_features : List[str]):
+
+def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures: List[str],
+                          process_features: List[str]):
     if not os.path.exists(spath):
         os.makedirs(spath)
 
@@ -226,3 +232,61 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
     saveFaultyDict(tallsavefaultypath, thisFileFaulty_PD_Dict)
     # 返回一个此文件所有错误的的Fault-PD， 返回按照时间段-核心-PD的字典结构， 返回按照时间段-核心-错误码-PD的字典结构
     return thisFileFaulty_PD_Dict, thisTime_core_PD_Dict, thisTime_core_FileFaulty_PD_Dict
+
+
+## ==== 用于process的步骤2
+
+"""
+得到平均值
+"""
+
+
+def getDFmean(df: pd.DataFrame, standardFeatures: List[str]) -> pd.Series:
+    if FAULT_FLAG in standardFeatures:
+        standardFeatures.remove(FAULT_FLAG)
+    if TIME_COLUMN_NAME in standardFeatures:
+        standardFeatures.remove(TIME_COLUMN_NAME)
+    return df.loc[:, standardFeatures].mean()
+
+
+"""
+作用：标准化 file-time-core 
+返回值： file-time-core的字典结构
+"""
+
+
+def standard_file_time_coreDict(ftcPD, standardFeature, meanvalue, standardValue: int):
+    resDict = {}
+    for filename, time_core_pdDict in ftcPD.items():
+        resDict[filename] = {}
+        for time, core_pdDict in time_core_pdDict.items():
+            resDict[filename][time] = {}
+            for icore, tpd in core_pdDict.items():
+                resDict[filename][time][icore] = standardPDfromOriginal(tpd, standardFeatures=standardFeature,
+                                                                        meanValue=meanvalue, standardValue=standardValue)
+    return resDict
+
+
+"""
+作用：标准化 file-time-core-fault
+返回值：file-time-core-fault的一个字典结构
+"""
+
+
+def standard_file_time_core_faultyDict(ftcPD, standardFeature, meanvalue, standardValue: int):
+    resDict = {}
+    for filename, time_core_pdDict in ftcPD.items():
+        resDict[filename] = {}
+        for time, core_pdDict in time_core_pdDict.items():
+            resDict[filename][time] = {}
+            for icore, faultypdDict in core_pdDict.items():
+                resDict[filename][time][icore] = {}
+                for ifault, tpd in faultypdDict.items():
+                    resDict[filename][time][icore][ifault] = standardPDfromOriginal(tpd,
+                                                                                    standardFeatures=standardFeature,
+                                                                                    meanValue=meanvalue, standardValue=standardValue)
+    return resDict
+
+
+
+
