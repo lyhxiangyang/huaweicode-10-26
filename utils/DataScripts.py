@@ -310,6 +310,21 @@ def FeaExtra_file_time_core(ftcDict, windowSize: int = 5, windowRealSize: int = 
     return resDict, fault_PDDict
 
 
+# 特征提取 file-time数据 主要是用于server数据
+def FeaExtra_file_time(ftcDict, windowSize: int = 5, windowRealSize: int = 1,
+                            silidWindows: bool = True,
+                            extraFeature=None):
+    resDict = {}
+    fault_PDDict = {}
+    for filename, time_core_pdDict in ftcDict.items():
+        resDict[filename] = {}
+        for time, timepd in time_core_pdDict.items():
+            fePD, fault_Dict = featureExtractionUsingFeatures(timepd, windowSize, windowRealSize, silidWindows,
+                                                              extraFeature)
+            resDict[filename][time] = fePD
+            fault_PDDict = mergeTwoDF(fault_Dict, fault_PDDict)
+            print("filename:{}-time:{}".format(filename, time))
+    return resDict, fault_PDDict
 
 # ==================================== 用于server数据
 """
