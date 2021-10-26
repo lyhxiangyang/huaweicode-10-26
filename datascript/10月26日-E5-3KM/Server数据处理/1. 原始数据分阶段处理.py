@@ -106,5 +106,5 @@ if __name__ == "__main__":
     saveFilename_Time_pdDict(sspath, filename_time_pdDict)
 
     # 将filename-time-core进行保存
-    sspath = os.path.join(spath, "3.filename-time-core-faulty")
+    sspath = os.path.join(spath, "3.filename-time-faulty")
     saveFilename_Time_Faulty_pdDict(sspath, filename_time_faultDict)
