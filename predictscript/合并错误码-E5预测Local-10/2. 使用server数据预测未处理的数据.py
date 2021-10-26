@@ -12,19 +12,20 @@ trainNormalDataPath = [
 ]
 
 trainAbnormalDataPath = [
-    "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/13.csv",
-    "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/14.csv",
-    "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/15.csv",
+    (10, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/13.csv"),
+    (10, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/14.csv"),
+    (10, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/15.csv"),
 ]
+
 
 testNormalDataPath = [
     "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/0.csv",
 ]
 
 testAbnormalDataPath = [
-    "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/13.csv",
-    "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/14.csv",
-    "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/15.csv",
+    (10, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/13.csv"),
+    (10, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/14.csv"),
+    (10, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/15.csv"),
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
@@ -52,17 +53,35 @@ def setPDfaultFlag(df: pd.DataFrame, ff: int) -> pd.DataFrame:
 # 预测未处理数据
 if __name__ == "__main__":
     spath = "tmp/E5多机预测Local-标准化特征提取-合并错误"
-
+    # trainedPDList: list[Union[Union[TextFileReader, Series, DataFrame, None], Any]] = []
+    # for i in trainDataPath:
+    #     tpd = pd.read_csv(i)
+    #     trainedPDList.append(tpd)
+    # allTrainedPD, err = mergeDataFrames(trainedPDList)
+    # allTrainedPD: pd.DataFrame
+    # if err:
+    #     print("train合并出错")
+    #     exit(1)
+    #
+    # testPDList = []
+    # for i in testDataPath:
+    #     tpd = pd.read_csv(i)
+    #     testPDList.append(tpd)
+    # allTestPD, err = mergeDataFrames(testPDList)
+    # if err:
+    #     print("test合并出错")
+    #     exit(1)
+    #==================================================================读取训练的normal数据
     trainNormalList = []
     for i in trainNormalDataPath:
         tpd = pd.read_csv(i)
         trainNormalList.append(tpd)
     #==================================================================读取训练的abnormal数据
     trainAbnormalList = []
-    for i in trainAbnormalDataPath:
-        tpd = pd.read_csv(i)
+    for ilabel, ipath in trainAbnormalDataPath:
+        tpd = pd.read_csv(ipath)
         # 修改list的标签
-        tpd = setPDfaultFlag(tpd, 10)
+        tpd = setPDfaultFlag(tpd, ilabel)
         trainAbnormalList.append(tpd)
     #==================================================================读取测试的normal数据
     testNormalList = []
@@ -71,9 +90,9 @@ if __name__ == "__main__":
         testNormalList.append(tpd)
     #==================================================================读取训练的normal数据
     testAbnormalList = []
-    for i in testAbnormalDataPath:
-        tpd = pd.read_csv(i)
-        tpd = setPDfaultFlag(tpd, 10)
+    for ilabel, ipath in testAbnormalDataPath:
+        tpd = pd.read_csv(ipath)
+        tpd = setPDfaultFlag(tpd, ilabel)
         testNormalList.append(tpd)
 
     #==================================================================将所有的训练数据进行合并
@@ -90,14 +109,7 @@ if __name__ == "__main__":
 
 
     # 获得需要训练的特征
-    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array),prefix="load1_", suffix="_diff")
-    # 使用平均值 最大值 和最小值
-    # allfeatureload1_nosuffix = [
-    #     "load1_mean",
-    #     "load1_max",
-    #     "load1_min",
-    #     "load1_percentage_50",
-    # ]
+    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="load1", suffix="_diff")
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
     ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")
