@@ -52,7 +52,7 @@ server_feature = [
     # "faultFlag",
 ]
 dataserverpath = [
-    "D:/HuaweiMachine/数据分类/wrf/多机/红区/3KM/异常数据/wrf_3km_multi_43/wrf_3km_160_server.csv"
+    "D:/HuaweiMachine/数据分类/wrf/多机/红区/3KM/异常数据/wrf_3km_160_server.csv"
 ]
 
 
