@@ -57,11 +57,11 @@ standardized_abnormalflag = [15]
 
 if __name__ == "__main__":
     # 所有正常数据的路径
-    normalpath = "tmp/tData-10-26/多机-E5-process-3KM/1.所有process错误码信息/0.csv"
+    normalpath = "tmp/tData-10-26/多机-Local-process-3KM/1.所有process错误码信息/0.csv"
     # 需要标准化的数据路径
-    file_time_corePath = "tmp/tData-10-26/多机-E5-process-3KM/2.filename-time-core"
-    file_time_core_faultyPath: str = "tmp/tData-10-26/多机-E5-process-3KM/3.filename-time-core-faulty"
-    spath = "tmp/tData-10-26/多机-E5-process-3KM"
+    file_time_corePath = "tmp/tData-10-26/多机-Local-process-3KM/2.filename-time-core"
+    file_time_core_faultyPath: str = "tmp/tData-10-26/多机-Local-process-3KM/3.filename-time-core-faulty"
+    spath = "tmp/tData-10-26/多机-Local-process-3KM"
     # 需要标准化的特征
     standardfeatur = ["user", "system", "cpu"]
     standardvalue = 60
