@@ -198,6 +198,7 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
             tpd = subtractLastLineFromDataFrame(ipd, accumulationFeatures)
             # 添加一个新的元素 cpu
             tpd['cpu'] = tpd['user'] + tpd['system']
+            tpd = PushLabelToEnd(tpd, FAULT_FLAG)
             subcorepds.append((icore, tpd))
 
         # tmp/{filename}/2.时间段划分集合文件详细信息/
