@@ -359,3 +359,32 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
         thisFileFaulty_pdDict = mergeTwoDF(thisFileFaulty_pdDict, faultDict)
     return thisFileFaulty_pdDict, thistime_pdDict, thistime_fault_pdDict
 
+"""
+作用：标准化 file-time 
+返回值： file-time的字典结构
+"""
+
+
+def standard_file_time_Dict(ftcPD, standardFeature, meanvalue, standardValue: int):
+    resDict = {}
+    for filename, time_core_pdDict in ftcPD.items():
+        resDict[filename] = {}
+        for time, timepd in time_core_pdDict.items():
+            resDict[filename][time] = standardPDfromOriginal(timepd, standardFeatures=standardFeature, meanValue=meanvalue, standardValue=standardValue)
+    return resDict
+
+"""
+作用：标准化 file-time-fault
+返回值：file-time-fault的一个字典结构
+"""
+
+
+def standard_file_time_faultyDict(ftcPD, standardFeature, meanvalue, standardValue: int):
+    resDict = {}
+    for filename, time_core_pdDict in ftcPD.items():
+        resDict[filename] = {}
+        for time, core_pdDict in time_core_pdDict.items():
+            resDict[filename][time] = {}
+            for ifault, faultypd in core_pdDict.items():
+                resDict[filename][time][ifault] = standardPDfromOriginal(faultypd, standardFeatures=standardFeature, meanValue=meanvalue, standardValue=standardValue)
+    return resDict
