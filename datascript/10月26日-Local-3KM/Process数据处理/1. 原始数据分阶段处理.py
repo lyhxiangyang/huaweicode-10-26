@@ -57,7 +57,7 @@ datapath = [
 # 将时间序列的秒这一项都变成秒
 def changeTimeColumns_process(df: pd.DataFrame) -> pd.DataFrame:
     # 时间格式使用默认值
-    tpd = df.loc[:, [TIME_COLUMN_NAME]].apply(lambda x: TranslateTimeListStrToStr(x.to_list()), axis=0)
+    tpd = df.loc[:, [TIME_COLUMN_NAME]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), '%Y/%m/%d %H:%M'), axis=0)
     df.loc[:, TIME_COLUMN_NAME] = tpd.loc[:, TIME_COLUMN_NAME]
     return df
 
