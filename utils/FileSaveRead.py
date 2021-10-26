@@ -180,5 +180,54 @@ def readFilename_Time_Core_Faulty_pdDict(readpath: str) -> Dict:
                     sfaulty = os.path.splitext(istrfaultyname)[0]
                     ifaulty = int(sfaulty)
                     file_timr_core_faultpath = os.path.join(file_time_corepath, istrfaultyname)
-                    filename_time_core_faultPd[istrfilename][itime][icore][ifaulty] = pd.read_csv(file_timr_core_faultpath)
+                    filename_time_core_faultPd[istrfilename][itime][icore][ifaulty] = pd.read_csv(
+                        file_timr_core_faultpath)
     return filename_time_core_faultPd
+
+
+"""
+将列表中的df保存为0.csv
+"""
+
+
+def saveDFListToFiles(spath: str, pds: List[pd.DataFrame]):
+    if not os.path.exists(spath):
+        os.makedirs(spath)
+    for i in range(0, len(pds)):
+        savefilepath = os.path.join(spath, str(i) + ".csv")
+        pds[i].to_csv(savefilepath, index=False)
+
+
+def readDFListFromFiles(spath: str) -> List[pd.DataFrame]:
+    reslist = []
+    if not os.path.exists(spath):
+        return reslist
+    files = os.listdir(spath)
+    for i in range(0, len(files)):
+        readfilenames = str(i) + ".csv"
+        readfilepath = os.path.join(spath, readfilenames)
+        tpd = pd.read_csv(readfilepath)
+        reslist.append(tpd)
+    return reslist
+
+
+# 将(int, df)这种格式的列表进行保存
+def saveCoreDFToFiles(spath: str, coreppds: List[Tuple[int, pd.DataFrame]]):
+    if not os.path.exists(spath):
+        os.makedirs(spath)
+    for icore, ipd in coreppds:
+        savefilename = os.path.join(spath, str(icore) + ".csv")
+        ipd.to_csv(savefilename)
+
+
+def readCoreDFFromFiles(spath) -> List[Tuple[int, pd.DataFrame]]:
+    if not os.path.exists(spath):
+        return []
+    dirnames = os.listdir(spath)
+    reslist = []
+    for ifile in dirnames:
+        icore = int(os.path.splitext(ifile)[0])
+        readfilename = os.path.join(spath, ifile)
+        tpd = pd.read_csv(readfilename)
+        reslist.append((icore, tpd))
+    return reslist

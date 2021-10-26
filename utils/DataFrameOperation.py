@@ -244,25 +244,27 @@ def subtractFirstLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[
 
 """
 -   功能介绍：
-    将一个DataFrame中的所有行中对应的特征值都都剪去第一行，除去time和flagFault
--   返回值一个DataFrame和一个是否有错误的bool类型
+    将一个DataFrame中的所有行中指定的特征值都都剪去第一行，
+    其中第一行的数据等于0
+-   返回值一个DataFrame
 
 -   重点：传入的参数必须是index=[0, 1, 2]
     传入前可以通过reset_index(drop=True, inplace=True)
 """
 
 
-def subtractLastLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[
-    Tuple[None, bool], Tuple[pd.DataFrame, bool]]:
+def subtractLastLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[None, pd.DataFrame]:
+    df = df.copy()
     if len(df) <= 1:
-        return None, True
-    # https://www.jianshu.com/p/72274ccb647a
-    # 注意会出现这种警告
-    for iline in range(len(df) - 1, 0, -1):
-        df.loc[iline, columns] = df.loc[iline, columns] - df.loc[iline - 1, columns]
-
-    df.loc[0, columns] = df.loc[1, columns]
-    return df, False
+        return None
+    # 先将整个表格往上一隔
+    dfcolumns_1 = df.loc[:, columns].shift(periods=-1, axis=0, fill_value=0)
+    # 然后相减
+    dfcolumns_2 = dfcolumns_1 - df.loc[:, columns]
+    # 然后下一一位
+    df.loc[:, columns] = dfcolumns_2.shift(periods=1, axis=0, fill_value=0)
+    # 第二种实现方式是使用df.diff(方式)
+    return df
 
 # 合并的两个类型是fault-DataFrame
 def mergeTwoDF(dic1: Dict[int, pd.DataFrame], dic2: Dict[int, pd.DataFrame]) -> Dict[int, pd.DataFrame]:
