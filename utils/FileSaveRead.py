@@ -151,8 +151,8 @@ def saveFilename_Time_Core_Faulty_pdDict(savepath: str, ftcPD: Dict):
     for filename, time_core_pdDict in ftcPD.items():
         for time, core_pdDict in time_core_pdDict.items():
             for icore, faultypdDict in core_pdDict.items():
+                tpath = os.path.join(savepath, filename, str(time), str())
                 for ifault, tpd in faultypdDict.items():
-                    tpath = os.path.join(savepath, filename, str(time), str(icore))
                     tfilename = os.path.join(tpath, str(ifault) + ".csv")
                     if not os.path.exists(tpath):
                         os.makedirs(tpath)
@@ -187,8 +187,8 @@ def readFilename_Time_Core_Faulty_pdDict(readpath: str) -> Dict:
 
 """
 将列表中的df保存为0.csv
+适合List[pd.DataFrame]
 """
-
 
 def saveDFListToFiles(spath: str, pds: List[pd.DataFrame]):
     if not os.path.exists(spath):
@@ -231,3 +231,64 @@ def readCoreDFFromFiles(spath) -> List[Tuple[int, pd.DataFrame]]:
         tpd = pd.read_csv(readfilename)
         reslist.append((icore, tpd))
     return reslist
+
+"""
+下面是针对server数据的读取
+"""
+# 保存 str-int类型
+# 文件-时间段PD
+
+def saveFilename_Time_pdDict(savepath: str, ftPD: Dict):
+    for filename, time_core_pdDict in ftPD.items():
+        tpath = os.path.join(savepath, filename)
+        for time, timePd in time_core_pdDict.items():
+            tfilename = os.path.join(tpath, str(time) + ".csv")
+            if not os.path.exists(tpath):
+                os.makedirs(tpath)
+            timePd.to_csv(tfilename, index=False)
+
+def readFilename_Time_pdDict(readpath: str) -> Dict:
+    filename_timePd = {}
+    filenames = os.listdir(readpath)
+    for istrfilename in filenames:
+        filepath = os.path.join(readpath, istrfilename)
+        times = os.listdir(filepath)
+        filename_timePd[istrfilename] = {}
+        for timefilename in times:
+            timepathfilename = os.path.join(filepath, timefilename)
+            strtime = os.path.splitext(timefilename)[0]
+            itime = int(strtime)
+            filename_timePd[istrfilename][itime] = pd.read_csv(timepathfilename)
+    return filename_timePd
+
+# 保存类型是 str-int-int
+# 文件名字-时间段-错误码PD
+
+def saveFilename_Time_Faulty_pdDict(savepath: str, ftcPD: Dict):
+    for filename, time_core_pdDict in ftcPD.items():
+        for time, fault_pdDict in time_core_pdDict.items():
+            tpath = os.path.join(savepath, filename, str(time))
+            for ifault, tpd in fault_pdDict.items():
+                tfilename = os.path.join(tpath, str(ifault) + ".csv")
+                if not os.path.exists(tpath):
+                    os.makedirs(tpath)
+                tpd.to_csv(tfilename, index=False)
+
+def readFilename_Time_Faulty_pdDict(readpath: str) -> Dict:
+    filename_time_faultPd = {}
+    filenames = os.listdir(readpath)
+    for istrfilename in filenames:
+        filepath = os.path.join(readpath, istrfilename)
+        times = os.listdir(filepath)
+        filename_time_faultPd[istrfilename] = {}
+        for istrtime in times:
+            file_timepath = os.path.join(filepath, istrtime)
+            itime = int(istrtime)
+            faultylists = os.listdir(file_timepath)
+            filename_time_faultPd[istrfilename][itime] = {}
+            for istrfaultyname in faultylists:
+                sfaulty = os.path.splitext(istrfaultyname)[0]
+                ifaulty = int(sfaulty)
+                file_time_faultpath = os.path.join(file_timepath, istrfaultyname)
+                filename_time_faultPd[istrfilename][itime][ifaulty] = pd.read_csv(file_time_faultpath)
+    return filename_time_faultPd

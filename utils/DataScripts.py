@@ -308,3 +308,56 @@ def FeaExtra_file_time_core(ftcDict, windowSize: int = 5, windowRealSize: int = 
                 resDict[filename][time][icore] = fePD
                 fault_PDDict = mergeTwoDF(fault_Dict, fault_PDDict)
     return resDict, fault_PDDict
+
+
+
+# ==================================== 用于server数据
+"""
+将一个server文件处理的过程
+返回值
+1. 所有的fault-Pd的一个Dict
+2. time-pd 的一个Dict
+3. time-fault-pd的一个Dict
+"""
+
+
+def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures: List[str],
+                         server_features: List[str]):
+    if not os.path.exists(spath):
+        os.makedirs(spath)
+
+    # 先按照时间段划分
+    pdbytime = splitDataFrameByTime(filepd)
+
+    # 将其保存到 spath/1.时间段划分集合
+    print("1. 按照时间段划分开始")
+    # tmp/{filename}/1.时间段划分集合
+    saveDFListToFiles(spath=os.path.join(spath, "1.时间段划分集合文件"), pds=pdbytime)
+    print("按照时间段划分结束")
+    thistime_pdDict = {} # time-PD
+    thistime_fault_pdDict = {} # time-fault-PD
+    thisFileFaulty_pdDict = {} # fault-PD
+
+    # 将累计值都减去上一行的
+    subcorepds = []
+    for i in range(0, len(pdbytime)):
+        thistime_pdDict[i] = {}
+        thistime_fault_pdDict[i] = {}
+        print("2.{} 第{}个时间段依照核心划分".format(i, i))
+        tpd = pdbytime[i]
+        tpd = subtractLastLineFromDataFrame(tpd, accumulationFeatures)
+        tpd['cpu'] = tpd['user'] + tpd['system']
+        tpd = PushLabelToEnd(tpd, FAULT_FLAG)
+        subcorepds.append((i, tpd))
+
+    # 将减去上一行的数据进行保存
+    tcoresavepath = os.path.join(spath, "2. 时间段划分集合文件-减去上一行")
+    saveCoreDFToFiles(tcoresavepath, subcorepds)
+
+    for itime, ipd in subcorepds:
+        faultDict = abstractFaultPDDict(ipd, server_features)
+        thistime_pdDict[itime] = ipd
+        thistime_pdDict[itime] = faultDict
+        thisFileFaulty_pdDict = mergeTwoDF(thisFileFaulty_pdDict, faultDict)
+    return thisFileFaulty_pdDict, thistime_pdDict, thistime_fault_pdDict
+
