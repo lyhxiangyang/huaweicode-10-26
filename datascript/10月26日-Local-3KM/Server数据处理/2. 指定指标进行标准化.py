@@ -10,10 +10,10 @@ if __name__ == "__main__":
     # 数据保存路径
     spath = "tmp/tData-10-26/多机-Local-server-3KM"
     # 所有正常数据的路径
-    normalpath = "tmp/tData-10-26/多机-红区-server-3KM/1.所有process错误码信息/0.csv"
+    normalpath = "tmp/tData-10-26/多机-Local-server-3KM/1.所有process错误码信息/0.csv"
     # 需要标准化的数据路径
-    file_timePath = "tmp/tData-10-26/多机-红区-server-3KM/2.filename-time"
-    file_time_faultyPath: str = "tmp/tData-10-26/多机-红区-server-3KM/3.filename-time-faulty"
+    file_timePath = "tmp/tData-10-26/多机-Local-server-3KM/2.filename-time"
+    file_time_faultyPath: str = "tmp/tData-10-26/多机-Local-server-3KM/3.filename-time-faulty"
     # 需要标准化的特征
     standardfeatur = ["load1", "used"]
     standardvalue = 100
