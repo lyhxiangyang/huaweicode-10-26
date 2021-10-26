@@ -17,12 +17,12 @@ if __name__ == "__main__":
 
     # 将特征提取之后的文件进行保存
     print("filename-time-标准化-特征提取开始".center(40, "*"))
-    sspath = os.path.join(spath, "8.filename-time-标准化-特征提取-未处理首尾")
+    sspath = os.path.join(spath, "8.filename-time-标准化-特征提取-处理首尾")
     saveFilename_Time_pdDict(sspath, file_time_standard_FeatureExtractionDict)
     print("filename-time-标准化-特征提取结束".center(40, "*"))
 
     # 将获得的所有特征提取之后的错误进行保存
-    sspath = os.path.join(spath, "9.特征提取所有错误-未处理首尾")
+    sspath = os.path.join(spath, "9.特征提取所有错误-处理首尾")
     saveFaultyDict(sspath, allFault_PDDict)
 
 
