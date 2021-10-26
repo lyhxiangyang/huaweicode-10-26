@@ -341,8 +341,6 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
     # 将累计值都减去上一行的
     subcorepds = []
     for i in range(0, len(pdbytime)):
-        thistime_pdDict[i] = {}
-        thistime_fault_pdDict[i] = {}
         print("2.{} 第{}个时间段依照核心划分".format(i, i))
         tpd = pdbytime[i]
         tpd = subtractLastLineFromDataFrame(tpd, accumulationFeatures)
@@ -357,7 +355,7 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
     for itime, ipd in subcorepds:
         faultDict = abstractFaultPDDict(ipd, server_features)
         thistime_pdDict[itime] = ipd
-        thistime_pdDict[itime] = faultDict
+        thistime_fault_pdDict[itime] = faultDict
         thisFileFaulty_pdDict = mergeTwoDF(thisFileFaulty_pdDict, faultDict)
     return thisFileFaulty_pdDict, thistime_pdDict, thistime_fault_pdDict
 

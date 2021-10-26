@@ -265,8 +265,8 @@ def readFilename_Time_pdDict(readpath: str) -> Dict:
 # 文件名字-时间段-错误码PD
 
 def saveFilename_Time_Faulty_pdDict(savepath: str, ftcPD: Dict):
-    for filename, time_core_pdDict in ftcPD.items():
-        for time, fault_pdDict in time_core_pdDict.items():
+    for filename, time_fault_pdDict in ftcPD.items():
+        for time, fault_pdDict in time_fault_pdDict.items():
             tpath = os.path.join(savepath, filename, str(time))
             for ifault, tpd in fault_pdDict.items():
                 tfilename = os.path.join(tpath, str(ifault) + ".csv")
