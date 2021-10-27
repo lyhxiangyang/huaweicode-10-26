@@ -13,23 +13,23 @@ trainNormalDataPath = [
 ]
 
 trainAbnormalDataPath = [
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
 ]
 
 testNormalDataPath = [
-    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/0.csv",
 ]
 
 testAbnormalDataPath = [
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/2.特征提取所有错误-未处理首尾/31.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/2.特征提取所有错误-未处理首尾/32.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/2.特征提取所有错误-未处理首尾/33.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/2.特征提取所有错误-未处理首尾/34.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/2.特征提取所有错误-未处理首尾/35.csv"),
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
