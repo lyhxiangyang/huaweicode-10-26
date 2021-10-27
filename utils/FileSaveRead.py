@@ -124,7 +124,7 @@ def saveFilename_Time_Core_pdDict(savepath: str, ftcPD: Dict):
                 tpd.to_csv(tfilename, index=False)
 
 
-def readFilename_Time_Core_pdDict(readpath: str) -> Dict:
+def readFilename_Time_Core_pdDict(readpath: str, readcore: List[int] = None) -> Dict:
     filename_time_corePd = {}
     filenames = os.listdir(readpath)
     for istrfilename in filenames:
@@ -139,6 +139,9 @@ def readFilename_Time_Core_pdDict(readpath: str) -> Dict:
             for istrcorename in coresname:
                 score = os.path.splitext(istrcorename)[0]
                 icore = int(score)
+                # 保证我们读取的核心数是我们所想要的
+                if readcore is not None and icore not in readcore:
+                    continue
                 file_time_corepath = os.path.join(file_timepath, istrcorename)
                 filename_time_corePd[istrfilename][itime][icore] = pd.read_csv(file_time_corepath)
     return filename_time_corePd
