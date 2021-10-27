@@ -224,7 +224,7 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
             print("3.第{}时间段-{}核心处理中".format(i, icore))
             # 将所有的错误码进行提取
             FaultPDDict = abstractFaultPDDict(icorepd, extraFeature=process_features)
-            if icore not in thisTime_core_FileFaulty_PD_Dict:
+            if icore not in thisTime_core_FileFaulty_PD_Dict[i]:
                 thisTime_core_FileFaulty_PD_Dict[i][icore] = FaultPDDict
             #  将每个文件中的每个时间段中的每个核心进行错误码划分的结果进行保存
             tcore_fault_savepath = os.path.join(tcoresavepath, str(icore))
