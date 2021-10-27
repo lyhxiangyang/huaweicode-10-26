@@ -151,7 +151,7 @@ def saveFilename_Time_Core_Faulty_pdDict(savepath: str, ftcPD: Dict):
     for filename, time_core_pdDict in ftcPD.items():
         for time, core_pdDict in time_core_pdDict.items():
             for icore, faultypdDict in core_pdDict.items():
-                tpath = os.path.join(savepath, filename, str(time), str())
+                tpath = os.path.join(savepath, filename, str(time), str(icore))
                 for ifault, tpd in faultypdDict.items():
                     tfilename = os.path.join(tpath, str(ifault) + ".csv")
                     if not os.path.exists(tpath):
