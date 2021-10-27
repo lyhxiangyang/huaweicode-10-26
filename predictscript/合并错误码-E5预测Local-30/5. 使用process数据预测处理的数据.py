@@ -8,8 +8,8 @@ from utils.DefineData import FAULT_FLAG
 
 # 训练数据要使用所有的正常数据
 trainNormalDataPath = [
-    "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
-    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-E5-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
 ]
 
 trainAbnormalDataPath = [
@@ -21,7 +21,7 @@ trainAbnormalDataPath = [
 ]
 
 testNormalDataPath = [
-    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
 ]
 
 testAbnormalDataPath = [
