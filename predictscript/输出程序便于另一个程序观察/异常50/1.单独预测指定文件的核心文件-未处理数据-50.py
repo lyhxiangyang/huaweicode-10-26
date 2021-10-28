@@ -27,9 +27,10 @@ if __name__ == "__main__":
     spath = "tmp/allpreinformation"
     # 使用模型路径
     usemodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
-    # 要预测的文件 第一时间段 第0核上的数据
+    # 要预测的文件
     prefiles = [
-        "tmp/tData-10-26/多机-Local-process-3KM/6.filename-time-core-标准化-特征提取-未处理首尾/wrf_3km_160_process/1/0.csv",
+        "tmp/tData-10-26/多机-Local-server-3KM/6.filename-time-标准化-特征提取-未处理首尾/wrf_3km_160_server/2.csv",
+        "tmp/tData-10-26/多机-Local-server-3KM/6.filename-time-标准化-特征提取-未处理首尾/wrf_3km_160_server/3.csv",
     ]
 
     # 要预测文件的路径
