@@ -112,7 +112,13 @@ if __name__ == "__main__":
 
 
     # 获得需要训练的特征
+    # 包含前缀以及后缀
     allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
+    # 只包含前缀
+    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="")
+    # 只包含diff数据
+    # allfeatureload1_nosuffix = get_List_pre_suffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
+
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
     ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")
