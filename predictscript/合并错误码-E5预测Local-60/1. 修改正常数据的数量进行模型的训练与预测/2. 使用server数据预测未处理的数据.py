@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import pandas as pd
@@ -5,6 +6,7 @@ import pandas as pd
 from Classifiers.TrainToTest import ModelTrainAndTest
 from utils.DataFrameOperation import mergeDataFrames, sortByAbsValue
 from utils.DefineData import FAULT_FLAG
+from utils.FileSaveRead import saveDFListToFiles
 
 trainNormalDataPath = [
     "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
@@ -111,16 +113,24 @@ if __name__ == "__main__":
     #==================================================================end
 
     #==================================================================将所有的训练数据进行合并
+    sdatapath = os.path.join(spath, "data")
     allTrainedPD, err = mergeDataFrames(trainNormalList + trainAbnormalList)
     if err:
         print("训练数据合并失败")
         exit(1)
+    tpath = os.path.join(spath, "data", "trainNormalist")
+    saveDFListToFiles(tpath, trainNormalList)
+    tpath = os.path.join(spath, "data", "trainAbnormalist")
+    saveDFListToFiles(tpath, trainAbnormalList)
     #==================================================================将所有的测试数据进行合并
     allTestPD, err = mergeDataFrames(testNormalList + testAbnormalList)
     if err:
         print("测试数据合并失败")
         exit(1)
-
+    tpath = os.path.join(spath, "data", "testNormalList")
+    saveDFListToFiles(tpath, testNormalList)
+    tpath = os.path.join(spath, "data", "testAbnormalList")
+    saveDFListToFiles(tpath, testAbnormalList)
 
 
     # 获得需要训练的特征
