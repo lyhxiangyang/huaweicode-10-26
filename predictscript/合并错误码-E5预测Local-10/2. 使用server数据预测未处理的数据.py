@@ -93,7 +93,7 @@ if __name__ == "__main__":
     for ilabel, ipath in testAbnormalDataPath:
         tpd = pd.read_csv(ipath)
         tpd = setPDfaultFlag(tpd, ilabel)
-        testNormalList.append(tpd)
+        testAbnormalList.append(tpd)
 
     #==================================================================将所有的训练数据进行合并
     allTrainedPD, err = mergeDataFrames(trainNormalList + trainAbnormalList)

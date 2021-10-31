@@ -98,7 +98,7 @@ if __name__ == "__main__":
     for ilabel, ipath in testAbnormalDataPath:
         tpd = pd.read_csv(ipath)
         tpd = setPDfaultFlag(tpd, ilabel)
-        testNormalList.append(tpd)
+        testAbnormalList.append(tpd)
 
     #==================================================================将正常的训练中截取一部分和异常数据等长的数据
     # 获得测试数据的总长度
