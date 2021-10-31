@@ -282,3 +282,13 @@ def mergeTwoDF(dic1: Dict[int, pd.DataFrame], dic2: Dict[int, pd.DataFrame]) -> 
             tpd = dic2[ifaulty]
         resDict[ifaulty] = tpd
     return resDict
+
+# 将一个tpd 按照绝对值之间的差值进行排序，比如按照列fe1排序，这一行所有的数都减去100的绝对值，按照这个进行排序
+def sortByAbsValue(tpd: pd.DataFrame, featurename: str, value: int = 100):
+    tpd = tpd.copy()
+    sortlabel = "sortlabel"
+    tpd[sortlabel] = abs(tpd[featurename] - value)
+    tpd = tpd.sort_values(by=[sortlabel], ascending=True)
+    tpd = tpd.drop(sortlabel, axis=1)
+    tpd = tpd.reset_index(drop=True)
+    return tpd
