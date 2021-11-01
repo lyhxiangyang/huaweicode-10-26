@@ -77,25 +77,25 @@ if __name__ == "__main__":
 
         if itime not in tree_time_abnormalCoreDict:
             print("{} 不在决策树中".format(stime))
-            tree_time_abnormalCoreDict[stime] = []
+            tree_time_abnormalCoreDict[itime] = []
         if itime not in forest_time_abnormalCoreDict:
             print("{} 不在随机森林中".format(stime))
-            forest_time_abnormalCoreDict[stime] = []
+            forest_time_abnormalCoreDict[itime] = []
         if itime not in adapt_time_abnormalCoreDict:
             print("{} 不在自适应增强中".format(stime))
-            adapt_time_abnormalCoreDict[stime] = []
+            adapt_time_abnormalCoreDict[itime] = []
         # 决策树标签 =====
         draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 0
-        if len(tree_time_abnormalCoreDict[stime]) != 0:
+        if len(tree_time_abnormalCoreDict[itime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 30
         # 随机森林标签 ====
         draw_time_flagDict[stime][MODEL_TYPE[1] + "_flag"] = 0
-        if len(forest_time_abnormalCoreDict[stime]) != 0:
+        if len(forest_time_abnormalCoreDict[itime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[1] + "_flag"] = 30
 
         # 自适应增强标签 ====
         draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 0
-        if len(adapt_time_abnormalCoreDict[stime]) != 0:
+        if len(adapt_time_abnormalCoreDict[itime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 30
         predictBeginitime += 60
 
