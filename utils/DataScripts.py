@@ -431,22 +431,23 @@ def getTime_AbnormalCore(ftcPD: Dict):
                 # 遍历一整个列表
                 for i in range(0, len(tpd)):
                     numiline = tpd.iloc[i]
-                    inowtime = TranslateTimeToInt(numiline[TIME_COLUMN_NAME])
+                    snowtime = numiline[TIME_COLUMN_NAME]
+                    inowtime = TranslateTimeToInt(snowtime)
                     # 决策树判断
                     tree_label = MODEL_TYPE[0] + "_flag"
                     tree_pre = numiline[tree_label]
                     if tree_pre != 0:
-                        tree_time_abnormalCoreDict[inowtime].append(icore)
+                        tree_time_abnormalCoreDict[snowtime].append(icore)
                     # 随机森林判断
                     forest_label = MODEL_TYPE[1] + "_flag"
                     forest_pre = numiline[forest_label]
                     if forest_pre != 0:
-                        forest_time_abnormalCoreDict[inowtime].append(icore)
+                        forest_time_abnormalCoreDict[snowtime].append(icore)
                     # 自适应增强判断
                     adapt_label = MODEL_TYPE[2] + "_flag"
                     adapt_pre = numiline[adapt_label]
                     if adapt_pre != 0:
-                        adapt_time_abnormalCoreDict[inowtime].append(icore)
+                        adapt_time_abnormalCoreDict[snowtime].append(icore)
     return tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict
 
 
