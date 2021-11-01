@@ -1,11 +1,12 @@
 import os
 import time
+from collections import defaultdict
 from typing import List, Union, Dict, Tuple, Any
 
 import pandas as pd
 
 from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabels, subtractLastLineFromDataFrame
-from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, TIME_INTERVAL, CPU_FEATURE
+from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, TIME_INTERVAL, CPU_FEATURE, MODEL_TYPE
 from utils.FeatureExtraction import featureExtractionUsingFeatures
 from utils.FileSaveRead import saveDFListToFiles, saveCoreDFToFiles, saveFaultyDict
 
@@ -18,6 +19,16 @@ from utils.FileSaveRead import saveDFListToFiles, saveCoreDFToFiles, saveFaultyD
 def TranslateTimeToInt(stime: str, timeformat: str = '%Y-%m-%d %H:%M:%S') -> int:
     itime = time.mktime(time.strptime(stime, timeformat))
     return int(itime)
+
+"""
+将时间格式转化为str
+"2021/8/29 0:54:08"
+"""
+
+def TranslateTimeToStr(nowtime: int, timeformat: str = '%Y-%m-%d %H:%M:%S') -> str:
+    struct_time = time.localtime(nowtime)
+    return time.strftime(timeformat, struct_time)
+
 
 
 """
@@ -403,3 +414,40 @@ def standard_file_time_faultyDict(ftcPD, standardFeature, meanvalue, standardVal
             for ifault, faultypd in core_pdDict.items():
                 resDict[filename][time][ifault] = standardPDfromOriginal(faultypd, standardFeatures=standardFeature, meanValue=meanvalue, standardValue=standardValue)
     return resDict
+
+
+
+"""
+遍历所有的核心，得到时间和异常核心数的关系
+返回 int - List[int]结构
+"""
+def getTime_AbnormalCore(ftcPD: Dict):
+    tree_time_abnormalCoreDict = defaultdict(list)
+    forest_time_abnormalCoreDict = defaultdict(list)
+    adapt_time_abnormalCoreDict = defaultdict(list)
+    for filename, time_core_pdDict in ftcPD.items():
+        for time, core_pdDict in time_core_pdDict.items():
+            for icore, tpd in core_pdDict.items():
+                # 遍历一整个列表
+                for i in range(0, len(tpd)):
+                    numiline = tpd.iloc(i)
+                    inowtime = TranslateTimeToInt(numiline[TIME_COLUMN_NAME])
+                    # 决策树判断
+                    tree_label = MODEL_TYPE[0] + "_flag"
+                    tree_pre = numiline[tree_label]
+                    if tree_pre != 0:
+                        tree_time_abnormalCoreDict[inowtime].append(icore)
+                    # 随机森林判断
+                    forest_label = MODEL_TYPE[1] + "_flag"
+                    forest_pre = numiline[forest_label]
+                    if forest_pre != 0:
+                        forest_time_abnormalCoreDict[inowtime].append(icore)
+                    # 自适应增强判断
+                    adapt_label = MODEL_TYPE[2] + "_flag"
+                    adapt_pre = numiline[adapt_label]
+                    if adapt_pre != 0:
+                        adapt_time_abnormalCoreDict[inowtime].append(icore)
+    return tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict
+
+
+
