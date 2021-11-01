@@ -78,13 +78,13 @@ if __name__ == "__main__":
             draw_time_flagDict[stime]["realflag"] = 30
 
         if itime not in tree_time_abnormalCoreDict:
-            print("{} 不在决策树中".format(stime))
+            # print("{} 不在决策树中".format(stime))
             tree_time_abnormalCoreDict[itime] = []
         if itime not in forest_time_abnormalCoreDict:
-            print("{} 不在随机森林中".format(stime))
+            # print("{} 不在随机森林中".format(stime))
             forest_time_abnormalCoreDict[itime] = []
         if itime not in adapt_time_abnormalCoreDict:
-            print("{} 不在自适应增强中".format(stime))
+            # print("{} 不在自适应增强中".format(stime))
             adapt_time_abnormalCoreDict[itime] = []
         # 决策树标签 =====
         draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 0
@@ -105,9 +105,9 @@ if __name__ == "__main__":
     tpd.to_csv(os.path.join(spath, "prelabels.csv"))
 
     # 将time-cores进行保存
-    treejson = json.dump(tree_time_abnormalCoreDict)
-    forestjson = json.dump(forest_time_abnormalCoreDict)
-    adaptjson = json.dump(adapt_time_abnormalCoreDict)
+    treejson = json.dumps(tree_time_abnormalCoreDict)
+    forestjson = json.dumps(forest_time_abnormalCoreDict)
+    adaptjson = json.dumps(adapt_time_abnormalCoreDict)
 
     with open(os.path.join(spath, "tree_time_cores.json"), "w") as f:
         f.write(str(treejson))
