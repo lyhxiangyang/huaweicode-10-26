@@ -12,7 +12,7 @@ from utils.GetMetrics import get_metrics
 
 
 def TrainThree(trainedpd: pd.DataFrame, spath: str, modelpath: str = "Classifiers/saved_model/tmp",
-               selectedFeature: List[str] = None):
+               selectedFeature: List[str] = None, maxdepth: int = 5):
     if os.path.exists(spath):
         pass
     else:
@@ -21,7 +21,7 @@ def TrainThree(trainedpd: pd.DataFrame, spath: str, modelpath: str = "Classifier
         os.makedirs(modelpath)
     tDic = {}
     for itype in MODEL_TYPE:
-        accuracy = model_train(trainedpd, itype, saved_model_path=modelpath, trainedFeature=selectedFeature)
+        accuracy = model_train(trainedpd, itype, saved_model_path=modelpath, trainedFeature=selectedFeature, maxdepth=maxdepth)
         print('Accuracy of %s classifier: %f' % (itype, accuracy))
         tallFault = sorted(list(set(getTestRealLabels())))
         for i in tallFault:
@@ -92,14 +92,14 @@ def testThree(testpd: pd.DataFrame, spath: str, modelpath: str = "Classifiers/sa
 
 def ModelTrainAndTest(trainedpd: pd.DataFrame, testpd: pd.DataFrame, spath: str,
                       modelpath: str = "Classifiers/saved_model/tmp", trainAgain: bool = True,
-                      selectedFeature: List[str] = None):
+                      selectedFeature: List[str] = None, maxdepth: int = 5):
     # 先生成模型 得到生成模型的准确率
     if not os.path.exists(spath):
         os.makedirs(spath)
     if not os.path.exists(modelpath):
         os.makedirs(modelpath)
     if trainAgain:
-        TrainThree(trainedpd, spath, modelpath, selectedFeature=selectedFeature)
+        TrainThree(trainedpd, spath, modelpath, selectedFeature=selectedFeature, maxdepth=maxdepth)
 
     print("模型训练完成".center(40, "*"))
     print("开始对测试数据进行预测".center(40, "*"))

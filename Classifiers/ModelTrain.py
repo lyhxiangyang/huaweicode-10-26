@@ -20,7 +20,7 @@ def getTestPreLabels() -> List:
     return TestPreLabels
 
 
-def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: List[str] = None):
+def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: List[str] = None, maxdepth: int = 5):
     """
     Train the model of selected type
     :param saved_model_path:
@@ -41,13 +41,13 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     #     header.remove('Intensity')
     # df = df[header]
 
-    model = DecisionTreeClassifier(random_state=0)
+    model = DecisionTreeClassifier(random_state=0, max_depth=maxdepth)
     if model_type == 'random_forest':
         # Numbers of decision trees is 100
-        model = RandomForestClassifier(n_estimators=100, random_state=0)
+        model = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=maxdepth)
     elif model_type == 'adaptive_boosting':
         # Numbers of decision trees is 100 and the maximum tree depth is 5
-        estimator_cart = DecisionTreeClassifier(max_depth=5)
+        estimator_cart = DecisionTreeClassifier(max_depth=maxdepth)
         model = AdaBoostClassifier(base_estimator=estimator_cart, n_estimators=100, random_state=0)
 
     # Split the data into train and test set
