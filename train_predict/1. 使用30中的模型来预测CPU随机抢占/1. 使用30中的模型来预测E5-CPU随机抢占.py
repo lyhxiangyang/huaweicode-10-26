@@ -72,6 +72,7 @@ if __name__ == "__main__":
         if stime not in draw_time_flagDict:
             draw_time_flagDict[stime] = {}
         # 真实标签 =====
+        draw_time_flagDict[stime]["realflag"] = 0
         if (judgeTimeIsAbnormal(stime, abnormaliTime)):
             draw_time_flagDict[stime]["realflag"] = 30
 
