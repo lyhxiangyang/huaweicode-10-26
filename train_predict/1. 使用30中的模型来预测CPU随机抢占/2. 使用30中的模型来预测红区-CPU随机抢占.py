@@ -31,9 +31,9 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
 
 if __name__ == "__main__":
     rmodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
-    rpath = "tmp/tData-10-26/多机-E5-process-3KM"
+    rpath = "tmp/tData-10-26/多机-红区-process-3KM"
     step6name = "6.filename-time-core-标准化-特征提取-未处理首尾"
-    spath = "tmp/预测80数据"
+    spath = "tmp/Local预测80数据/Data"
 
     # 将未处理首尾的特征提取之后的数据进行读取
     tpath = os.path.join(rpath, step6name)
