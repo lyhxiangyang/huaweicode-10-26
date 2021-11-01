@@ -430,7 +430,7 @@ def getTime_AbnormalCore(ftcPD: Dict):
             for icore, tpd in core_pdDict.items():
                 # 遍历一整个列表
                 for i in range(0, len(tpd)):
-                    numiline = tpd.iloc(i)
+                    numiline = tpd.iloc[i]
                     inowtime = TranslateTimeToInt(numiline[TIME_COLUMN_NAME])
                     # 决策树判断
                     tree_label = MODEL_TYPE[0] + "_flag"

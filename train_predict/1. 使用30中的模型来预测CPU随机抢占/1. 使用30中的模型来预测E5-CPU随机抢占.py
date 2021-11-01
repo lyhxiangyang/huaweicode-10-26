@@ -27,11 +27,11 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
 
 
 abnormaliTime = [
-    [c("2021-07-29 14:21:00"), c("2021-07-29 14:40:00")],
-    [c("2021-07-29 14:49:00"), c("2021-07-29 15:10:00")],
-    [c("2021-07-29 15:19:00"), c("2021-07-29 15:40:00")],
-    [c("2021-07-29 15:49:00"), c("2021-07-29 16:10:00")],
-    [c("2021-07-29 16:19:00"), c("2021-07-29 16:40:00")],
+    [c("2021-08-30 13:15:00"), c("2021-08-30 13:36:00")],
+    [c("2021-08-30 13:55:00"), c("2021-08-30 14:16:00")],
+    [c("2021-08-30 14:35:00"), c("2021-08-30 14:56:00")],
+    [c("2021-08-30 15:15:00"), c("2021-08-30 15:36:00")],
+    [c("2021-08-30 15:55:00"), c("2021-08-30 16:16:00")],
 ]
 # 判断一个时间是否属于异常时间段内
 def judgeTimeIsAbnormal(nowtime: str, abnormaltimes: List) -> bool:
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict = getTime_AbnormalCore(filename_time_corePdDict)
 
     # 绘制关键的图 时间段
-    predictBegintime = "2021-07-29 14:21:00"
-    predictEndtime = "2021-07-29 16:48:00"
+    predictBegintime = "2021-08-30 13:14:00"
+    predictEndtime = "2021-08-30 17:03:00"
     predictBeginitime = TranslateTimeToInt(predictBegintime)
     predictEnditime = TranslateTimeToInt(predictEndtime)
     draw_time_flagDict = {}
@@ -96,6 +96,7 @@ if __name__ == "__main__":
         draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 0
         if len(adapt_time_abnormalCoreDict[stime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 30
+        predictBeginitime += 60
 
     tpd = pd.DataFrame(data=draw_time_flagDict).T
     tpd.to_csv(os.path.join(spath, "prelabels.csv"))

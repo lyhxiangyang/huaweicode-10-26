@@ -23,6 +23,13 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
                     prelist = select_and_pred(tpd, model_type=itype, saved_model_path=modelpath)
                     tpd[itype + "_flag"] = prelist
 
+abnormaliTime = [
+    [c("2021-07-29 14:21:00"), c("2021-07-29 14:40:00")],
+    [c("2021-07-29 14:49:00"), c("2021-07-29 15:10:00")],
+    [c("2021-07-29 15:19:00"), c("2021-07-29 15:40:00")],
+    [c("2021-07-29 15:49:00"), c("2021-07-29 16:10:00")],
+    [c("2021-07-29 16:19:00"), c("2021-07-29 16:40:00")],
+]
 
 if __name__ == "__main__":
     rmodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
