@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Dict, List
 
@@ -102,5 +103,18 @@ if __name__ == "__main__":
 
     tpd = pd.DataFrame(data=draw_time_flagDict).T
     tpd.to_csv(os.path.join(spath, "prelabels.csv"))
+
+    # 将time-cores进行保存
+    treejson = json.dump(tree_time_abnormalCoreDict)
+    forestjson = json.dump(forest_time_abnormalCoreDict)
+    adaptjson = json.dump(adapt_time_abnormalCoreDict)
+
+    with open(os.path.join(spath, "tree_time_cores.json"), "w") as f:
+        f.write(str(treejson))
+    with open(os.path.join(spath, "forest_time_cores.json"), "w") as f:
+        f.write(str(forestjson))
+    with open(os.path.join(spath, "adapt_time_cores.json"), "w") as f:
+        f.write(str(adaptjson))
+
 
 
