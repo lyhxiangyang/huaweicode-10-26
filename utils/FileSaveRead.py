@@ -124,7 +124,7 @@ def saveFilename_Time_Core_pdDict(savepath: str, ftcPD: Dict):
                 tpd.to_csv(tfilename, index=False)
 
 
-def readFilename_Time_Core_pdDict(readpath: str, readcore: List[int] = None) -> Dict:
+def readFilename_Time_Core_pdDict(readpath: str, readtime: List[int] = None, readcore: List[int] = None) -> Dict:
     filename_time_corePd = {}
     filenames = os.listdir(readpath)
     for istrfilename in filenames:
@@ -134,6 +134,8 @@ def readFilename_Time_Core_pdDict(readpath: str, readcore: List[int] = None) -> 
         for istrtime in times:
             file_timepath = os.path.join(filepath, istrtime)
             itime = int(istrtime)
+            if readtime is not None and itime not in readtime:
+                continue
             coresname = os.listdir(file_timepath)
             filename_time_corePd[istrfilename][itime] = {}
             for istrcorename in coresname:

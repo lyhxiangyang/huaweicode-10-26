@@ -15,15 +15,10 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
         for time, core_pdDict in time_core_pdDict.items():
             for icore, tpd in core_pdDict.items():
                 tpd: pd.DataFrame
+                print("{}-{}-{}".format(filename, time, icore))
                 for itype in MODEL_TYPE:
                     prelist = select_and_pred(tpd, model_type=itype, saved_model_path=modelpath)
-                    tpd[MODEL_TYPE + "_flag"] = prelist;
-
-
-
-
-
-
+                    tpd[itype + "_flag"] = prelist
 
 if __name__ == "__main__":
     rmodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
@@ -33,7 +28,7 @@ if __name__ == "__main__":
 
     # 将未处理首尾的特征提取之后的数据进行读取
     tpath = os.path.join(rpath, step6name)
-    filename_time_corePdDict = readFilename_Time_Core_pdDict(tpath)
+    filename_time_corePdDict = readFilename_Time_Core_pdDict(tpath, readtime=[7])
     # 进行预测
     predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
     # 数据保存
