@@ -4,21 +4,30 @@ from typing import Dict
 import pandas as pd
 
 from Classifiers.ModelPred import select_and_pred
-from utils.DefineData import MODEL_TYPE
+from utils.DefineData import MODEL_TYPE, FAULT_FLAG
 from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_Core_pdDict
 
 """
 将每个核心上的数据
 """
 def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
+    filename_time_corePd = {}
     for filename, time_core_pdDict in ftcPD.items():
+        filename_time_corePd[filename] = {}
         for time, core_pdDict in time_core_pdDict.items():
+            filename_time_corePd[filename][time] = {}
             for icore, tpd in core_pdDict.items():
                 tpd: pd.DataFrame
                 print("{}-{}-{}".format(filename, time, icore))
+                predictDict = {
+                    FAULT_FLAG: list(tpd[FAULT_FLAG])
+                }
                 for itype in MODEL_TYPE:
                     prelist = select_and_pred(tpd, model_type=itype, saved_model_path=modelpath)
-                    tpd[itype + "_flag"] = prelist
+                    predictDict[itype + "_flag"] = prelist
+                ttpd = pd.DataFrame(data=predictDict)
+                filename_time_corePd[filename][time][icore] = ttpd
+    return filename_time_corePd
 
 if __name__ == "__main__":
     rmodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
