@@ -4,7 +4,7 @@ from typing import Dict
 import pandas as pd
 
 from Classifiers.ModelPred import select_and_pred
-from utils.DefineData import MODEL_TYPE, FAULT_FLAG
+from utils.DefineData import MODEL_TYPE, FAULT_FLAG, TIME_COLUMN_NAME
 from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_Core_pdDict
 
 """
@@ -20,6 +20,7 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
                 tpd: pd.DataFrame
                 print("{}-{}-{}".format(filename, time, icore))
                 predictDict = {
+                    TIME_COLUMN_NAME: list(tpd[TIME_COLUMN_NAME]),
                     FAULT_FLAG: list(tpd[FAULT_FLAG])
                 }
                 for itype in MODEL_TYPE:
