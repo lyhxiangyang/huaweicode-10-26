@@ -68,19 +68,20 @@ if __name__ == "__main__":
     draw_time_flagDict = {}
     while (predictBeginitime <= predictEnditime):
         stime = TranslateTimeToStr(predictBeginitime)
+        itime = predictBeginitime
         if stime not in draw_time_flagDict:
             draw_time_flagDict[stime] = {}
         # 真实标签 =====
         if (judgeTimeIsAbnormal(stime, abnormaliTime)):
             draw_time_flagDict[stime]["realflag"] = 30
 
-        if stime not in tree_time_abnormalCoreDict:
+        if itime not in tree_time_abnormalCoreDict:
             print("{} 不在决策树中".format(stime))
             tree_time_abnormalCoreDict[stime] = []
-        if stime not in forest_time_abnormalCoreDict:
+        if itime not in forest_time_abnormalCoreDict:
             print("{} 不在随机森林中".format(stime))
             forest_time_abnormalCoreDict[stime] = []
-        if stime not in adapt_time_abnormalCoreDict:
+        if itime not in adapt_time_abnormalCoreDict:
             print("{} 不在自适应增强中".format(stime))
             adapt_time_abnormalCoreDict[stime] = []
         # 决策树标签 =====
