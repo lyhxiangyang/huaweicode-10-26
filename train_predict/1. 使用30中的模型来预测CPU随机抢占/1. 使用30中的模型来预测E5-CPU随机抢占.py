@@ -39,7 +39,7 @@ if __name__ == "__main__":
     tpath = os.path.join(rpath, step6name)
     filename_time_corePdDict = readFilename_Time_Core_pdDict(tpath,readfilename=["wrf_3km_e5-43_process-63", "wrf_3km_e5-43_process-64"] ,readtime=[0])
     # 进行预测
-    predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
+    filename_time_corePdDict = predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
     # 数据保存
     saveFilename_Time_Core_pdDict(spath, filename_time_corePdDict)
 

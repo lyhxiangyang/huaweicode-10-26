@@ -31,7 +31,7 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
 
 if __name__ == "__main__":
     rmodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
-    rpath = "tmp/tData-10-26/多机-红区-process-3KM"
+    rpath = "tmp/tData-10-26/多机-Local-process-3KM"
     step6name = "6.filename-time-core-标准化-特征提取-未处理首尾"
     spath = "tmp/Local预测80数据/Data"
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     tpath = os.path.join(rpath, step6name)
     filename_time_corePdDict = readFilename_Time_Core_pdDict(tpath, readtime=[7])
     # 进行预测
-    predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
+    filename_time_corePdDict = predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
     # 数据保存
     saveFilename_Time_Core_pdDict(spath, filename_time_corePdDict)
 
