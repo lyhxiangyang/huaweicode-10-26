@@ -34,12 +34,14 @@ datapath = [
 传一个process的DF，然后将每一个时间点的user和system的和计算出来
 """
 
+
 def getAllprocessCPUTime(processDF: pd.DataFrame, extractFeature: List[str]) -> pd.DataFrame:
     user_systemDF = processDF.groupby(TIME_COLUMN_NAME)[extractFeature].sum()
     flagDF = processDF.groupby(TIME_COLUMN_NAME)[FAULT_FLAG].first()
     user_systemDF[FAULT_FLAG] = flagDF
     user_systemDF = user_systemDF.reset_index()
     return user_systemDF
+
 
 def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[str]) -> pd.DataFrame:
     if not os.path.exists(spath):
@@ -50,20 +52,20 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
         if not os.path.exists(ipath):
             print("{} 文件不存在".format(ipath))
             exit(1)
-        print ("处理文件-{}".format(ipath))
+        print("处理文件-{}".format(ipath))
         tpd = pd.read_csv(ipath)
         datapd.append(tpd)
 
     # 进行文件的分析
     cpudatapd = []
     for ipd in datapd:
-        tpd = getAllprocessCPUTime(ipd)
+        tpd = getAllprocessCPUTime(ipd, extractFeature)
         cpudatapd.append(tpd)
     # 进行文件的合并
     mergecpupd, _ = mergeDataFrames(cpudatapd)
     # 使用新特征cpu
     mergecpupd["cpu"] = mergecpupd["user"] + mergecpupd["system"]
-    mergecpupd:pd.DataFrame
+    mergecpupd: pd.DataFrame
     mergecpupd.to_csv(os.path.join(spath, "mergedcpu.csv"))
     return mergecpupd
 
