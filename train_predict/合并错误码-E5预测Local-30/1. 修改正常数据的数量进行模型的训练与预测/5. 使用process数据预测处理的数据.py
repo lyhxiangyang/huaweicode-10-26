@@ -1,4 +1,3 @@
-import os
 from typing import List
 
 import pandas as pd
@@ -6,31 +5,31 @@ import pandas as pd
 from Classifiers.TrainToTest import ModelTrainAndTest
 from utils.DataFrameOperation import mergeDataFrames, sortByAbsValue
 from utils.DefineData import FAULT_FLAG
-from utils.FileSaveRead import saveDFListToFiles
 
+# 训练数据要使用所有的正常数据
 trainNormalDataPath = [
-    "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
-    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-E5-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
 ]
 
 trainAbnormalDataPath = [
-    (60, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/61.csv"),
-    (60, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/62.csv"),
-    (60, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/63.csv"),
-    (60, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/64.csv"),
-    (60, "tmp/tData-10-26/多机-E5-server-3KM/9.特征提取所有错误-处理首尾/65.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
+    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
 ]
 
 testNormalDataPath = [
-    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
 ]
 
 testAbnormalDataPath = [
-    (60, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/61.csv"),
-    (60, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/62.csv"),
-    (60, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/63.csv"),
-    (60, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/64.csv"),
-    (60, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/65.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
+    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
@@ -52,8 +51,9 @@ def setPDfaultFlag(df: pd.DataFrame, ff: int) -> pd.DataFrame:
     tpd = pd.concat([df, tpd], axis=1)
     return tpd
 
-
-
+"""
+指定标准化之后并且特征提取的数据， 去除后缀为_diff的特征，对强度为15的数据进行验证
+"""
 # 预测未处理数据
 if __name__ == "__main__":
     spath = "tmp/E5多机预测Local-标准化特征提取-合并错误"
@@ -99,44 +99,35 @@ if __name__ == "__main__":
         tpd = setPDfaultFlag(tpd, ilabel)
         testAbnormalList.append(tpd)
 
+
     #==================================================================将正常的训练中截取一部分和异常数据等长的数据
     # 获得测试数据的总长度
     lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
     tmplist = []
     for ipd in trainNormalList:
-        ipd = sortByAbsValue(ipd, "used_mean", 100)
+        ipd = sortByAbsValue(ipd, "cpu_mean", 60)
         ipd = ipd.loc[0: lenAbnormalData, :]
         tmplist.append(ipd)
     trainNormalList = tmplist
-    #==================================================================end
-
+    #==================================================================en
 
     #==================================================================将所有的训练数据进行合并
-    sdatapath = os.path.join(spath, "data")
     allTrainedPD, err = mergeDataFrames(trainNormalList + trainAbnormalList)
     if err:
         print("训练数据合并失败")
         exit(1)
-    tpath = os.path.join(spath, "data", "trainNormalist")
-    saveDFListToFiles(tpath, trainNormalList)
-    tpath = os.path.join(spath, "data", "trainAbnormalist")
-    saveDFListToFiles(tpath, trainAbnormalList)
     #==================================================================将所有的测试数据进行合并
     allTestPD, err = mergeDataFrames(testNormalList + testAbnormalList)
     if err:
         print("测试数据合并失败")
         exit(1)
-    tpath = os.path.join(spath, "data", "testNormalList")
-    saveDFListToFiles(tpath, testNormalList)
-    tpath = os.path.join(spath, "data", "testAbnormalList")
-    saveDFListToFiles(tpath, testAbnormalList)
 
 
 
     # 获得需要训练的特征
-    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
-    allfeatureload1_nosuffix = ["used_mean"]
+    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="cpu_", suffix="_diff")
+    allfeatureload1_nosuffix = ["cpu_mean"]
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
-    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")
+    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix", maxdepth=3)
 

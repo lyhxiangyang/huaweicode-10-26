@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     # 将未处理首尾的特征提取之后的数据进行读取
     tpath = os.path.join(rpath, step6name)
-    filename_time_corePdDict = readFilename_Time_Core_pdDict(tpath, readtime=[0])
+    filename_time_corePdDict = readFilename_Time_Core_pdDict(tpath, readtime=[7])
     # 进行预测
     predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
     # 数据保存
@@ -107,7 +107,9 @@ if __name__ == "__main__":
         predictBeginitime += 60
 
     tpd = pd.DataFrame(data=draw_time_flagDict).T
-    tpd.to_csv(os.path.join(spath, "prelabels.csv"))
+    tpd = tpd.reset_index()
+    tpd = tpd.rename(columns={"index": "time"})
+    tpd.to_csv(os.path.join(spath, "prelabels.csv"), index=False)
 
     # 将time-cores进行保存
     treejson = json.dumps(tree_time_abnormalCoreDict)

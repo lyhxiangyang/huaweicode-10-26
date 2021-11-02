@@ -48,6 +48,8 @@ if __name__ == "__main__":
     rpath = "tmp/tData-10-26/多机-E5-process-3KM"
     step6name = "6.filename-time-core-标准化-特征提取-未处理首尾"
     spath = "tmp/E5预测80数据"
+    predictBegintime = "2021-08-30 13:14:00"
+    predictEndtime = "2021-08-30 17:03:00"
 
     # 将未处理首尾的特征提取之后的数据进行读取
     tpath = os.path.join(rpath, step6name)
@@ -62,8 +64,6 @@ if __name__ == "__main__":
     tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict = getTime_AbnormalCore(filename_time_corePdDict)
 
     # 绘制关键的图 时间段
-    predictBegintime = "2021-08-30 13:14:00"
-    predictEndtime = "2021-08-30 17:03:00"
     predictBeginitime = TranslateTimeToInt(predictBegintime)
     predictEnditime = TranslateTimeToInt(predictEndtime)
     draw_time_flagDict = {}
@@ -102,7 +102,9 @@ if __name__ == "__main__":
         predictBeginitime += 60
 
     tpd = pd.DataFrame(data=draw_time_flagDict).T
-    tpd.to_csv(os.path.join(spath, "prelabels.csv"))
+    tpd = tpd.reset_index()
+    tpd = tpd.rename(columns={"index": "time"})
+    tpd.to_csv(os.path.join(spath, "prelabels.csv"), index=False)
 
     # 将time-cores进行保存
     treejson = json.dumps(tree_time_abnormalCoreDict)
