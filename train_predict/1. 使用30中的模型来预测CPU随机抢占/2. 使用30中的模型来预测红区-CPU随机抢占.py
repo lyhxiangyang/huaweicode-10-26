@@ -78,9 +78,9 @@ if __name__ == "__main__":
         if stime not in draw_time_flagDict:
             draw_time_flagDict[stime] = {}
         # 真实标签 =====
-        draw_time_flagDict[stime]["realflag"] = 0
+        draw_time_flagDict[stime][FAULT_FLAG] = 0
         if (judgeTimeIsAbnormal(stime, abnormaliTime)):
-            draw_time_flagDict[stime]["realflag"] = 30
+            draw_time_flagDict[stime][FAULT_FLAG] = 30
 
         if stime not in tree_time_abnormalCoreDict:
             # print("{} 不在决策树中".format(stime))
