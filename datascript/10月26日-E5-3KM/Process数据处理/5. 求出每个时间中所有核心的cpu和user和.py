@@ -36,6 +36,9 @@ datapath = [
 
 
 def getAllprocessCPUTime(processDF: pd.DataFrame, extractFeature: List[str]) -> pd.DataFrame:
+    # 先每一行减去前一行
+    processDF[extractFeature] = processDF.groupby(TIME_COLUMN_NAME)[extractFeature].diff(period=1).dropna()
+    # 对每一个时间点进行求和
     user_systemDF = processDF.groupby(TIME_COLUMN_NAME)[extractFeature].sum()
     flagDF = processDF.groupby(TIME_COLUMN_NAME)[FAULT_FLAG].first()
     user_systemDF[FAULT_FLAG] = flagDF
@@ -66,7 +69,7 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
     # 使用新特征cpu
     mergecpupd["cpu"] = mergecpupd["user"] + mergecpupd["system"]
     mergecpupd: pd.DataFrame
-    mergecpupd.to_csv(os.path.join(spath, "mergedcpu.csv"))
+    mergecpupd.to_csv(os.path.join(spath, "mergedcpu.csv"), index=False)
     return mergecpupd
 
 
