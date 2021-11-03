@@ -88,15 +88,18 @@ if __name__ == "__main__":
             adapt_time_abnormalCoreDict[stime] = []
         # 决策树标签 =====
         draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 0
+        draw_time_flagDict[stime][MODEL_TYPE[0] + "_num"] = len(tree_time_abnormalCoreDict[stime])
         if len(tree_time_abnormalCoreDict[stime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 30
         # 随机森林标签 ====
         draw_time_flagDict[stime][MODEL_TYPE[1] + "_flag"] = 0
+        draw_time_flagDict[stime][MODEL_TYPE[1] + "_num"] = len(tree_time_abnormalCoreDict[stime])
         if len(forest_time_abnormalCoreDict[stime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[1] + "_flag"] = 30
 
         # 自适应增强标签 ====
         draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 0
+        draw_time_flagDict[stime][MODEL_TYPE[2] + "_num"] = len(tree_time_abnormalCoreDict[stime])
         if len(adapt_time_abnormalCoreDict[stime]) != 0:
             draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 30
         predictBeginitime += 60

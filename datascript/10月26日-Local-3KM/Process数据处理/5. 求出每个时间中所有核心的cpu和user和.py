@@ -44,7 +44,6 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
         # datapd.extend(tpd)
         datapd.append(tpd)
 
-    saveDFListToFiles(os.path.join(spath, "1. 时间段划分"), datapd)
     # 进行文件的分析
     cpudatapd = []
     for ipd in datapd:
