@@ -123,7 +123,7 @@ def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, timeformat: 
         if inowLineTime - iLastLineTime == 0:
             continue
         # 误差在59 - 61s之间 或者等于0
-        if not (time_interval - 1 <= inowLineTime - iLastLineTime <= time_interval + 1):
+        if not (-time_interval - 1 <= inowLineTime - iLastLineTime <= time_interval + 1):
             tpd = df.loc[beginLine: nowline - 1, :].reset_index(drop=True)
             beginLine = nowline
             respd.append(tpd)
