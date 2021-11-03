@@ -1,9 +1,12 @@
+from typing import Dict
+
 import joblib
+import pandas as pd
 
-from utils.DefineData import SaveModelPath
+from utils.DefineData import SaveModelPath, MODEL_TYPE
 
 
-def model_pred(x_pred, model_type, saved_model_path = SaveModelPath):
+def model_pred(x_pred, model_type, saved_model_path=SaveModelPath):
     """
     Use trained model to predict
     :param saved_model_path:
@@ -18,7 +21,7 @@ def model_pred(x_pred, model_type, saved_model_path = SaveModelPath):
     return y_pred
 
 
-def select_and_pred(df, model_type, saved_model_path = SaveModelPath):
+def select_and_pred(df, model_type, saved_model_path=SaveModelPath):
     # Select needed features
     f = open('%s\\header.txt' % saved_model_path, 'r')
     features = f.read().splitlines()
@@ -27,3 +30,22 @@ def select_and_pred(df, model_type, saved_model_path = SaveModelPath):
     # Use trained model to predict
     y_pred = model_pred(df_selected, model_type, saved_model_path=saved_model_path)
     return y_pred
+
+
+"""
+将每个核心上的数据都进行预测
+"""
+
+
+def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
+    filename_time_corePd = {}
+    for filename, time_core_pdDict in ftcPD.items():
+        filename_time_corePd[filename] = {}
+        for time, core_pdDict in time_core_pdDict.items():
+            filename_time_corePd[filename][time] = {}
+            for icore, tpd in core_pdDict.items():
+                tpd: pd.DataFrame
+                print("{}-{}-{}".format(filename, time, icore))
+                for itype in MODEL_TYPE:
+                    prelist = select_and_pred(tpd, model_type=itype, saved_model_path=modelpath)
+                    tpd[itype + "_flag"] = prelist

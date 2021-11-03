@@ -2,7 +2,7 @@ import os
 import time
 from collections import defaultdict
 from typing import List, Union, Dict, Tuple, Any
-
+from utils.DataScripts import TranslateTimeToInt as c
 import pandas as pd
 
 from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabels, subtractLastLineFromDataFrame
@@ -452,3 +452,76 @@ def getTime_AbnormalCore(ftcPD: Dict):
 
 
 
+"""
+- 计算一个开始和结束时间段内的预测结果 将三个字典传输进来 字典是时间-核列表，代表这个时间，这几个核出现了问题
+参数说明：
+- predictBegintime 开始时间
+- predictEndtime   结束时间
+- abnormaliTime 是一个异常和时间的集合, 格式如下：
+# abnormaliTime = [
+#     [c("2021-08-30 13:15:00"), c("2021-08-30 13:36:00"), 31],
+#     [c("2021-08-30 13:55:00"), c("2021-08-30 14:16:00"), 32],
+#     [c("2021-08-30 14:35:00"), c("2021-08-30 14:56:00"), 33],
+#     [c("2021-08-30 15:15:00"), c("2021-08-30 15:36:00"), 34],
+#     [c("2021-08-30 15:55:00"), c("2021-08-30 16:16:00"), 35],
+#     [c("2021-08-30 16:37:00"), c("2021-08-30 16:56:00"), 11],
+# ]
+- tree_time_abnormalCoreDict 等其他两个是字典，存储的是时间-核心列表，代表这个时间有哪些核心被检测为异常
+
+备注： 可能会往最后三个字典中添加若干时间，但是其对应的核心列表为空
+
+返回值说明：
+返回的是一个pd，存储的是结果说明
+
+"""
+
+def getResultFromTimequantum(predictBegintime: str, predictEndtime: str, abnormaliTime ,tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict):
+    # 判断一个时间是否属于异常时间段内
+    def judgeTimeIsAbnormal(nowtime: str, abnormaltimes: List) -> Union[int, Any]:
+        inowtime = c(nowtime)
+        for i in abnormaltimes:
+            if i[0] <= inowtime <= i[1]:
+                return i[2]
+        return 0
+    # 将时间转化为数字， 时间默认格式为 '%Y-%m-%d %H:%M:%S'
+    predictBeginitime = TranslateTimeToInt(predictBegintime)
+    predictEnditime = TranslateTimeToInt(predictEndtime)
+    draw_time_flagDict = {}
+    while predictBeginitime <= predictEnditime:
+        stime = TranslateTimeToStr(predictBeginitime)
+        itime = predictBeginitime
+        if stime not in draw_time_flagDict:
+            draw_time_flagDict[stime] = {}
+        # 真实标签 =====
+        flag = judgeTimeIsAbnormal(stime, abnormaliTime)
+        draw_time_flagDict[stime][FAULT_FLAG] = flag
+
+        # 下面6行会对参数进行修改
+        if stime not in tree_time_abnormalCoreDict:
+            tree_time_abnormalCoreDict[stime] = []
+        if stime not in forest_time_abnormalCoreDict:
+            forest_time_abnormalCoreDict[stime] = []
+        if stime not in adapt_time_abnormalCoreDict:
+            adapt_time_abnormalCoreDict[stime] = []
+        # 决策树标签 =====
+        draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 0
+        draw_time_flagDict[stime][MODEL_TYPE[0] + "_num"] = len(tree_time_abnormalCoreDict[stime])
+        if len(tree_time_abnormalCoreDict[stime]) != 0:
+            draw_time_flagDict[stime][MODEL_TYPE[0] + "_flag"] = 30
+        # 随机森林标签 ====
+        draw_time_flagDict[stime][MODEL_TYPE[1] + "_flag"] = 0
+        draw_time_flagDict[stime][MODEL_TYPE[1] + "_num"] = len(tree_time_abnormalCoreDict[stime])
+        if len(forest_time_abnormalCoreDict[stime]) != 0:
+            draw_time_flagDict[stime][MODEL_TYPE[1] + "_flag"] = 30
+
+        # 自适应增强标签 ====
+        draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 0
+        draw_time_flagDict[stime][MODEL_TYPE[2] + "_num"] = len(tree_time_abnormalCoreDict[stime])
+        if len(adapt_time_abnormalCoreDict[stime]) != 0:
+            draw_time_flagDict[stime][MODEL_TYPE[2] + "_flag"] = 30
+        predictBeginitime += 60
+
+    time_coreinformationtpd = pd.DataFrame(data=draw_time_flagDict).T
+    time_coreinformationtpd = time_coreinformationtpd.reset_index()
+    time_coreinformationtpd = time_coreinformationtpd.rename(columns={"index": "time"})
+    return time_coreinformationtpd
