@@ -6,6 +6,7 @@ import pandas as pd
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DataScripts import splitDataFrameByTime
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
+from utils.FileSaveRead import saveDFListToFiles
 
 datapath = [
     "D:/HuaweiMachine/数据分类/wrf/多机/红区/3KM/异常数据/wrf_3km_160_process.csv",
@@ -47,6 +48,7 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
     for ipd in datapd:
         tpd = getAllprocessCPUTime(ipd, extractFeature)
         cpudatapd.append(tpd)
+    saveDFListToFiles(os.path.join(spath, "时间段数据"), cpudatapd)
     # 进行文件的合并
     mergecpupd, _ = mergeDataFrames(cpudatapd)
     # 使用新特征cpu
