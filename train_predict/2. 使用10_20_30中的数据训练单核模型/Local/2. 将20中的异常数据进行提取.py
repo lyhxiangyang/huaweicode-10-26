@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # 要读取的filename
     rfilename = ["wrf_3km_160_process"]
     rtime = [1]
-    rcores = [0]
+    rcores = [1]
     extractedFeatures = ["cpu"]
 
     # 读取数据
