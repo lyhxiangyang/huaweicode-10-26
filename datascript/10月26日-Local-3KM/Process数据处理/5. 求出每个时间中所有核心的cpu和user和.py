@@ -20,7 +20,7 @@ datapath = [
 
 def getAllprocessCPUTime(processDF: pd.DataFrame, extractFeature: List[str]) -> pd.DataFrame:
     # 先每一行减去前一行, 根据pid进行处理
-    processDF[extractFeature] = processDF.groupby("pid")[extractFeature].diff(periods=1).dropna()
+    processDF[extractFeature] = processDF.groupby("pid")[extractFeature].diff(periods=1)
     # 对每一个时间点进行求和
     user_systemDF = processDF.groupby(TIME_COLUMN_NAME)[extractFeature].sum()
     flagDF = processDF.groupby(TIME_COLUMN_NAME)[FAULT_FLAG].first()
@@ -40,8 +40,8 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
             exit(1)
         print("处理文件-{}".format(ipath))
         tpd = pd.read_csv(ipath)
-        tpdlists = splitDataFrameByTime(tpd, time_interval=60, timeformat='%Y/%m/%d %H:%M')
-        datapd.extend(tpdlists)
+        # tpdlists = splitDataFrameByTime(tpd, time_interval=60, timeformat='%Y/%m/%d %H:%M')
+        datapd.extend(tpd)
 
     saveDFListToFiles(os.path.join(spath, "1. 时间段划分"), datapd)
     # 进行文件的分析
