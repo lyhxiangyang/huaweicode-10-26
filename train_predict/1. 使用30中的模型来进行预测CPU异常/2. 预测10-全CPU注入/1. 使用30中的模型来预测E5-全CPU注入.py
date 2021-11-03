@@ -6,7 +6,7 @@ import pandas as pd
 
 from Classifiers.ModelPred import predictFilename_Time_Core
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import TranslateTimeToInt as c, getTime_AbnormalCore
+from utils.DataScripts import TranslateTimeToInt as c, getTime_AbnormalCore, getResultFromTimequantum
 from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_Core_pdDict
 
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     #=====================================进行标准流程
     # 将未处理首尾的特征提取之后的数据进行读取
-    filename_time_corePdDict = readFilename_Time_Core_pdDict(rpath, readfilename=rfilenames, readtime=rtimes, rcores=rcores)
+    filename_time_corePdDict = readFilename_Time_Core_pdDict(rpath, readfilename=rfilenames, readtime=rtimes, readcore=rcores)
     # 进行预测, 数据会保存在filename_time_corePdDict字典里面
     predictFilename_Time_Core(filename_time_corePdDict, modelpath=rmodelpath)
     # 数据保存
