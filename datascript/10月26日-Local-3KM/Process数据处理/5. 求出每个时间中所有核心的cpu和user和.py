@@ -4,6 +4,7 @@ from typing import List
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
+from utils.DataScripts import splitDataFrameByTime
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 
 datapath = [
@@ -38,7 +39,8 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
             exit(1)
         print("处理文件-{}".format(ipath))
         tpd = pd.read_csv(ipath)
-        datapd.append(tpd)
+        tpdlists = splitDataFrameByTime(tpd, time_interval=60)
+        datapd.extend(*datapd)
 
     # 进行文件的分析
     cpudatapd = []
