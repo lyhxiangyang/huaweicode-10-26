@@ -2,7 +2,6 @@ import os
 import time
 from collections import defaultdict
 from typing import List, Union, Dict, Tuple, Any
-from utils.DataScripts import TranslateTimeToInt as c
 import pandas as pd
 
 from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabels, subtractLastLineFromDataFrame
@@ -20,15 +19,16 @@ def TranslateTimeToInt(stime: str, timeformat: str = '%Y-%m-%d %H:%M:%S') -> int
     itime = time.mktime(time.strptime(stime, timeformat))
     return int(itime)
 
+
 """
 将时间格式转化为str
 "2021/8/29 0:54:08"
 """
 
+
 def TranslateTimeToStr(nowtime: int, timeformat: str = '%Y-%m-%d %H:%M:%S') -> str:
     struct_time = time.localtime(nowtime)
     return time.strftime(timeformat, struct_time)
-
 
 
 """
@@ -61,7 +61,8 @@ def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%
 """
 
 
-def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None, standardValue: int = 100) -> pd.DataFrame:
+def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None,
+                           standardValue: int = 100) -> pd.DataFrame:
     if standardFeatures is None:
         standardFeatures = []
     nostandardDf = df.loc[:, standardFeatures]
@@ -111,7 +112,8 @@ index必须是0开头的
 """
 
 
-def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, timeformat: str = '%Y-%m-%d %H:%M:%S') -> List[pd.DataFrame]:
+def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, timeformat: str = '%Y-%m-%d %H:%M:%S') -> List[
+    pd.DataFrame]:
     respd = []
     beginLine = 0
     sbeginLineTime = df.loc[beginLine, TIME_COLUMN_NAME]
@@ -278,7 +280,8 @@ def standard_file_time_coreDict(ftcPD, standardFeature, meanvalue, standardValue
             resDict[filename][time] = {}
             for icore, tpd in core_pdDict.items():
                 resDict[filename][time][icore] = standardPDfromOriginal(tpd, standardFeatures=standardFeature,
-                                                                        meanValue=meanvalue, standardValue=standardValue)
+                                                                        meanValue=meanvalue,
+                                                                        standardValue=standardValue)
     return resDict
 
 
@@ -299,7 +302,8 @@ def standard_file_time_core_faultyDict(ftcPD, standardFeature, meanvalue, standa
                 for ifault, tpd in faultypdDict.items():
                     resDict[filename][time][icore][ifault] = standardPDfromOriginal(tpd,
                                                                                     standardFeatures=standardFeature,
-                                                                                    meanValue=meanvalue, standardValue=standardValue)
+                                                                                    meanValue=meanvalue,
+                                                                                    standardValue=standardValue)
     return resDict
 
 
@@ -315,7 +319,8 @@ def FeaExtra_file_time_core(ftcDict, windowSize: int = 5, windowRealSize: int = 
             resDict[filename][time] = {}
             print("filename:{}-time:{}".format(filename, time))
             for icore, tpd in core_pdDict.items():
-                fePD, fault_Dict = featureExtractionUsingFeatures(tpd, windowSize, windowRealSize, silidWindows, extraFeature)
+                fePD, fault_Dict = featureExtractionUsingFeatures(tpd, windowSize, windowRealSize, silidWindows,
+                                                                  extraFeature)
                 resDict[filename][time][icore] = fePD
                 fault_PDDict = mergeTwoDF(fault_Dict, fault_PDDict)
     return resDict, fault_PDDict
@@ -323,8 +328,8 @@ def FeaExtra_file_time_core(ftcDict, windowSize: int = 5, windowRealSize: int = 
 
 # 特征提取 file-time数据 主要是用于server数据
 def FeaExtra_file_time(ftcDict, windowSize: int = 5, windowRealSize: int = 1,
-                            silidWindows: bool = True,
-                            extraFeature=None):
+                       silidWindows: bool = True,
+                       extraFeature=None):
     resDict = {}
     fault_PDDict = {}
     for filename, time_core_pdDict in ftcDict.items():
@@ -336,6 +341,7 @@ def FeaExtra_file_time(ftcDict, windowSize: int = 5, windowRealSize: int = 1,
             fault_PDDict = mergeTwoDF(fault_Dict, fault_PDDict)
             print("filename:{}-time:{}".format(filename, time))
     return resDict, fault_PDDict
+
 
 # ==================================== 用于server数据
 """
@@ -360,9 +366,9 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
     # tmp/{filename}/1.时间段划分集合
     saveDFListToFiles(spath=os.path.join(spath, "1.时间段划分集合文件"), pds=pdbytime)
     print("按照时间段划分结束")
-    thistime_pdDict = {} # time-PD
-    thistime_fault_pdDict = {} # time-fault-PD
-    thisFileFaulty_pdDict = {} # fault-PD
+    thistime_pdDict = {}  # time-PD
+    thistime_fault_pdDict = {}  # time-fault-PD
+    thisFileFaulty_pdDict = {}  # fault-PD
 
     # 将累计值都减去上一行的
     subcorepds = []
@@ -385,6 +391,7 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
         thisFileFaulty_pdDict = mergeTwoDF(thisFileFaulty_pdDict, faultDict)
     return thisFileFaulty_pdDict, thistime_pdDict, thistime_fault_pdDict
 
+
 """
 作用：标准化 file-time 
 返回值： file-time的字典结构
@@ -396,8 +403,10 @@ def standard_file_time_Dict(ftcPD, standardFeature, meanvalue, standardValue: in
     for filename, time_core_pdDict in ftcPD.items():
         resDict[filename] = {}
         for time, timepd in time_core_pdDict.items():
-            resDict[filename][time] = standardPDfromOriginal(timepd, standardFeatures=standardFeature, meanValue=meanvalue, standardValue=standardValue)
+            resDict[filename][time] = standardPDfromOriginal(timepd, standardFeatures=standardFeature,
+                                                             meanValue=meanvalue, standardValue=standardValue)
     return resDict
+
 
 """
 作用：标准化 file-time-fault
@@ -412,15 +421,18 @@ def standard_file_time_faultyDict(ftcPD, standardFeature, meanvalue, standardVal
         for time, core_pdDict in time_core_pdDict.items():
             resDict[filename][time] = {}
             for ifault, faultypd in core_pdDict.items():
-                resDict[filename][time][ifault] = standardPDfromOriginal(faultypd, standardFeatures=standardFeature, meanValue=meanvalue, standardValue=standardValue)
+                resDict[filename][time][ifault] = standardPDfromOriginal(faultypd, standardFeatures=standardFeature,
+                                                                         meanValue=meanvalue,
+                                                                         standardValue=standardValue)
     return resDict
-
 
 
 """
 遍历所有的核心，得到时间和异常核心数的关系
 返回 int - List[int]结构
 """
+
+
 def getTime_AbnormalCore(ftcPD: Dict):
     tree_time_abnormalCoreDict = defaultdict(list)
     forest_time_abnormalCoreDict = defaultdict(list)
@@ -451,7 +463,6 @@ def getTime_AbnormalCore(ftcPD: Dict):
     return tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict
 
 
-
 """
 - 计算一个开始和结束时间段内的预测结果 将三个字典传输进来 字典是时间-核列表，代表这个时间，这几个核出现了问题
 参数说明：
@@ -475,14 +486,19 @@ def getTime_AbnormalCore(ftcPD: Dict):
 
 """
 
-def getResultFromTimequantum(predictBegintime: str, predictEndtime: str, abnormaliTime ,tree_time_abnormalCoreDict, forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict):
+
+def getResultFromTimequantum(predictBegintime: str, predictEndtime: str, abnormaliTime, tree_time_abnormalCoreDict,
+                             forest_time_abnormalCoreDict, adapt_time_abnormalCoreDict):
     # 判断一个时间是否属于异常时间段内
+    c = TranslateTimeToInt
+
     def judgeTimeIsAbnormal(nowtime: str, abnormaltimes: List) -> Union[int, Any]:
         inowtime = c(nowtime)
         for i in abnormaltimes:
             if i[0] <= inowtime <= i[1]:
                 return i[2]
         return 0
+
     # 将时间转化为数字， 时间默认格式为 '%Y-%m-%d %H:%M:%S'
     predictBeginitime = TranslateTimeToInt(predictBegintime)
     predictEnditime = TranslateTimeToInt(predictEndtime)

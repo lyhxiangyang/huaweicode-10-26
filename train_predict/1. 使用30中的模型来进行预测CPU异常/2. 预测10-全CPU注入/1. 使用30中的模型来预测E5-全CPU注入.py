@@ -6,8 +6,7 @@ import pandas as pd
 
 from Classifiers.ModelPred import predictFilename_Time_Core
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import TranslateTimeToInt as c, TranslateTimeToInt, TranslateTimeToStr, getTime_AbnormalCore
-from utils.DefineData import FAULT_FLAG, MODEL_TYPE
+from utils.DataScripts import TranslateTimeToInt as c, getTime_AbnormalCore
 from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_Core_pdDict
 
 
