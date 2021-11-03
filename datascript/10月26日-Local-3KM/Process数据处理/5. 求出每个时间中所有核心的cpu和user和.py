@@ -43,12 +43,13 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
         tpdlists = splitDataFrameByTime(tpd, time_interval=60, timeformat='%Y/%m/%d %H:%M')
         datapd.extend(tpdlists)
 
+    saveDFListToFiles(os.path.join(spath, "1. 时间段划分"), datapd)
     # 进行文件的分析
     cpudatapd = []
     for ipd in datapd:
         tpd = getAllprocessCPUTime(ipd, extractFeature)
         cpudatapd.append(tpd)
-    saveDFListToFiles(os.path.join(spath, "时间段数据"), cpudatapd)
+    saveDFListToFiles(os.path.join(spath, "2. 处理积累数据"), cpudatapd)
     # 进行文件的合并
     mergecpupd, _ = mergeDataFrames(cpudatapd)
     # 使用新特征cpu
