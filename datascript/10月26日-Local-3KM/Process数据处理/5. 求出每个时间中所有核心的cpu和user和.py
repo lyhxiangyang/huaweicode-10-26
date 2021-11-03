@@ -39,8 +39,8 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
             exit(1)
         print("处理文件-{}".format(ipath))
         tpd = pd.read_csv(ipath)
-        tpdlists = splitDataFrameByTime(tpd, time_interval=60)
-        datapd.extend(*datapd)
+        tpdlists = splitDataFrameByTime(tpd, time_interval=60, timeformat='%Y/%m/%d %H:%M')
+        datapd.extend(*tpdlists)
 
     # 进行文件的分析
     cpudatapd = []

@@ -111,15 +111,15 @@ index必须是0开头的
 """
 
 
-def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, ) -> List[pd.DataFrame]:
+def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, timeformat: str = '%Y-%m-%d %H:%M:%S') -> List[pd.DataFrame]:
     respd = []
     beginLine = 0
     sbeginLineTime = df.loc[beginLine, TIME_COLUMN_NAME]
-    ibeginTime = TranslateTimeToInt(sbeginLineTime, '%Y-%m-%d %H:%M:%S')
+    ibeginTime = TranslateTimeToInt(sbeginLineTime, timeformat)
     iLastLineTime = ibeginTime
     for nowline in range(1, len(df)):
         snowLineTime = df.loc[nowline, TIME_COLUMN_NAME]
-        inowLineTime = TranslateTimeToInt(snowLineTime, '%Y-%m-%d %H:%M:%S')
+        inowLineTime = TranslateTimeToInt(snowLineTime, timeformat)
         if inowLineTime - iLastLineTime == 0:
             continue
         # 误差在59 - 61s之间 或者等于0
