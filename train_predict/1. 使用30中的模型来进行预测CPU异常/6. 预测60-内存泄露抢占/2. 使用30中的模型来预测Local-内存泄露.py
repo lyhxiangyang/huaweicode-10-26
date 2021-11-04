@@ -15,7 +15,7 @@ from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_
 if __name__ == "__main__":
     # 要读取的文件路径
     rpath = "tmp/tData-10-26/多机-Local-process-3KM/6.filename-time-core-标准化-特征提取-未处理首尾"
-    spath = "tmp/30模型预测总集合/46.2.预测60数据-Local"
+    spath = "tmp/30模型预测总集合/6.2.预测60数据-Local"
     # 模型路径
     rmodelpath = "Classifiers/saved_model/tmp_load1_nosuffix"
     # Local全CPU抢占只有一个文件，默认即可
