@@ -5,7 +5,47 @@ from utils.FileSaveRead import readFilename_Time_pdDict, saveFilename_Time_pdDic
 
 if __name__ == "__main__":
     spath = "tmp/tData-10-26/多机-Local-server-3KM"
-    extractedFeaturee = ["load1", "used"]
+    # 需要特征提取的特征
+    # extractedFeaturee = ["load1", "used"]
+    extractedFeaturee = [
+        # "time",
+        "user",
+        "nice",
+        "system",
+        "idle",
+        "iowait",
+        "irq",
+        "softirq",
+        "steal",
+        "guest",
+        "guest_nice",
+        "ctx_switches",
+        "interrupts",
+        "soft_interrupts",
+        "syscalls",
+        "freq",
+        "load1",
+        "load5",
+        "load15",
+        "total",
+        "available",
+        "percent",
+        "used",
+        "free",
+        "active",
+        "inactive",
+        "buffers",
+        "cached",
+        "handlesNum",
+        "pgpgin",
+        "pgpgout",
+        "fault",
+        "majflt",
+        "pgscank",
+        "pgsteal",
+        "pgfree",
+        # "faultFlag",
+    ]
     # 将所有标准化数据进行读取
     file_time_standardPath = os.path.join(spath, "4.filename-time-标准化")
     print("读取filename-time-core数据中".center(40, "*"))
