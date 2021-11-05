@@ -20,15 +20,15 @@ trainAbnormalDataPath = [
 ]
 
 testNormalDataPath = [
-    "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/0.csv",
 ]
 
 testAbnormalDataPath = [
-    (50, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/51.csv"),
-    (50, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/52.csv"),
-    (50, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/53.csv"),
-    (50, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/54.csv"),
-    (50, "tmp/tData-10-26/多机-Local-server-3KM/9.特征提取所有错误-处理首尾/55.csv"),
+    (50, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/51.csv"),
+    (50, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/52.csv"),
+    (50, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/53.csv"),
+    (50, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/54.csv"),
+    (50, "tmp/tData-10-26/多机-Local-server-3KM/7.特征提取所有错误-未处理首尾/55.csv"),
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
@@ -113,7 +113,6 @@ if __name__ == "__main__":
 
     # 获得需要训练的特征
     allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
-
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
     ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")

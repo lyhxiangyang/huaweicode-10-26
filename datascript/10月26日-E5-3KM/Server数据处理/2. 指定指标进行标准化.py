@@ -15,7 +15,48 @@ if __name__ == "__main__":
     file_timePath = "tmp/tData-10-26/多机-E5-server-3KM/2.filename-time"
     file_time_faultyPath: str = "tmp/tData-10-26/多机-E5-server-3KM/3.filename-time-faulty"
     # 需要标准化的特征
-    standardfeatur = ["load1", "used"]
+    # 只标准化这几个特征值
+    # standardfeatur = ["load1", "used"]
+    # 将所有的特征值都进行标准化
+    standardfeatur = [
+        # "time",
+        "user",
+        "nice",
+        "system",
+        "idle",
+        "iowait",
+        "irq",
+        "softirq",
+        "steal",
+        "guest",
+        "guest_nice",
+        "ctx_switches",
+        "interrupts",
+        "soft_interrupts",
+        "syscalls",
+        "freq",
+        "load1",
+        "load5",
+        "load15",
+        "total",
+        "available",
+        "percent",
+        "used",
+        "free",
+        "active",
+        "inactive",
+        "buffers",
+        "cached",
+        "handlesNum",
+        "pgpgin",
+        "pgpgout",
+        "fault",
+        "majflt",
+        "pgscank",
+        "pgsteal",
+        "pgfree",
+        # "faultFlag",
+    ]
     standardvalue = 100
 
     # 获得所有正常情况下各个特征的平均值
