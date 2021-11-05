@@ -70,6 +70,8 @@ def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=No
     # 如果为空 代表使用自己的mean
     if meanValue is None:
         meanValue = nostandardDf.mean()
+    # 需要先将meanValue中的0值去掉
+    meanValue = meanValue[~meanValue.isin([0])]
     # 进行标准化
     standardDf = (nostandardDf / meanValue * standardValue).astype("int64")
     if TIME_COLUMN_NAME in df.columns.array:
