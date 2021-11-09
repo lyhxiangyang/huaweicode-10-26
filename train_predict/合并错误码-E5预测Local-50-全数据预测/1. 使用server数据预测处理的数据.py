@@ -116,5 +116,5 @@ if __name__ == "__main__":
     
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
-    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")
+    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix", maxdepth=10)
 
