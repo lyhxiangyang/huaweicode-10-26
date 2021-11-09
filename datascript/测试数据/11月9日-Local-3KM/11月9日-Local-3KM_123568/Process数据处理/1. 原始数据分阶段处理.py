@@ -49,8 +49,7 @@ process_features = [
     "faultFlag",
 ]
 datapath = [
-    # R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_server.csv",
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_process.csv",
+    R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\local环境\标注数据\local_wrf\wrf_3km_multi\wrf_160\wrf_local_160_process.csv"
 ]
 
 
@@ -63,7 +62,7 @@ def changeTimeColumns_process(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/训练数据/多机-E5-process-3KM_12356"
+    spath = "tmp/tData-11-09/测试数据/多机-Local-process-3KM_123568"
     all_faulty_pd_dict = {}
     orginal_all_faulty_pd_dict = {}
     isSlideWin = True  # True代表这个step为1， False代表step为Win
