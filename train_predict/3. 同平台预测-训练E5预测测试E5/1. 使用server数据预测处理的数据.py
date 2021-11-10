@@ -8,28 +8,87 @@ from utils.DefineData import FAULT_FLAG
 
 # 训练数据要使用所有的正常数据
 trainNormalDataPath = [
-    "tmp/tData-10-26/多机-E5-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
-    "tmp/tData-10-26/多机-Local-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\E5正常数据\server数据处理\9.特征提取所有错误-处理首尾\0.csv",
 ]
 
 trainAbnormalDataPath = [
-    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
-    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
-    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
-    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
-    (30, "tmp/预测30处理数据/多机-E5-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\11.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\12.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\13.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\14.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\15.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\21.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\22.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\23.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\24.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\25.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\31.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\32.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\33.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\34.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\35.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\51.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\52.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\53.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\54.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\55.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\61.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\62.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\63.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\64.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\65.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\81.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\82.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\83.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\84.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\85.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\91.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\92.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\93.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\94.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\95.csv"),
 ]
 
 testNormalDataPath = [
-    "tmp/tData-10-26/多机-Local-process-3KM/9.特征提取所有错误-处理首尾/0.csv",
+    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\0.csv",
 ]
 
 testAbnormalDataPath = [
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/31.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/32.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/33.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/34.csv"),
-    (30, "tmp/预测30处理数据/多机-Local-process-3KM/4.特征提取所有错误-处理首尾/35.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\11.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\12.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\13.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\14.csv"),
+    (10, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\15.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\21.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\22.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\23.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\24.csv"),
+    (20, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\25.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\31.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\32.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\33.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\34.csv"),
+    (30, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\35.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\51.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\52.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\53.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\54.csv"),
+    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\55.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\61.csv"),
+    # (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\62.csv"),
+    # (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\63.csv"),
+    # (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\64.csv"),
+    # (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\65.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\81.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\82.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\83.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\84.csv"),
+    (80, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\85.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\91.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\92.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\93.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\94.csv"),
+    (90, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\95.csv"),
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
@@ -102,13 +161,13 @@ if __name__ == "__main__":
 
     #==================================================================将正常的训练中截取一部分和异常数据等长的数据
     # 获得测试数据的总长度
-    lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
-    tmplist = []
-    for ipd in trainNormalList:
-        ipd = sortByAbsValue(ipd, "cpu_mean", 60)
-        ipd = ipd.loc[0: lenAbnormalData, :]
-        tmplist.append(ipd)
-    trainNormalList = tmplist
+    # lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
+    # tmplist = []
+    # for ipd in trainNormalList:
+    #     ipd = sortByAbsValue(ipd, "cpu_mean", 60)
+    #     ipd = ipd.loc[0: lenAbnormalData, :]
+    #     tmplist.append(ipd)
+    # trainNormalList = tmplist
     #==================================================================en
 
     #==================================================================将所有的训练数据进行合并
