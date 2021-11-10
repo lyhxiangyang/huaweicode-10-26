@@ -29,9 +29,16 @@ def TrainThree(trainedpd: pd.DataFrame, spath: str, modelpath: str = "Classifier
                 tDic[i] = {}
             tmetrics = get_metrics(getTestRealLabels(), getTestPreLabels(), label=i)
 
+            if "num" not in tDic[i].keys():
+                tDic[i]["num"] = tmetrics["realnums"][i]
+            # 将数据进行保存
             tDic[i]["accuracy_" + itype] = tmetrics["accuracy"]
             tDic[i]["precision_" + itype] = tmetrics["precision"]
             tDic[i]["recall_" + itype] = tmetrics["recall"]
+            tDic[i]["per_itself_" + itype] = tmetrics["per_itself"]
+            tDic[i]["per_normal_" + itype] = tmetrics["per_normal"]
+            tDic[i]["per_samefault_" + itype] = tmetrics["per_samefault"]
+            tDic[i]["per_fault_" + itype] = tmetrics["per_fault"]
 
     itpd = pd.DataFrame(data=tDic).T
     savefilename = "1.模型训练过程中数据统计.csv"
