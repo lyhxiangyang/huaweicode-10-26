@@ -263,7 +263,8 @@ def subtractLastLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[None
     dfcolumns_2 = dfcolumns_1 - df.loc[:, columns]
     # 然后下一一位
     df.loc[:, columns] = dfcolumns_2.shift(periods=1, axis=0, fill_value=0)
-    # 第二种实现方式是使用df.diff(方式)
+    # 然后需要让第一行和第二行进行相等
+    df.loc[0, columns] = df.loc[1, columns]
     return df
 
 # 合并的两个类型是fault-DataFrame
