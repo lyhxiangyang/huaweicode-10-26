@@ -52,8 +52,8 @@ server_feature = [
     # "faultFlag",
 ]
 dataserverpath = [
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_server.csv",
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_server-9.csv",
+    R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_server.csv",
+    R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_server-9.csv",
 ]
 
 
