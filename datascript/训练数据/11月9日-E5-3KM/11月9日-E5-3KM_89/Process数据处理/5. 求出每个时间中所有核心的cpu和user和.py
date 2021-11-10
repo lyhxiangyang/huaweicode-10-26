@@ -8,8 +8,7 @@ from utils.DataScripts import splitDataFrameByTime
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 
 datapath = [
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\local环境\多机\wrf_3km_多机\part1\output\local_160\wrf_3km_160_process.csv",
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\local环境\多机\wrf_3km_多机\part2\output\local_160\wrf_3km_160_process.csv",
+    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\e5环境\标注数据\wrf\wrf_3km_multi_89\wrf_43\wrf_e5_43_process.csv",
 ]
 
 """
@@ -58,6 +57,6 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
 
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/训练数据/多机-Local-process-3KM/10.提取进程文件中的CPU数据"
+    spath = "tmp/tData-11-09/训练数据/多机-E5-process-3KM_89/10.提取进程文件中的CPU数据"
     extractFeature = ["user", "system"]
     processAllprocessData(spath, datapath, extractFeature)
