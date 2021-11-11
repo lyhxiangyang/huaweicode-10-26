@@ -19,7 +19,7 @@ trainAbnormalDataPath = [
 ]
 
 testNormalDataPath = [
-    "D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\0.csv",
+    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\0.csv",
 ]
 
 testAbnormalDataPath = [

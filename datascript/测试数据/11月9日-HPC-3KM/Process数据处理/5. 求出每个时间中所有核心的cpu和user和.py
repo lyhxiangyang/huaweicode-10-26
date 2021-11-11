@@ -9,6 +9,7 @@ from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 
 datapath = [
     R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\hpc环境\标注数据\hpc_wrf\wrf_3km_multi\hpcagent18\wrf_hpc_hpcagent18_process.csv",
+    R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\hpc环境\标注数据\hpc_wrf\wrf_3km_multi\hpcagent18\wrf_hpc_hpcagent18_process-9.csv",
 ]
 
 """
@@ -57,6 +58,6 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
 
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM_123568/10.提取进程文件中的CPU数据"
+    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM/10.提取进程文件中的CPU数据"
     extractFeature = ["user", "system"]
     processAllprocessData(spath, datapath, extractFeature)

@@ -4,7 +4,7 @@ from utils.DataScripts import FeaExtra_file_time_core
 from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_Core_pdDict, saveFaultyDict
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM_123568"
+    spath = "tmp/tData-11-09/测试数据/多机-Local-process-3KM"
     extractedFeaturee = ["cpu", "system", "user"]
     # 将所有的标准化数据读取
     file_time_core_standardPath = os.path.join(spath, "4.filename-time-core-标准化")

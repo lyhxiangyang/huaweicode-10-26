@@ -4,7 +4,7 @@ from utils.DataScripts import FeaExtra_file_time
 from utils.FileSaveRead import readFilename_Time_pdDict, saveFilename_Time_pdDict, saveFaultyDict
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/训练数据/多机-E5-server-3KM_12356"
+    spath = "tmp/tData-11-09/训练数据/多机-Local-server-3KM"
     # 需要特征提取的特征值
     # extractedFeaturee = ["load1", "used"]
     extractedFeaturee = [

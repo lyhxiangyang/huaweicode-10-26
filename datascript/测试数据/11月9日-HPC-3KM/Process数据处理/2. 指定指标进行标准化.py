@@ -57,7 +57,7 @@ standardized_abnormalflag = [15]
 
 if __name__ == "__main__":
     # 所有正常数据的路径
-    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM_9"
+    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM"
     normalpath = os.path.join(spath, "1.所有process错误码信息/0.csv")
     # 需要标准化的数据路径
     file_time_corePath = os.path.join(spath, "2.filename-time-core")

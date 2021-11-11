@@ -57,6 +57,6 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
 
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/测试数据/多机-Local-process-3KM_123568/10.提取进程文件中的CPU数据"
+    spath = "tmp/tData-11-09/测试数据/多机-Local-process-3KM/10.提取进程文件中的CPU数据"
     extractFeature = ["user", "system"]
     processAllprocessData(spath, datapath, extractFeature)

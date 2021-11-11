@@ -50,6 +50,7 @@ process_features = [
 ]
 datapath = [
     R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\hpc环境\标注数据\hpc_wrf\wrf_3km_multi\hpcagent18\wrf_hpc_hpcagent18_process.csv",
+    R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\hpc环境\标注数据\hpc_wrf\wrf_3km_multi\hpcagent18\wrf_hpc_hpcagent18_process-9.csv",
 ]
 
 
@@ -62,7 +63,7 @@ def changeTimeColumns_process(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM_123568"
+    spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM"
     all_faulty_pd_dict = {}
     orginal_all_faulty_pd_dict = {}
     isSlideWin = True  # True代表这个step为1， False代表step为Win
