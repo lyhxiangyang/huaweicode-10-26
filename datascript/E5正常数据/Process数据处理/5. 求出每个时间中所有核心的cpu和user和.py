@@ -8,7 +8,7 @@ from utils.DataScripts import splitDataFrameByTime
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 
 datapath = [
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\训练数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_process.csv",
+    R"D:\HuaweiMachine\数据分类\wrf\多机\E5\3KM\正常数据\wrf_3km_mormal\wrf_e5_43_process-4.csv",
 ]
 
 """

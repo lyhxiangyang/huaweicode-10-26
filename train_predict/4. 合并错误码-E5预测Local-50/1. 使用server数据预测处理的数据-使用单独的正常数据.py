@@ -111,7 +111,8 @@ if __name__ == "__main__":
 
 
     # 获得需要训练的特征
-    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
+    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
+    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="pgfree_", suffix="_diff")
 
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))

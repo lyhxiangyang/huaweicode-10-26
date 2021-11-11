@@ -8,7 +8,7 @@ from utils.FileSaveRead import readFilename_Time_pdDict, readFilename_Time_Fault
 
 if __name__ == "__main__":
     # 数据保存路径
-    spath = "tmp/tData-11-09/训练数据/多机-E5-server-3KM"
+    spath = "tmp/tData-11-09/测试数据/多机-E5-server-3KM"
 
     # 使用自己的正常数据
     # normalreadpath = os.path.join(spath, R"1.所有process错误码信息\0.csv")

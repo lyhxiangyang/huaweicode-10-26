@@ -50,7 +50,7 @@ process_features = [
 ]
 datapath = [
     R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_process.csv",
-    R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_process-9.csv",
+    # R"D:\HuaweiMachine\数据分类\TrainAndTest\测试数据\B\e5环境\标注数据\wrf\wrf_3km_multi\wrf_43\wrf_e5_43_process-9.csv",
 ]
 
 
