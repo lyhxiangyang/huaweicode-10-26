@@ -58,6 +58,8 @@ standardized_abnormalflag = [15]
 if __name__ == "__main__":
     # 所有正常数据的路径
     spath = "tmp/tData-11-09/训练数据/多机-E5-process-3KM"
+    # 使用自己的正常数据
+    # normalreadpath = os.path.join(spath, R"1.所有process错误码信息\0.csv")
     # 使用正常数据中的平均值
     normalreadpath = R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\E5正常数据\process数据处理\1.所有process错误码信息\0.csv"
     normalpath = os.path.join(normalreadpath)

@@ -8,13 +8,9 @@ from utils.FileSaveRead import readFilename_Time_pdDict, readFilename_Time_Fault
 
 if __name__ == "__main__":
     # 数据保存路径
-    spath = "tmp/tData-11-09/测试数据/多机-E5-server-3KM"
-
-    # 使用自己的正常数据
-    # normalreadpath = os.path.join(spath, R"1.所有process错误码信息\0.csv")
+    spath = "tmp/tData-11-09/Local正常数据/server数据处理"
     # 所有正常数据的路径
     normalreadpath = R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\E5正常数据\server数据处理\1.所有process错误码信息\0.csv"
-
     normalpath = os.path.join(normalreadpath)
     # 需要标准化的数据路径
     file_timePath = os.path.join(spath, "2.filename-time")
