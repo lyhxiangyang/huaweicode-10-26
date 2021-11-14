@@ -428,7 +428,7 @@ def getfilespath(filepath: str) -> List[str]:
     if not os.path.exists(filepath):
         print("{}路径不存在".format(filepath))
         exit(1)
-    files = os.listdir(spath)
+    files = os.listdir(filepath)
     filepaths = [os.path.join(filepath, i) for i in files]
     return filepaths
 
