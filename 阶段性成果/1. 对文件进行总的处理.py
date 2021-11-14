@@ -242,6 +242,8 @@ time, server_flag(可选), used, used_mean, pgfree, pgfree_mean, pgfree_min, pgf
 def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, spath: str = None,
                                   isThreshold: bool = False, thresholdValue: Dict = None,
                                   modelfilepath: str = None) -> Dict:
+    if spath is not None and not os.path.exists(spath):
+        os.makedirs(spath)
     # 将allserverpds里面所有的时间搜集起来
     timecolumns = allserverpds[TIME_COLUMN_NAME]
     serverinformationDict = defaultdict(list)
