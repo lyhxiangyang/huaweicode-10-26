@@ -22,7 +22,8 @@ import pandas as pd
 def mergeDataFrames(lpds: List[pd.DataFrame]) -> (pd.DataFrame, bool):
     # 如果说传进来的DataFrame头部不一样 就报错
     if not judgeSameFrames(lpds):
-        return None, False
+        print("mergeDataFrames函数-合并失误")
+        exit(1)
     # 将列表中的数据全都合并
     dfres = pd.concat(lpds, ignore_index=True)
     return dfres, False
@@ -256,7 +257,9 @@ def subtractFirstLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[
 def subtractLastLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[None, pd.DataFrame]:
     df = df.copy()
     if len(df) <= 1:
-        return None
+        print("subtractLastLineFromDataFrame 长度为1 出错")
+        exit(1)
+    df.reset_index(drop=True, inplace=True)
     # 先将整个表格往上一隔
     dfcolumns_1 = df.loc[:, columns].shift(periods=-1, axis=0, fill_value=0)
     # 然后相减

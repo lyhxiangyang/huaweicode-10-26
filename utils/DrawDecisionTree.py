@@ -7,9 +7,11 @@ import joblib
 from utils.DefineData import MODEL_TYPE
 
 
-def plot_tree_structure(depth, modelpath: str):
+def plot_tree_structure(depth, modelpath: str, filename: str = None):
+    if filename is None:
+        filename = MODEL_TYPE[0] + ".pkl"
     # Load the model
-    modelname = os.path.join(modelpath, MODEL_TYPE[0] + ".pkl")
+    modelname = os.path.join(modelpath, filename)
     model = joblib.load(modelname)
     classes = ["Normal", "CPU_ALL"]
     headerfile = os.path.join(modelpath, "header.txt")

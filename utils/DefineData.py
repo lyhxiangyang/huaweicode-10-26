@@ -11,6 +11,7 @@ WINDOWS_SIZE= 5
 FAULT_FLAG = "faultFlag"
 TIME_COLUMN_NAME = "time"
 CPU_FEATURE = "cpu_affinity"
+PID_FEATURE = "pid"
 TIME_INTERVAL = 60
 
 DEBUG = False
