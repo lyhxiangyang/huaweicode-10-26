@@ -485,9 +485,8 @@ if __name__ == "__main__":
     time_server_feature = server_feature.copy()
     time_process_feature = process_feature.copy()
     # 加入时间是为了process和server的对应， 加入pid 是为了进行分类。加入CPU是为了预测哪个CPU出现了异常
-    add_feature = [TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE]
-    time_server_feature.extend(add_feature)
-    time_process_feature.extend(add_feature)
+    time_server_feature.extend([TIME_COLUMN_NAME])
+    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
     # flagFault要视情况而定
     if isExistFaultFlag:
         time_server_feature.append(FAULT_FLAG)
