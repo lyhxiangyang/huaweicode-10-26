@@ -229,7 +229,7 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
     assert len(predictflag) == len(cores_serialnumber)
-    abnormalcores = [cores_serialnumber[i] for i, flag in range(predictflag) if flag]
+    abnormalcores = [cores_serialnumber[i] for i, flag in enumerate(predictflag) if flag]
     # 将所有的cputime和不正常的核心数据进行返回
     return cputime, abnormalcores
 
