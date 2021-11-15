@@ -137,9 +137,9 @@ def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumul
         idf: pd.DataFrame
         print("pid: {} size: {}".format(ipid, idf.size))
         # 进行累计差分处理
-        subtractpd = subtractLastLineFromDataFrame(idf, columns=accumulateFeatures)
+        # subtractpd = subtractLastLineFromDataFrame(idf, columns=accumulateFeatures)
         # 对对应的特征进行提取
-        featureExtractionDf = featureExtractionPd(subtractpd, extraFeature=extractFeatures, windowSize=windowsSize)
+        featureExtractionDf = featureExtractionPd(idf, extraFeature=extractFeatures, windowSize=windowsSize)
         # 将特征提取之后的效果进行保存
         if spath is not None:
             featureExtractionDf.to_csv(os.path.join(spath, "{}.csv".format(ipid)))
@@ -600,7 +600,6 @@ if __name__ == "__main__":
     print("对process数据进行特征处理".center(40, "*"))
     tpath = os.path.join(spath, "3. process特征提取数据")
     # 将cpu特征添加到process_feature中
-    process_feature.append('cpu')
     extraction_process_pds = processpdsList(standard_process_pds, extractFeatures=process_feature,
                                             accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
     print("对server数据进行特征处理".center(40, "*"))
@@ -633,3 +632,5 @@ if __name__ == "__main__":
         Memory_leaks_modelpath=servermemory_modelpath,
         coresnumber=coresnumber
     )
+
+
