@@ -299,7 +299,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
 """
 
 
-def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
+def predictcpu1(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     #  wrfnumList不为None
     wrfnumList = serverinformationDict['abnormalcores']
     assert len(serverinformationDict[TIME_COLUMN_NAME]) == len(wrfnumList)
@@ -308,7 +308,6 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
         if ilist is None:
             iscpu.append(-1)
             continue
-
         if i == 0:
             iscpu.append(0)  # 第一个我直接预测为正常
             continue
@@ -327,6 +326,84 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             iscpu.append(80)
     return iscpu[1:]
 
+"""
+
+"""
+
+def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
+    #  wrfnumList不为None
+    wrfnumList = serverinformationDict['abnormalcores']
+    assert len(serverinformationDict[TIME_COLUMN_NAME]) == len(wrfnumList)
+    iscpu = []  # 先添加一个数值，最后返回的时候要去掉
+    ilastlist = None
+    for i, ilist in enumerate(wrfnumList):
+        # ===========================
+        if ilist is None:
+            iscpu.append(-1)
+            ilastlist = None
+            continue
+        # ========================
+        if len(ilist) == 0:
+            iscpu.append(0)
+            ilastlist = []
+            continue
+        # ========================
+        if len(ilist) == 1:
+            if ilastlist is None:
+                iscpu.append(20)
+            elif len(ilastlist) == 0:
+                iscpu.append(20)
+            elif len(ilastlist) == 1 and set(ilastlist) == set(ilist):
+                iscpu.append(20)
+            elif len(ilastlist) == 1 and set(ilastlist) != set(ilist):
+                iscpu[-1] = 80
+                iscpu.append(80)
+            elif len(ilastlist) > 1:
+                iscpu[-1] = 80
+                iscpu.append(80)
+            else:
+                print("len(list) == 1: 预测cpu出现了不可预知的错误")
+                exit(1)
+            ilastlist = ilist
+            continue
+        # =======================
+        if len(ilist) == coresnumber:
+            if ilastlist is None:
+                iscpu.append(10)
+            elif len(ilastlist) == 0:
+                iscpu.append(10)
+            elif len(ilastlist) == coresnumber:
+                iscpu.append(10)
+            else:
+                iscpu[-1] = 80
+                iscpu.append(80)
+            ilastlist = ilist
+            continue
+        # =======================
+        # 现在就是多核心cpu的数据
+        if ilastlist is None:
+            iscpu.append(30)
+        elif len(ilastlist) == 0:
+            iscpu.append(30)
+        elif len(ilastlist) == 1:
+            iscpu[-1] = 80
+            iscpu.append(80)
+        elif len(ilastlist) == coresnumber:
+            iscpu[-1] = 80
+            iscpu.append(80)
+        elif len(ilastlist) != len(ilist):
+            iscpu[-1] = 80
+            iscpu.append(80)
+        elif len(ilastlist) == len(ilist) and set(ilastlist) != set(ilist):
+            iscpu[-1] = 80
+            iscpu.append(80)
+        elif len(ilastlist) == len(ilist) and set(ilastlist) == set(ilist):
+            iscpu[-1] = 30
+            iscpu.append(30)
+        else:
+            print("多核cpu 来到了不可能来到的位置")
+            exit(1)
+    return iscpu
 
 """
 对内存泄露进行预测
@@ -362,7 +439,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
     if isThreshold:
         memorybandwidthValue = thresholdValue["pgfree"]
         realmemorywidthValue = serverinformationDict["pgfree_mean"]
-        prelistflag = [60 if i > memorybandwidthValue else 0 for i in realmemorywidthValue]
+        prelistflag = [50 if i > memorybandwidthValue else 0 for i in realmemorywidthValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
         used_features = ["pgfree_mean", "pgfree_amax", "pgfree_amin"]
@@ -467,6 +544,7 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
         differencepds.append(allsubtractpd)
     return differencepds
 
+
 def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str]) -> List[pd.DataFrame]:
     differencepds = []
     for iserverpd in serverpds:
@@ -568,7 +646,7 @@ if __name__ == "__main__":
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, server_feature)
 
-    #----
+    # ----
     process_feature = ["cpu"]
 
     # ============================================================================================= 先对正常数据的各个指标求平均值
@@ -638,5 +716,3 @@ if __name__ == "__main__":
         Memory_leaks_modelpath=servermemory_modelpath,
         coresnumber=coresnumber
     )
-
-
