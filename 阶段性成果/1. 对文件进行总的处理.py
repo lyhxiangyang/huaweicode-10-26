@@ -255,7 +255,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
                                                                  modelfilepath=modelfilepath)
         # 不管返回值如何都进行直接的添加
         serverinformationDict["wrf_cpu"].append(wrf_cpu_time)
-        serverinformationDict["abnormalcores"] = abnormalcores
+        serverinformationDict["abnormalcores"].append(abnormalcores)
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
@@ -295,15 +295,20 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
 20 代表单CPU抢占
 30 代表多CPU抢占
 80 代表随机抢占
+-1 代表这个时间没有数据
 """
 
 
 def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     #  wrfnumList不为None
-    wrfnumList = serverinformationDict['abnormalcore']
+    wrfnumList = serverinformationDict['abnormalcores']
     assert len(serverinformationDict[TIME_COLUMN_NAME]) == len(wrfnumList)
     iscpu = [0]  # 先添加一个数值，最后返回的时候要去掉
-    for i, ilist in range(wrfnumList):
+    for i, ilist in enumerate(wrfnumList):
+        if ilist is None:
+            iscpu.append(-1)
+            continue
+
         if i == 0:
             iscpu.append(0)  # 第一个我直接预测为正常
             continue
@@ -313,7 +318,8 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             iscpu.append(10)
         elif len(ilist) == 1:
             iscpu.append(20)
-        elif len(ilist) == len(wrfnumList[i - 1]) or len(wrfnumList[i - 1]) == 0:
+        elif wrfnumList[i - 1] is None or len(ilist) == len(wrfnumList[i - 1]) or len(wrfnumList[i - 1]) == 0:
+            # 上一个不是None 并且不是0，1 并且 与上一个相等
             iscpu.append(30)
         else:
             # cpu数量不等于0，并且前一个不等于，并且和前面的数量不相等
