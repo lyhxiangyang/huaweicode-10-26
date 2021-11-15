@@ -326,9 +326,11 @@ def predictcpu1(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             iscpu.append(80)
     return iscpu[1:]
 
+
 """
 
 """
+
 
 def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     #  wrfnumList不为None
@@ -404,6 +406,7 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             print("多核cpu 来到了不可能来到的位置")
             exit(1)
     return iscpu
+
 
 """
 对内存泄露进行预测
@@ -553,6 +556,13 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
     return differencepds
 
 
+# time  faultFlag  preFlag  mem_leak  mem_bandwidth
+def analysePredictResult(predictpd: pd.DataFrame, spath: str) -> pd.DataFrame:
+    analyseDict = {}
+    # 分析
+    pass
+
+
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
@@ -579,6 +589,7 @@ if __name__ == "__main__":
 
     # 需要对server数据进行处理的指标
     server_feature = ["used", "pgfree"]
+    server_accumulate_feature = ["pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system"]
 
@@ -642,9 +653,9 @@ if __name__ == "__main__":
     add_cpu_column(predictprocesspds)
 
     # 对正常server进程数据进行差分处理之后，得到一些指标
-    normalserverpds = differenceServer(normalserverpds, server_feature)
+    normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
     # 对异常server服务数据进行差分处理之后，得到一些指标
-    predictserverpds = differenceServer(predictserverpds, server_feature)
+    predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
 
     # ----
     process_feature = ["cpu"]
@@ -707,7 +718,8 @@ if __name__ == "__main__":
     # ============================================================================================= 对process数据和server数据合在一起进行预测
     print("对server数据和process数据进行预测".center(40, "*"))
     tpath = os.path.join(spath, "6. 最终预测结果")
-    predictAllAbnormal(
+    # time  faultFlag  preFlag  mem_leak  mem_bandwidth
+    predictpd = predictAllAbnormal(
         serverinformationDict=serverinformationDict,
         spath=tpath,
         isThreshold=isThreshold,
@@ -716,3 +728,5 @@ if __name__ == "__main__":
         Memory_leaks_modelpath=servermemory_modelpath,
         coresnumber=coresnumber
     )
+    # 对结果进行分析
+    analysePd = analysePredictResult(predictpd, tpath)
