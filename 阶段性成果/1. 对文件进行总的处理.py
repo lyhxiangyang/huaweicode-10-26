@@ -10,7 +10,7 @@ from pandas import DataFrame
 from Classifiers.ModelPred import select_and_pred
 from utils.DataFrameOperation import mergeDataFrames, SortLabels, PushLabelToFirst, PushLabelToEnd, \
     subtractLastLineFromDataFrame
-from utils.DataScripts import getDFmean, standardPDfromOriginal, TranslateTimeListStrToStr
+from utils.DataScripts import getDFmean, standardPDfromOriginal, TranslateTimeListStrToStr, standardPDfromOriginal1
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE, CPU_FEATURE, MODEL_TYPE
 from utils.FileSaveRead import saveDFListToFiles
 
@@ -42,7 +42,7 @@ def standardLists(pds: List[pd.DataFrame], standardFeatures: List[str], meanValu
     pd.DataFrame]:
     standardList = []
     for ipd in pds:
-        tpd = standardPDfromOriginal(ipd, standardFeatures, meanValue, standardValue)
+        tpd = standardPDfromOriginal1(ipd, standardFeatures, meanValue, standardValue)
         standardList.append(tpd)
     return standardList
 
@@ -213,7 +213,7 @@ def isCPUAbnormalsByThreshold(predictpd: pd.DataFrame, thresholdValue: Dict) -> 
 def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThreshold: bool = False,
                                thresholdValue: Dict = None, modelfilepath: str = None) -> Union[
     tuple[None, None], tuple[Any, list[Union[list, Any]]]]:
-    nowdf = processpds[TIME_COLUMN_NAME == nowtime]
+    nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
     if len(nowdf) == 0:
         return None, None
 
@@ -460,7 +460,7 @@ if __name__ == "__main__":
 
     # 需要对server数据进行处理的指标
     server_feature = ["used", "pgfree"]
-    # 需要对process数据进行处理的指标
+    # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
@@ -498,6 +498,8 @@ if __name__ == "__main__":
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_process_feature]
         normalprocesspds.append(tpd)
+    # 正常进程数据添加特征值
+    normalprocesspds = add_cpu_column(normalprocesspds)  # 针对process数据计算cpu的值
     # 正常服务数据
     for ifile in normalserverfiles:
         tpd = getfilepd(ifile)
@@ -508,6 +510,8 @@ if __name__ == "__main__":
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_process_feature]
         predictprocesspds.append(tpd)
+    # 添加cpu特征值
+    predictprocesspds = add_cpu_column(predictprocesspds)
     # 预测服务数据
     for ifile in predictserverfiles:
         tpd = getfilepd(ifile)
@@ -515,6 +519,9 @@ if __name__ == "__main__":
         predictserverpds.append(tpd)
 
     # ============================================================================================= 先对正常数据的各个指标求平均值
+    # 往进程指标中只使用"cpu"指标
+    process_feature = ["cpu"]
+
     print("先对正常数据的各个指标求平均值".center(40, "*"))
     allnormalserverpd, _ = mergeDataFrames(normalserverpds)
     allnormalprocesspd, _ = mergeDataFrames(normalprocesspds)
@@ -529,14 +536,13 @@ if __name__ == "__main__":
     normalserver_meanvalue.to_csv(os.path.join(tpath, "meanvalue_server.csv"))
 
     # ============================================================================================= 对要预测的数据进行标准化处理
-    # 标准化process 和 server数据
+    # 标准化process 和 server数据， 对于process数据，先将cpu想加在一起，然后在求平均值。
     print("标准化要预测的process和server数据".center(40, "*"))
     standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=server_feature,
                                         meanValue=normalserver_meanvalue, standardValue=100)
     standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=process_feature,
                                          meanValue=normalprocess_meanvalue, standardValue=60)
-    standard_process_pds = add_cpu_column(standard_process_pds)  # 针对process数据计算cpu的值
-    
+
     # 对标准化结果进行存储
     tpath = os.path.join(spath, "2. 标准化数据存储")
     saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)

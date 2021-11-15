@@ -63,7 +63,7 @@ meanvalue的包含应该大于standardFeatures, 如果meanValue的取值为0的�
 """
 
 
-def standardPDfromOriginal1(df: pd.DataFrame, standardFeatures=None, meanValue=None,
+def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None,
                            standardValue: int = 100) -> pd.DataFrame:
     if standardFeatures is None:
         standardFeatures = []
@@ -89,7 +89,7 @@ def standardPDfromOriginal1(df: pd.DataFrame, standardFeatures=None, meanValue=N
     standardDf = PushLabelToFirst(standardDf, TIME_COLUMN_NAME)
     standardDf = PushLabelToEnd(standardDf, FAULT_FLAG)
     return standardDf
-def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None,
+def standardPDfromOriginal1(df: pd.DataFrame, standardFeatures=None, meanValue=None,
                            standardValue: int = 100) -> pd.DataFrame:
     if standardFeatures is None:
         standardFeatures = []
@@ -275,7 +275,8 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
 ## ==== 用于process的步骤2
 
 """
-得到平均值
+得到平均
+如果DataFrame中有"user"和"system", 那么就计算一个CPU的平均值
 """
 
 
