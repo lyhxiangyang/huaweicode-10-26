@@ -12,6 +12,7 @@ from utils.DataFrameOperation import mergeDataFrames, SortLabels, PushLabelToFir
     subtractLastLineFromDataFrame
 from utils.DataScripts import getDFmean, standardPDfromOriginal, TranslateTimeListStrToStr
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE, CPU_FEATURE, MODEL_TYPE
+from utils.FileSaveRead import saveDFListToFiles
 
 
 def getfilepd(ipath: str) -> pd.DataFrame:
@@ -95,11 +96,11 @@ def featureExtractionPd(df: pd.DataFrame, extraFeature: List[str], windowSize: i
     # 得到的这个DataFrame是一个二级列名类似下面这种
     #	    system	                            ｜                      user
     #  sum	mean	amax	amin	quantile50  ｜ sum	mean	amax	amin	quantile50
-    featureExtractionDf = df.loc[:, extraFeature].rolling(window=windowSize).agg(
+    featureExtractionDf = df.loc[:, extraFeature].rolling(window=windowSize, min_periods=1).agg(
         [np.mean, np.max, np.min, quantile(0.5)])
 
     # 将二级索引变成一级的
-    featureExtractionDf.columns = ["_".join(x) for x in featureExtractionDf.columns.ravel()]
+    featureExtractionDf.columns = ["_".join(x) for x in featureExtractionDf.columns]
 
     # 此时应该将其和原本的df进行合并，这样既保存了原文件，也保存了新的数据
     resdf = pd.concat([df, featureExtractionDf], axis=1)
@@ -175,7 +176,7 @@ def serverpdsList(serverpds: List[pd.DataFrame], extractFeatures: List[str], acc
     if spath is not None and not os.path.exists(spath):
         os.makedirs(spath)
     extraction_dfs = []
-    for i, iserverpd in range(serverpds):
+    for i, iserverpd in enumerate(serverpds):
         # 对累计的特征值进行数据的处理, 默认一个server数据里面都是连续的, 就算不连续，也只会影响几个点
         subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
         # 对特征值进行特征提取
@@ -535,24 +536,29 @@ if __name__ == "__main__":
     standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=process_feature,
                                          meanValue=normalprocess_meanvalue, standardValue=60)
     standard_process_pds = add_cpu_column(standard_process_pds)  # 针对process数据计算cpu的值
+    
+    # 对标准化结果进行存储
+    tpath = os.path.join(spath, "2. 标准化数据存储")
+    saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
+    saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
     # ============================================================================================= 对process数据和server数据进行秒数的处理，将秒数去掉
     standard_server_pds = changeTimeTo_pdlists(standard_server_pds, server_time_format)
     standard_process_pds = changeTimeTo_pdlists(standard_process_pds, process_time_format)
     # ============================================================================================= 对process数据和server数据进行特征提取
     print("对process数据进行特征处理".center(40, "*"))
-    tpath = os.path.join(spath, "2. process特征提取数据")
+    tpath = os.path.join(spath, "3. process特征提取数据")
     # 将cpu特征添加到process_feature中
     process_feature.append('cpu')
     extraction_process_pds = processpdsList(standard_process_pds, extractFeatures=process_feature,
                                             accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
     print("对server数据进行特征处理".center(40, "*"))
-    tpath = os.path.join(spath, "3. server特征提取数据")
+    tpath = os.path.join(spath, "4. server特征提取数据")
     extraction_server_pds = serverpdsList(standard_server_pds, extractFeatures=server_feature,
                                           accumulateFeatures=server_feature, windowsSize=3, spath=tpath)
 
     # ============================================================================================= 将process数据和server数据合在一起，按照server时间进行预测
     print("将提取之后的server数据和process数据进行合并".center(40, "*"))
-    tpath = os.path.join(spath, "4. server和process合并")
+    tpath = os.path.join(spath, "5. server和process合并")
     allserverpds, _ = mergeDataFrames(extraction_server_pds)
     allprocesspds, _ = mergeDataFrames(extraction_process_pds)
     serverinformationDict = deal_serverpds_and_processpds(
@@ -565,7 +571,7 @@ if __name__ == "__main__":
     )
     # ============================================================================================= 对process数据和server数据合在一起进行预测
     print("对server数据和process数据进行预测".center(40, "*"))
-    tpath = os.path.join(spath, "5. 最终预测结果")
+    tpath = os.path.join(spath, "6. 最终预测结果")
     predictAllAbnormal(
         serverinformationDict=serverinformationDict,
         spath=tpath,
