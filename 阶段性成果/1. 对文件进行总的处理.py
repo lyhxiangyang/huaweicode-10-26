@@ -522,8 +522,10 @@ if __name__ == "__main__":
     normalprocess_meanvalue = getDFmean(allnormalprocesspd, process_feature)
     # 将这几个平均值进行保存
     tpath = os.path.join(spath, "1. 正常数据的平均值")
-    normalprocess_meanvalue.to_csv(os.path.join(tpath, "meanvalue_process.csv"), index=False)
-    normalserver_meanvalue.to_csv(os.path.join(tpath, "meanvalue_server.csv"), index=False)
+    if not os.path.exists(tpath):
+        os.makedirs(tpath)
+    normalprocess_meanvalue.to_csv(os.path.join(tpath, "meanvalue_process.csv"))
+    normalserver_meanvalue.to_csv(os.path.join(tpath, "meanvalue_server.csv"))
 
     # ============================================================================================= 对要预测的数据进行标准化处理
     # 标准化process 和 server数据

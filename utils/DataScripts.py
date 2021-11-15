@@ -59,10 +59,11 @@ def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%
 只返回标准化之后的数据特征， 没有标准化的不返回
 # 保留time和label
 meanvalue的包含应该大于standardFeatures, 如果meanValue的取值为0的时候，那么特征保持原值就行
+保证进来的是df，处理完特征之后，其他值是保持不变的
 """
 
 
-def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None,
+def standardPDfromOriginal1(df: pd.DataFrame, standardFeatures=None, meanValue=None,
                            standardValue: int = 100) -> pd.DataFrame:
     if standardFeatures is None:
         standardFeatures = []
@@ -88,6 +89,19 @@ def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=No
     standardDf = PushLabelToFirst(standardDf, TIME_COLUMN_NAME)
     standardDf = PushLabelToEnd(standardDf, FAULT_FLAG)
     return standardDf
+def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=None,
+                           standardValue: int = 100) -> pd.DataFrame:
+    if standardFeatures is None:
+        standardFeatures = []
+    # 如果为空 代表使用自己的mean
+    if meanValue is None:
+        meanValue = df.mean()
+    # 需要先将meanValue中的0值去掉
+    meanValue = meanValue[~meanValue.isin([0])]
+    #
+    columnnames = list(set(meanValue.index) & set(standardFeatures))
+    df.loc[:, columnnames] = (df.loc[:, columnnames] / meanValue * standardValue).astype("int64")
+    return df
 
 
 """
