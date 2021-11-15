@@ -268,7 +268,8 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
 
     # 将字典中的数据进行保存 ==========================================================================================
     nosavefeatures = ["abnormalcores"]
-    savedict = dict([(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key not in nosavefeatures])
+    savedict = dict(
+        [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key not in nosavefeatures])
     tpd = pd.DataFrame(data=savedict)
     tpd.to_csv(os.path.join(spath, "server_process有用指标.csv"))
     # 将时间和错误核心列表进行保存
@@ -316,14 +317,16 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             iscpu.append(30)
         else:
             # cpu数量不等于0，并且前一个不等于，并且和前面的数量不相等
-            iscpu[-1] = 80 # 将前一个也改为随机，毕竟前面的就不是多CPU抢占了
+            iscpu[-1] = 80  # 将前一个也改为随机，毕竟前面的就不是多CPU抢占了
             iscpu.append(80)
     return iscpu[1:]
+
 
 """
 对内存泄露进行预测
 有两种方式，一种是通过阀值，一种是通过模型， 如果是通过模型则需要生成一个dataFrame传递进去
 """
+
 
 def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False, thresholdValue: Dict = None,
                          Memory_leaks_modelpath: str = None) -> List:
@@ -334,11 +337,13 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
         used_features = ["used_mean", "used_amax", "used_amin"]
-        savedict = dict([(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
+        savedict = dict(
+            [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
         prelistflag = select_and_pred(tpd, MODEL_TYPE[0], saved_model_path=Memory_leaks_modelpath)
 
     return prelistflag
+
 
 """
 对内存带宽进行预测
@@ -347,7 +352,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
 
 
 def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = False, thresholdValue: Dict = None,
-                         Memory_bandwidth_modelpath: str = None) -> List:
+                             Memory_bandwidth_modelpath: str = None) -> List:
     if isThreshold:
         memorybandwidthValue = thresholdValue["pgfree"]
         realmemorywidthValue = serverinformationDict["pgfree_mean"]
@@ -361,9 +366,13 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
         prelistflag = select_and_pred(tpd, MODEL_TYPE[0], saved_model_path=Memory_bandwidth_modelpath)
 
     return prelistflag
+
+
 """
 根据CPU异常，内存泄露异常以及多CPU异常判断
 """
+
+
 def get_realpredict(predictDict: Dict) -> List:
     cpu_list = predictDict["CPU_Abnormal"]
     leak_list = predictDict["mem_leak"]
@@ -425,6 +434,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     tpd.to_csv(os.path.join(spath, "预测结果.csv"))
     return tpd
 
+
 def getfilespath(filepath: str) -> List[str]:
     if not os.path.exists(filepath):
         print("{}路径不存在".format(filepath))
@@ -432,6 +442,31 @@ def getfilespath(filepath: str) -> List[str]:
     files = os.listdir(filepath)
     filepaths = [os.path.join(filepath, i) for i in files]
     return filepaths
+
+
+"""
+对进程数据进行差分, 其他数据全部保存不变
+进程数据的差分是按照pid进行修改的
+"""
+
+
+def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[str]) -> List[pd.DataFrame]:
+    differencepds = []
+    for iprocesspd in processpds:
+        subtractpdLists = []
+        for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
+            subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
+            subtractpdLists.append(subtractpd)
+        allsubtractpd, _ = mergeDataFrames(subtractpdLists)
+        differencepds.append(allsubtractpd)
+    return differencepds
+
+def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str]) -> List[pd.DataFrame]:
+    differencepds = []
+    for iserverpd in serverpds:
+        subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
+        differencepds.append(subtractpd)
+    return differencepds
 
 
 if __name__ == "__main__":
@@ -471,7 +506,7 @@ if __name__ == "__main__":
     isThreshold = True
     thresholdValueDict = {
         "process_cpu_mean": 57,
-        "used": 110, # 不要改key值
+        "used": 110,  # 不要改key值
         "pgfree": 110
     }
 
@@ -498,8 +533,6 @@ if __name__ == "__main__":
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_process_feature]
         normalprocesspds.append(tpd)
-    # 正常进程数据添加特征值
-    normalprocesspds = add_cpu_column(normalprocesspds)  # 针对process数据计算cpu的值
     # 正常服务数据
     for ifile in normalserverfiles:
         tpd = getfilepd(ifile)
@@ -510,17 +543,30 @@ if __name__ == "__main__":
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_process_feature]
         predictprocesspds.append(tpd)
-    # 添加cpu特征值
-    predictprocesspds = add_cpu_column(predictprocesspds)
     # 预测服务数据
     for ifile in predictserverfiles:
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_server_feature]
         predictserverpds.append(tpd)
+    # ============================================================================================= 对读取到的数据进行差分，并且将cpu添加到要提取的特征中
+    print("对读取到的原始数据进行差分".format(40, "*"))
+    # 对正常进程数据进行差分处理之后，得到cpu特征值
+    normalprocesspds = differenceProcess(normalprocesspds, process_feature)
+    add_cpu_column(normalprocesspds)
+    # 对异常数据进行差分处理之后，得到cpu特征值
+    predictprocesspds = differenceProcess(predictprocesspds, process_feature)
+    add_cpu_column(predictprocesspds)
+
+    # 对正常server进程数据进行差分处理之后，得到一些指标
+    normalserverpds = differenceServer(normalserverpds, server_feature)
+    # 对异常server服务数据进行差分处理之后，得到一些指标
+    predictserverpds = differenceServer(predictserverpds, server_feature)
+
+    #----
+    process_feature = ["cpu"]
 
     # ============================================================================================= 先对正常数据的各个指标求平均值
-    # 往进程指标中只使用"cpu"指标
-    process_feature = ["cpu"]
+    # 往进程指标中只使用"cpu"指标, 需要保证正常数据中的累计值都减去了
 
     print("先对正常数据的各个指标求平均值".center(40, "*"))
     allnormalserverpd, _ = mergeDataFrames(normalserverpds)
