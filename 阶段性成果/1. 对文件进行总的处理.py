@@ -171,14 +171,14 @@ accumulateFeatures : 累计特征 都在extractFeatures
 """
 
 
-def serverpdsList(serverpds: List[pd.DataFrame], extractFeatures: List[str], accumulateFeatures: List[str],
+def serverpdsList(serverpds: List[pd.DataFrame], extractFeatures: List[str],
                   windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
     if spath is not None and not os.path.exists(spath):
         os.makedirs(spath)
     extraction_dfs = []
     for i, iserverpd in enumerate(serverpds):
         # 对累计的特征值进行数据的处理, 默认一个server数据里面都是连续的, 就算不连续，也只会影响几个点
-        subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
+        # subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
         # 对特征值进行特征提取
         featureExtractionDf = featureExtractionPd(subtractpd, extraFeature=extractFeatures, windowSize=windowsSize)
         if spath is not None:
@@ -558,6 +558,7 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
     return differencepds
 
 
+
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 def analysePredictResult(predictpd: pd.DataFrame, spath: str) -> pd.DataFrame:
     analyseDict = {}
@@ -701,7 +702,7 @@ if __name__ == "__main__":
     print("对server数据进行特征处理".center(40, "*"))
     tpath = os.path.join(spath, "4. server特征提取数据")
     extraction_server_pds = serverpdsList(standard_server_pds, extractFeatures=server_feature,
-                                          accumulateFeatures=server_feature, windowsSize=3, spath=tpath)
+                                          windowsSize=3, spath=tpath)
 
     # ============================================================================================= 将process数据和server数据合在一起，按照server时间进行预测
     print("将提取之后的server数据和process数据进行合并".center(40, "*"))
