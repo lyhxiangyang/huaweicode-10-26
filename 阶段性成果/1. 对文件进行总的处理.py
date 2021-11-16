@@ -581,7 +581,7 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
     realflags = list(predictpd[FAULT_FLAG])
     preflags = list(predictpd[preflaglabel])
     assert len(realflags) == len(preflags)
-    rightflagSet = set([i // 10 for i in abnormalsSet])  # 如果预测在这个集合中， 则认为预测正确
+    rightflagSet = set([(i // 10) * 10 for i in abnormalsSet])  # 如果预测在这个集合中， 则认为预测正确
 
     real_abnormalnums = 0 # 异常的总数量
     pre_allabnormalnums = 0 # 所有预测数据中，被预测为异常的数量
@@ -605,10 +605,11 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
             if preflags[i] in rightflagSet:
                 abnormal_rightabnormal_nums += 1 # 异常预测正确
 
-    infoDict["recall"] = abnormal_rightabnormal_nums / real_abnormalnums
-    infoDict["precison"] = abnormal_rightabnormal_nums / pre_allabnormalnums
-    infoDict["pre_abnormal"] = abnormal_abnormal_nums / real_abnormalnums # 预测为异常的比例, 异常的发现率
-    infoDict["pre_normal"] = abnormal_normal_nums / real_abnormalnums # 预测为正常的比例
+    infoDict["num"] = real_abnormalnums
+    infoDict["recall"] = -1 if real_abnormalnums == 0 else abnormal_rightabnormal_nums / real_abnormalnums
+    infoDict["precison"] = -1 if pre_allabnormalnums == 0  else abnormal_rightabnormal_nums / pre_allabnormalnums
+    infoDict["pre_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_abnormal_nums / real_abnormalnums # 预测为异常的比例, 异常的发现率
+    infoDict["pre_normal"] = -1 if real_abnormalnums == 0 else abnormal_normal_nums / real_abnormalnums # 预测为正常的比例
     return infoDict
 
 
@@ -699,7 +700,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     })
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
-    tpd.to_csv(os.path.join(spath, "3. 去除首位_去除低强敌_统计数据.csv"))
+    tpd.to_csv(os.path.join(spath, "3. 去除首位_去除低强度_统计数据.csv"))
 
 
 
