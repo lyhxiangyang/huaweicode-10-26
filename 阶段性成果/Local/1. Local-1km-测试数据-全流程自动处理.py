@@ -722,7 +722,7 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\Local-3km-测试数据-异常数据"
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-Local-1km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
@@ -736,7 +736,7 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = ""
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析Local-测试数据-3km"
+    spath = "tmp/总过程分析/测试数据-Local-1km"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据
@@ -756,8 +756,8 @@ if __name__ == "__main__":
     isThreshold = True
     thresholdValueDict = {
         "process_cpu_mean": 57,
-        "used": 110,  # 不要改key值
-        "pgfree": 110
+        "used": 120,  # 不要改key值
+        "pgfree": 140
     }
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中

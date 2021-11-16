@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-E5-rst-异常数据"
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\训练数据-E5-9km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = ""
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/测试数据-E5-RST"
+    spath = "tmp/总过程分析/训练数据-E5-9km"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据

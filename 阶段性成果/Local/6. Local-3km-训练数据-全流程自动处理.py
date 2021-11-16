@@ -1,4 +1,3 @@
-
 import json
 import os.path
 from collections import defaultdict
@@ -135,12 +134,8 @@ def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumul
     pidpds = []
     print(PID_FEATURE.center(40, "*"))
     for ipid, idf in processpd.groupby(PID_FEATURE):
-        print("pid: {} ".format(ipid), end="")
         idf: pd.DataFrame
-        # 对每一个进程开始的前两个点和后两个点都去掉
-        assert len(idf) > 4
-        idf = idf.iloc[2:-2]
-        print("size: {}".format(idf.size))
+        print("pid: {} size: {}".format(ipid, idf.size))
         # 进行累计差分处理
         # subtractpd = subtractLastLineFromDataFrame(idf, columns=accumulateFeatures)
         # 对对应的特征进行提取
@@ -217,10 +212,10 @@ def isCPUAbnormalsByThreshold(predictpd: pd.DataFrame, thresholdValue: Dict) -> 
 
 def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThreshold: bool = False,
                                thresholdValue: Dict = None, modelfilepath: str = None) -> Union[
-    tuple[int, None], tuple[Any, list]]:
+    tuple[None, None], tuple[Any, list[Union[list, Any]]]]:
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
     if len(nowdf) == 0:
-        return 0, None
+        return None, None
 
     # 先得到总的CPUTIME的时间
     cputime = nowdf["cpu"].sum()
@@ -436,22 +431,16 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
 
 """
 根据CPU异常，内存泄露异常以及多CPU异常判断
-coresList代表每个时间段
 """
 
 
-def get_realpredict(predictDict: Dict, coresList: List) -> List:
+def get_realpredict(predictDict: Dict) -> List:
     cpu_list = predictDict["CPU_Abnormal"]
     leak_list = predictDict["mem_leak"]
     bandwidth_list = predictDict["mem_bandwidth"]
-    assert len(cpu_list) == len(coresList)
 
     preflag = []
     for i in range(0, len(cpu_list)):
-        # 如果coresList[i]为null， 代表这个时间点，在process中不存在，第一种可能是：真的不存在  第二种可能是: 作为进程一开始，我将刚刚开始的两分钟和结尾的两分钟删除了
-        if coresList[i] is None:
-            preflag.append(0)
-            continue
         if bandwidth_list[i] != 0:
             preflag.append(50)
             continue
@@ -493,10 +482,10 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         thresholdValue=thresholdValue,
         Memory_bandwidth_modelpath=Memory_bandwidth_modelpath
     )
-    # 得到核的数量
-    predictDict["coresnums"] = serverinformationDict["coresnums"]
     # 根据CPU信息和得到真是标签值
-    predictDict["preFlag"] = get_realpredict(predictDict, serverinformationDict["abnormalcores"])
+    predictDict["preFlag"] = get_realpredict(predictDict)
+    predictDict["coresnums"] = serverinformationDict["coresnums"]
+
 
     tpd = pd.DataFrame(data=predictDict)
     tpd = PushLabelToFirst(tpd, "preFlag")
@@ -584,15 +573,6 @@ def remobe_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], wind
     return predictPd[savelines]
 
 
-# 计算调和平均数
-def harmonic_mean(data):  # 计算调和平均数
-    total = 0
-    for i in data:
-        if i == 0:  # 处理包含0的情况
-            return 0
-        total += 1 / i
-    return len(data) / total
-
 """
 将abnormalsList中的异常当做同一种类的异常, 其预测
 """
@@ -638,7 +618,6 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
     infoDict["precison"] = -1 if pre_allabnormalnums == 0  else abnormal_rightabnormal_nums / pre_allabnormalnums
     infoDict["pre_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_abnormal_nums / real_abnormalnums # 预测为异常的比例, 异常的发现率
     infoDict["pre_normal"] = -1 if real_abnormalnums == 0 else abnormal_normal_nums / real_abnormalnums # 预测为正常的比例
-    infoDict["f-score"] =  harmonic_mean([infoDict["recall"], infoDict["precison"]])
     return infoDict
 
 
@@ -735,4 +714,176 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
 
 
 
+
+
+
+
+if __name__ == "__main__":
+    # ============================================================================================= 输入数据定义
+    # 先将所有的server文件和process文件进行指定
+    # 其中单个server文件我默认是连续的
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\训练数据-Local-3km-异常数据"
+    predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
+    predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
+    # 指定正常server和process文件路径
+    normaldirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\Local-3km-正常数据"
+    normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
+    normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
+    # 预测CPU的模型路径
+    processcpu_modelpath = ""
+    # 预测内存泄露的模型路径
+    servermemory_modelpath = ""
+    # 预测内存带宽的模型路径
+    serverbandwidth_modelpath = ""
+    # 将一些需要保存的临时信息进行保存路径
+    spath = "tmp/总过程分析/训练数据-Local-3km"
+    # 是否有存在faultFlag
+    isExistFaultFlag = True
+    # 核心数据
+    coresnumber = 56
+
+    # 需要对server数据进行处理的指标
+    server_feature = ["used", "pgfree"]
+    server_accumulate_feature = ["pgfree"]
+    # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
+    process_feature = ["user", "system"]
+
+    # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
+    server_time_format = '%Y/%m/%d %H:%M'
+    process_time_format = '%Y/%m/%d %H:%M'
+
+    # 预测是否使用阀值, True为使用阀值预测 必须指定thresholdValueDict， False代表使用模型进行预测, 必须设置好模型的路径
+    isThreshold = True
+    thresholdValueDict = {
+        "process_cpu_mean": 57,
+        "used": 120,  # 不要改key值
+        "pgfree": 140
+    }
+
+
+    # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
+    print("将数据从文件中读取".center(40, "*"))
+    normalprocesspds = []
+    normalserverpds = []
+    predictprocesspds = []
+    predictserverpds = []
+
+    # 加入time faultFlag特征值
+    time_server_feature = server_feature.copy()
+    time_process_feature = process_feature.copy()
+    # 加入时间是为了process和server的对应， 加入pid 是为了进行分类。加入CPU是为了预测哪个CPU出现了异常
+    time_server_feature.extend([TIME_COLUMN_NAME])
+    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
+    # flagFault要视情况而定
+    if isExistFaultFlag:
+        time_server_feature.append(FAULT_FLAG)
+        time_process_feature.append(FAULT_FLAG)
+
+    # 正常进程数据
+    for ifile in normalprocessfiles:
+        tpd = getfilepd(ifile)
+        tpd = tpd.loc[:, time_process_feature]
+        normalprocesspds.append(tpd)
+    # 正常服务数据
+    for ifile in normalserverfiles:
+        tpd = getfilepd(ifile)
+        tpd = tpd.loc[:, time_server_feature]
+        normalserverpds.append(tpd)
+    # 预测进程数据
+    for ifile in predictprocessfiles:
+        tpd = getfilepd(ifile)
+        tpd = tpd.loc[:, time_process_feature]
+        predictprocesspds.append(tpd)
+    # 预测服务数据
+    for ifile in predictserverfiles:
+        tpd = getfilepd(ifile)
+        tpd = tpd.loc[:, time_server_feature]
+        predictserverpds.append(tpd)
+    # ============================================================================================= 对读取到的数据进行差分，并且将cpu添加到要提取的特征中
+    print("对读取到的原始数据进行差分".format(40, "*"))
+    # 对正常进程数据进行差分处理之后，得到cpu特征值
+    normalprocesspds = differenceProcess(normalprocesspds, process_feature)
+    add_cpu_column(normalprocesspds)
+    # 对异常数据进行差分处理之后，得到cpu特征值
+    predictprocesspds = differenceProcess(predictprocesspds, process_feature)
+    add_cpu_column(predictprocesspds)
+
+    # 对正常server进程数据进行差分处理之后，得到一些指标
+    normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
+    # 对异常server服务数据进行差分处理之后，得到一些指标
+    predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
+
+    # ----
+    process_feature = ["cpu"]
+
+    # ============================================================================================= 先对正常数据的各个指标求平均值
+    # 往进程指标中只使用"cpu"指标, 需要保证正常数据中的累计值都减去了
+
+    print("先对正常数据的各个指标求平均值".center(40, "*"))
+    allnormalserverpd, _ = mergeDataFrames(normalserverpds)
+    allnormalprocesspd, _ = mergeDataFrames(normalprocesspds)
+    # 得到正常数据的平均值
+    normalserver_meanvalue = getDFmean(allnormalserverpd, server_feature)
+    normalprocess_meanvalue = getDFmean(allnormalprocesspd, process_feature)
+    # 将这几个平均值进行保存
+    tpath = os.path.join(spath, "1. 正常数据的平均值")
+    if not os.path.exists(tpath):
+        os.makedirs(tpath)
+    normalprocess_meanvalue.to_csv(os.path.join(tpath, "meanvalue_process.csv"))
+    normalserver_meanvalue.to_csv(os.path.join(tpath, "meanvalue_server.csv"))
+
+    # ============================================================================================= 对要预测的数据进行标准化处理
+    # 标准化process 和 server数据， 对于process数据，先将cpu想加在一起，然后在求平均值。
+    print("标准化要预测的process和server数据".center(40, "*"))
+    standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=server_feature,
+                                        meanValue=normalserver_meanvalue, standardValue=100)
+    standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=process_feature,
+                                         meanValue=normalprocess_meanvalue, standardValue=60)
+
+    # 对标准化结果进行存储
+    tpath = os.path.join(spath, "2. 标准化数据存储")
+    saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
+    saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
+    # ============================================================================================= 对process数据和server数据进行秒数的处理，将秒数去掉
+    standard_server_pds = changeTimeTo_pdlists(standard_server_pds, server_time_format)
+    standard_process_pds = changeTimeTo_pdlists(standard_process_pds, process_time_format)
+    # ============================================================================================= 对process数据和server数据进行特征提取
+    print("对process数据进行特征处理".center(40, "*"))
+    tpath = os.path.join(spath, "3. process特征提取数据")
+    # 将cpu特征添加到process_feature中
+    extraction_process_pds = processpdsList(standard_process_pds, extractFeatures=process_feature,
+                                            accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
+    print("对server数据进行特征处理".center(40, "*"))
+    tpath = os.path.join(spath, "4. server特征提取数据")
+    extraction_server_pds = serverpdsList(standard_server_pds, extractFeatures=server_feature,
+                                          windowsSize=3, spath=tpath)
+
+    # ============================================================================================= 将process数据和server数据合在一起，按照server时间进行预测
+    print("将提取之后的server数据和process数据进行合并".center(40, "*"))
+    tpath = os.path.join(spath, "5. server和process合并")
+    allserverpds, _ = mergeDataFrames(extraction_server_pds)
+    allprocesspds, _ = mergeDataFrames(extraction_process_pds)
+    serverinformationDict = deal_serverpds_and_processpds(
+        allserverpds=allserverpds,
+        allprocesspds=allprocesspds,
+        spath=tpath,
+        isThreshold=isThreshold,
+        thresholdValue=thresholdValueDict,
+        modelfilepath=processcpu_modelpath
+    )
+    # ============================================================================================= 对process数据和server数据合在一起进行预测
+    print("对server数据和process数据进行预测".center(40, "*"))
+    tpath = os.path.join(spath, "6. 最终预测结果")
+    # time  faultFlag  preFlag  mem_leak  mem_bandwidth
+    predictpd = predictAllAbnormal(
+        serverinformationDict=serverinformationDict,
+        spath=tpath,
+        isThreshold=isThreshold,
+        thresholdValue=thresholdValueDict,
+        Memory_bandwidth_modelpath=serverbandwidth_modelpath,
+        Memory_leaks_modelpath=servermemory_modelpath,
+        coresnumber=coresnumber
+    )
+    # 对结果进行分析
+    analysePredictResult(predictpd, tpath)
 
