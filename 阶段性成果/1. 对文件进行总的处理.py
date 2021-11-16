@@ -1,7 +1,7 @@
 import json
 import os.path
 from collections import defaultdict
-from typing import List, Tuple, Dict, Union, Any
+from typing import List, Tuple, Dict, Union, Any, Set
 
 import numpy as np
 import pandas as pd
@@ -180,7 +180,7 @@ def serverpdsList(serverpds: List[pd.DataFrame], extractFeatures: List[str],
         # 对累计的特征值进行数据的处理, 默认一个server数据里面都是连续的, 就算不连续，也只会影响几个点
         # subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
         # 对特征值进行特征提取
-        featureExtractionDf = featureExtractionPd(subtractpd, extraFeature=extractFeatures, windowSize=windowsSize)
+        featureExtractionDf = featureExtractionPd(iserverpd, extraFeature=extractFeatures, windowSize=windowsSize)
         if spath is not None:
             featureExtractionDf.to_csv(os.path.join(spath, "server" + str(i) + ".csv"))
         extraction_dfs.append(featureExtractionDf)
@@ -298,39 +298,6 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
 30 代表多CPU抢占
 80 代表随机抢占
 -1 代表这个时间没有数据
-"""
-
-
-def predictcpu1(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
-    #  wrfnumList不为None
-    wrfnumList = serverinformationDict['abnormalcores']
-    assert len(serverinformationDict[TIME_COLUMN_NAME]) == len(wrfnumList)
-    iscpu = [0]  # 先添加一个数值，最后返回的时候要去掉
-    for i, ilist in enumerate(wrfnumList):
-        if ilist is None:
-            iscpu.append(-1)
-            continue
-        if i == 0:
-            iscpu.append(0)  # 第一个我直接预测为正常
-            continue
-        if len(ilist) == 0:
-            iscpu.append(0)
-        elif len(ilist) == coresnumber:
-            iscpu.append(10)
-        elif len(ilist) == 1:
-            iscpu.append(20)
-        elif wrfnumList[i - 1] is None or len(ilist) == len(wrfnumList[i - 1]) or len(wrfnumList[i - 1]) == 0:
-            # 上一个不是None 并且不是0，1 并且 与上一个相等
-            iscpu.append(30)
-        else:
-            # cpu数量不等于0，并且前一个不等于，并且和前面的数量不相等
-            iscpu[-1] = 80  # 将前一个也改为随机，毕竟前面的就不是多CPU抢占了
-            iscpu.append(80)
-    return iscpu[1:]
-
-
-"""
-
 """
 
 
@@ -558,11 +525,186 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
     return differencepds
 
 
+# time  faultFlag  preFlag  mem_leak  mem_bandwidth
+# 去除指定异常的首尾, 只去除首尾部分
+def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
+    dealflag = FAULT_FLAG
+
+    def judge(x: pd.Series):
+        # abnormals中有一个
+        if len(abnormals & set(x)) != 0 and x.nunique() != 1:
+            return False  # 表示去除
+        else:
+            return True  # 表示保留
+
+    savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
+    return predictPd[savelines]
+
+
+# 去除每个异常的首尾
+def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFrame:
+    allabnormals = set(predictPd[FAULT_FLAG])
+    if 0 in allabnormals:
+        allabnormals.remove(0)
+    removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
+    return removepd
+
+
+# 去除指定异常及其首尾数据
+def remobe_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
+    dealflag = "faultFlag"
+
+    def judge(x: pd.Series):
+        # abnormals中有一个
+        if len(abnormals & set(x)) != 0:
+            return False  # 表示去除
+        else:
+            return True  # 表示保留
+
+    savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
+    return predictPd[savelines]
+
+
+"""
+将abnormalsList中的异常当做同一种类的异常, 其预测
+"""
+
+
+def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
+    infoDict = {}
+    # num 数据的数量
+    # recall  召回率
+    # precision 精确率
+    # per_normal 预测为正常的百分比
+    # per_fault 预测为异常的百分比
+    preflaglabel = "preFlag"
+    realflags = list(predictpd[FAULT_FLAG])
+    preflags = list(predictpd[preflaglabel])
+    assert len(realflags) == len(preflags)
+    rightflagSet = set([i // 10 for i in abnormalsSet])  # 如果预测在这个集合中， 则认为预测正确
+
+    real_abnormalnums = 0 # 异常的总数量
+    pre_allabnormalnums = 0 # 所有预测数据中，被预测为异常的数量
+    abnormal_rightabnormal_nums = 0 # 异常被预测为正确的个数
+    abnormal_abnormal_nums = 0 # 异常被预测为!=0的数量
+    abnormal_normal_nums = 0 # 异常被预测为正常的数量
+
+    for i in range(len(realflags)):
+        if realflags[i] in abnormalsSet:
+            real_abnormalnums += 1 # 表示异常的真实数量+1
+        if preflags[i] in rightflagSet:
+            pre_allabnormalnums += 1 # 被预测为异常的真实数量+1
+
+        if realflags[i] in abnormalsSet:
+            # 现在实际预测值是异常
+            if preflags[i] == 0:
+                # 预测值是0
+                abnormal_normal_nums += 1
+            if preflags[i] != 0:
+                abnormal_abnormal_nums += 1
+            if preflags[i] in rightflagSet:
+                abnormal_rightabnormal_nums += 1 # 异常预测正确
+
+    infoDict["recall"] = abnormal_rightabnormal_nums / real_abnormalnums
+    infoDict["precison"] = abnormal_rightabnormal_nums / pre_allabnormalnums
+    infoDict["pre_abnormal"] = abnormal_abnormal_nums / real_abnormalnums # 预测为异常的比例, 异常的发现率
+    infoDict["pre_normal"] = abnormal_normal_nums / real_abnormalnums # 预测为正常的比例
+    return infoDict
+
 
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
-def analysePredictResult(predictpd: pd.DataFrame, spath: str) -> pd.DataFrame:
+# 主要分析三种情况，1. 不去除首位的，2. 去除首位  3. 去除低等级
+# 得到10 20 30 50 60 以及 将10 20 30当作cpu 一种情况
+def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int = 3) -> pd.DataFrame:
+    # 先将{40, 70, 90} 这三种异常去除,并且去除其首尾数据
+    predictpd = remobe_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
+        41, 42, 43, 44, 45,
+        71, 72, 73, 74, 75,
+        91, 92, 93, 94, 95
+    })
+
+    # 预测不去除首位数据 ================================================
     analyseDict = {}
-    # 分析单CPU抢占
+    analyseDict[0] = getBasicInfo(predictpd, {0})
+    analyseDict[10] = getBasicInfo(predictpd, {11, 12, 13, 14, 15})
+    analyseDict[20] = getBasicInfo(predictpd, {21, 22, 23, 24, 25})
+    analyseDict[30] = getBasicInfo(predictpd, {31, 32, 33, 34, 35})
+    analyseDict[50] = getBasicInfo(predictpd, {51, 52, 53, 54, 55})
+    analyseDict[60] = getBasicInfo(predictpd, {61, 62, 63, 64, 65})
+    analyseDict[80] = getBasicInfo(predictpd, {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getBasicInfo(predictpd, {
+        11, 12, 13, 14, 15,
+        21, 22, 23, 24, 25,
+        31, 32, 33, 34, 35,
+        81, 82, 83, 84, 85
+    })
+    analyseDict["memory"] = getBasicInfo(predictpd, {
+        51, 52, 53, 54, 55,
+        61, 62, 63, 64, 65
+    })
+    # 将信息进行保存
+    tpd = pd.DataFrame(data=analyseDict).T
+    tpd.to_csv(os.path.join(spath, "1. 不去除首位_统计数据.csv"))
+
+    # 预测全部异常去除首尾之后的数据 ===================================
+    tpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
+    analyseDict = {}
+    analyseDict[0] = getBasicInfo(predictpd, {0})
+    analyseDict[10] = getBasicInfo(predictpd, {11, 12, 13, 14, 15})
+    analyseDict[20] = getBasicInfo(predictpd, {21, 22, 23, 24, 25})
+    analyseDict[30] = getBasicInfo(predictpd, {31, 32, 33, 34, 35})
+    analyseDict[50] = getBasicInfo(predictpd, {51, 52, 53, 54, 55})
+    analyseDict[60] = getBasicInfo(predictpd, {61, 62, 63, 64, 65})
+    analyseDict[80] = getBasicInfo(predictpd, {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getBasicInfo(predictpd, {
+        11, 12, 13, 14, 15,
+        21, 22, 23, 24, 25,
+        31, 32, 33, 34, 35,
+        81, 82, 83, 84, 85
+    })
+    analyseDict["memory"] = getBasicInfo(predictpd, {
+        51, 52, 53, 54, 55,
+        61, 62, 63, 64, 65
+    })
+    # 将信息进行保存
+    tpd = pd.DataFrame(data=analyseDict).T
+    tpd.to_csv(os.path.join(spath, "2. 去除首位_统计数据.csv"))
+
+    # 预测去除低等级之后的数据
+    tpd = remobe_Abnormal_Head_Tail(predictPd=predictpd, windowsize=windowsize, abnormals={
+        11, 12,
+        21, 22,
+        31, 32,
+        51, 52,
+        61, 62,
+        81, 82
+    })
+    analyseDict = {}
+    analyseDict[0] = getBasicInfo(predictpd, {0})
+    analyseDict[10] = getBasicInfo(predictpd, {11, 12, 13, 14, 15})
+    analyseDict[20] = getBasicInfo(predictpd, {21, 22, 23, 24, 25})
+    analyseDict[30] = getBasicInfo(predictpd, {31, 32, 33, 34, 35})
+    analyseDict[50] = getBasicInfo(predictpd, {51, 52, 53, 54, 55})
+    analyseDict[60] = getBasicInfo(predictpd, {61, 62, 63, 64, 65})
+    analyseDict[80] = getBasicInfo(predictpd, {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getBasicInfo(predictpd, {
+        11, 12, 13, 14, 15,
+        21, 22, 23, 24, 25,
+        31, 32, 33, 34, 35,
+        81, 82, 83, 84, 85
+    })
+    analyseDict["memory"] = getBasicInfo(predictpd, {
+        51, 52, 53, 54, 55,
+        61, 62, 63, 64, 65
+    })
+    # 将信息进行保存
+    tpd = pd.DataFrame(data=analyseDict).T
+    tpd.to_csv(os.path.join(spath, "3. 去除首位_去除低强敌_统计数据.csv"))
+
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -731,4 +873,5 @@ if __name__ == "__main__":
         coresnumber=coresnumber
     )
     # 对结果进行分析
-    analysePd = analysePredictResult(predictpd, tpath)
+    analysePredictResult(predictpd, tpath)
+
