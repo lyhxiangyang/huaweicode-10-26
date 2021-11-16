@@ -270,6 +270,8 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     nosavefeatures = ["abnormalcores"]
     savedict = dict(
         [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key not in nosavefeatures])
+    coresnumslist = [len(i) if i is not None else -1 for i in serverinformationDict["abnormalcores"]]
+    savedict["coresnums"] = coresnumslist
     tpd = pd.DataFrame(data=savedict)
     tpd.to_csv(os.path.join(spath, "server_process有用指标.csv"))
     # 将时间和错误核心列表进行保存
@@ -559,8 +561,7 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 def analysePredictResult(predictpd: pd.DataFrame, spath: str) -> pd.DataFrame:
     analyseDict = {}
-    # 分析
-    pass
+    # 分析单CPU抢占
 
 
 if __name__ == "__main__":
