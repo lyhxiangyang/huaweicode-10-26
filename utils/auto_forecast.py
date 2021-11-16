@@ -136,6 +136,9 @@ def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumul
     print(PID_FEATURE.center(40, "*"))
     for ipid, idf in processpd.groupby(PID_FEATURE):
         idf: pd.DataFrame
+        # 对每一个进程开始的前两个点和后两个点都去掉
+        assert len(idf) > 4
+        idf = idf.iloc[2:-2]
         print("pid: {} size: {}".format(ipid, idf.size))
         # 进行累计差分处理
         # subtractpd = subtractLastLineFromDataFrame(idf, columns=accumulateFeatures)
@@ -213,10 +216,10 @@ def isCPUAbnormalsByThreshold(predictpd: pd.DataFrame, thresholdValue: Dict) -> 
 
 def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThreshold: bool = False,
                                thresholdValue: Dict = None, modelfilepath: str = None) -> Union[
-    tuple[None, None], tuple[Any, list[Union[list, Any]]]]:
+    tuple[int, None], tuple[Any, list]]:
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
     if len(nowdf) == 0:
-        return None, None
+        return 0, None
 
     # 先得到总的CPUTIME的时间
     cputime = nowdf["cpu"].sum()
@@ -432,16 +435,22 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
 
 """
 根据CPU异常，内存泄露异常以及多CPU异常判断
+coresList代表每个时间段
 """
 
 
-def get_realpredict(predictDict: Dict) -> List:
+def get_realpredict(predictDict: Dict, coresList: List) -> List:
     cpu_list = predictDict["CPU_Abnormal"]
     leak_list = predictDict["mem_leak"]
     bandwidth_list = predictDict["mem_bandwidth"]
+    assert len(cpu_list) == len(coresList)
 
     preflag = []
     for i in range(0, len(cpu_list)):
+        # 如果coresList[i]为null， 代表这个时间点，在process中不存在，第一种可能是：真的不存在  第二种可能是: 作为进程一开始，我将刚刚开始的两分钟和结尾的两分钟删除了
+        if coresList[i] is None:
+            preflag.append(0)
+            continue
         if bandwidth_list[i] != 0:
             preflag.append(50)
             continue
@@ -483,10 +492,10 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         thresholdValue=thresholdValue,
         Memory_bandwidth_modelpath=Memory_bandwidth_modelpath
     )
-    # 根据CPU信息和得到真是标签值
-    predictDict["preFlag"] = get_realpredict(predictDict)
+    # 得到核的数量
     predictDict["coresnums"] = serverinformationDict["coresnums"]
-
+    # 根据CPU信息和得到真是标签值
+    predictDict["preFlag"] = get_realpredict(predictDict, serverinformationDict["abnormalcores"])
 
     tpd = pd.DataFrame(data=predictDict)
     tpd = PushLabelToFirst(tpd, "preFlag")
