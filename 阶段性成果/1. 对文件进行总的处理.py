@@ -650,20 +650,20 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     # 预测全部异常去除首尾之后的数据 ===================================
     tpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
     analyseDict = {}
-    analyseDict[0] = getBasicInfo(predictpd, {0})
-    analyseDict[10] = getBasicInfo(predictpd, {11, 12, 13, 14, 15})
-    analyseDict[20] = getBasicInfo(predictpd, {21, 22, 23, 24, 25})
-    analyseDict[30] = getBasicInfo(predictpd, {31, 32, 33, 34, 35})
-    analyseDict[50] = getBasicInfo(predictpd, {51, 52, 53, 54, 55})
-    analyseDict[60] = getBasicInfo(predictpd, {61, 62, 63, 64, 65})
-    analyseDict[80] = getBasicInfo(predictpd, {81, 82, 83, 84, 85})
-    analyseDict["cpu"] = getBasicInfo(predictpd, {
+    analyseDict[0] = getBasicInfo(tpd, {0})
+    analyseDict[10] = getBasicInfo(tpd, {11, 12, 13, 14, 15})
+    analyseDict[20] = getBasicInfo(tpd, {21, 22, 23, 24, 25})
+    analyseDict[30] = getBasicInfo(tpd, {31, 32, 33, 34, 35})
+    analyseDict[50] = getBasicInfo(tpd, {51, 52, 53, 54, 55})
+    analyseDict[60] = getBasicInfo(tpd, {61, 62, 63, 64, 65})
+    analyseDict[80] = getBasicInfo(tpd, {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getBasicInfo(tpd, {
         11, 12, 13, 14, 15,
         21, 22, 23, 24, 25,
         31, 32, 33, 34, 35,
         81, 82, 83, 84, 85
     })
-    analyseDict["memory"] = getBasicInfo(predictpd, {
+    analyseDict["memory"] = getBasicInfo(tpd, {
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65
     })
@@ -680,21 +680,23 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         61, 62,
         81, 82
     })
+    # 去除所有的首尾数据
+    tpd = removeAllHeadTail(tpd, windowsize=windowsize)
     analyseDict = {}
-    analyseDict[0] = getBasicInfo(predictpd, {0})
-    analyseDict[10] = getBasicInfo(predictpd, {11, 12, 13, 14, 15})
-    analyseDict[20] = getBasicInfo(predictpd, {21, 22, 23, 24, 25})
-    analyseDict[30] = getBasicInfo(predictpd, {31, 32, 33, 34, 35})
-    analyseDict[50] = getBasicInfo(predictpd, {51, 52, 53, 54, 55})
-    analyseDict[60] = getBasicInfo(predictpd, {61, 62, 63, 64, 65})
-    analyseDict[80] = getBasicInfo(predictpd, {81, 82, 83, 84, 85})
-    analyseDict["cpu"] = getBasicInfo(predictpd, {
+    analyseDict[0] = getBasicInfo(tpd, {0})
+    analyseDict[10] = getBasicInfo(tpd, {11, 12, 13, 14, 15})
+    analyseDict[20] = getBasicInfo(tpd, {21, 22, 23, 24, 25})
+    analyseDict[30] = getBasicInfo(tpd, {31, 32, 33, 34, 35})
+    analyseDict[50] = getBasicInfo(tpd, {51, 52, 53, 54, 55})
+    analyseDict[60] = getBasicInfo(tpd, {61, 62, 63, 64, 65})
+    analyseDict[80] = getBasicInfo(tpd, {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getBasicInfo(tpd, {
         11, 12, 13, 14, 15,
         21, 22, 23, 24, 25,
         31, 32, 33, 34, 35,
         81, 82, 83, 84, 85
     })
-    analyseDict["memory"] = getBasicInfo(predictpd, {
+    analyseDict["memory"] = getBasicInfo(tpd, {
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65
     })
