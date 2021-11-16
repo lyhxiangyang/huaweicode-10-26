@@ -237,6 +237,8 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
 """
 将server文件和process结合，根据时间对数据进行分析，最后得到一个Dict，包含如下信息
 time, server_flag(可选), used, used_mean, pgfree, pgfree_mean, pgfree_min, pgfree_max, wrf_cpu, abnormalcore(是一个列表)
+返回值key 
+time    wrf_cpu    abnormalcores    faultyFlag   "used", "used_mean", "pgfree", "pgfree_mean", "pgfree_amin", "pgfree_amax"  coresnums
 """
 
 
@@ -263,6 +265,10 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     for ife in add_server_feature:
         serverinformationDict[ife] = list(allserverpds[ife])
 
+    # 得到cpu每个时间点的数量
+    coresnumslist = [len(i) if i is not None else -1 for i in serverinformationDict["abnormalcores"]]
+    serverinformationDict["coresnums"] = coresnumslist
+
     # 加入一个断言
     assert len(serverinformationDict["wrf_cpu"]) == len(allserverpds)
 
@@ -270,7 +276,6 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     nosavefeatures = ["abnormalcores"]
     savedict = dict(
         [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key not in nosavefeatures])
-    coresnumslist = [len(i) if i is not None else -1 for i in serverinformationDict["abnormalcores"]]
     savedict["coresnums"] = coresnumslist
     tpd = pd.DataFrame(data=savedict)
     tpd.to_csv(os.path.join(spath, "server_process有用指标.csv"))
@@ -478,6 +483,8 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     )
     # 根据CPU信息和得到真是标签值
     predictDict["preFlag"] = get_realpredict(predictDict)
+    predictDict["coresnums"] = serverinformationDict["coresnums"]
+
 
     tpd = pd.DataFrame(data=predictDict)
     tpd = PushLabelToFirst(tpd, "preFlag")
@@ -616,7 +623,7 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 # 主要分析三种情况，1. 不去除首位的，2. 去除首位  3. 去除低等级
 # 得到10 20 30 50 60 以及 将10 20 30当作cpu 一种情况
-def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int = 3) -> pd.DataFrame:
+def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int = 3):
     # 先将{40, 70, 90} 这三种异常去除,并且去除其首尾数据
     predictpd = remobe_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
         41, 42, 43, 44, 45,
