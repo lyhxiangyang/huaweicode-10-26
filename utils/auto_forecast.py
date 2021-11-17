@@ -529,18 +529,26 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
     for iprocesspd in processpds:
         subtractpdLists = []
         for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
+            # 先将一些不可用的数据进行清除,比如一个进程只运行了两分钟
+            if len(ipd) <= 1:
+                continue
             subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
             subtractpdLists.append(subtractpd)
         allsubtractpd, _ = mergeDataFrames(subtractpdLists)
         differencepds.append(allsubtractpd)
     return differencepds
 
-
+"""
+对数据进行差分处理
+并且对pgfree这个指标进行中位数平滑
+"""
 def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str]) -> List[pd.DataFrame]:
     differencepds = []
     for iserverpd in serverpds:
         subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
         differencepds.append(subtractpd)
+    # 中位数进行平滑操作
+    differencepds = smooth_pgfree(differencepds, smoothwinsize=7)
     return differencepds
 
 
@@ -732,6 +740,18 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "3. 去除首位_去除低强度_统计数据.csv"))
+
+"""
+对server数据列表中pgfree进行滑动窗口的处理
+"""
+def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
+    pgfree_name = "pgfree"
+    for ipd in serverpds:
+        if pgfree_name in ipd.columns.array:
+            ipd[pgfree_name] = ipd[pgfree_name].rolling(window=smoothwinsize, min_periods=1, center=True).median()
+    return serverpds
+
+
 
 
 

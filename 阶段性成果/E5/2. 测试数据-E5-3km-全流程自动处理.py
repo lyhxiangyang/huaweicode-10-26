@@ -1,5 +1,7 @@
 import os
 
+import pandas as pd
+
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DataScripts import getDFmean
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
@@ -7,6 +9,8 @@ from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
     predictAllAbnormal, analysePredictResult
+
+
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
@@ -101,6 +105,8 @@ if __name__ == "__main__":
     normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
+
+    # 对pgfree进行6个窗口的平滑处理
 
     # ----
     process_feature = ["cpu"]
