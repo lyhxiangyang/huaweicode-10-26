@@ -578,7 +578,7 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
         subtractpdLists = []
         for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
             # 先将一些不可用的数据进行清除,比如一个进程只运行了两分钟
-            if len(ipd) <= 1:
+            if len(ipd) <= 4:
                 continue
             subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
             subtractpdLists.append(subtractpd)
@@ -671,7 +671,7 @@ def getTimePeriodInfo(predictpd: pd.DataFrame):
     #
     sameLen = 0
     for i in range(0, len(tlist) - 3):
-        if tlist1[i] and tlist1[i + 1] and tlist1[i + 2] and tlist2[i] and tlist[i + 1] and tlist[i + 2]:
+        if tlist1[i] and tlist1[i + 1] and tlist1[i + 2] and tlist2[i] and tlist2[i + 1] and tlist2[i + 2]:
             sameLen += 1
 
     return realperiodLen, preperiodLen, sameLen
@@ -783,7 +783,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     # ===============================================================================统计时间段信息
     realperiodLen, preperiodLen, sameLen = getTimePeriodInfo(tpd)
     writeinfo = ["实际时间段个数: {}\n".format(realperiodLen), "预测时间段个数：{}\n".format(preperiodLen), "预测准确时间段个数: {}\n".\
-        format(sameLen), "预测召回率: {:.2%}".format(sameLen / realperiodLen), "预测精确率: {:.2%}".format(sameLen / preperiodLen)]
+        format(sameLen), "预测召回率: {:.2%}\n".format(sameLen / realperiodLen), "预测精确率: {:.2%}\n".format(sameLen / preperiodLen)]
     # ===============================================================================
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T

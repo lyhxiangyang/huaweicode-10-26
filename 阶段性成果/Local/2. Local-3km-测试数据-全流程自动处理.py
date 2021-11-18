@@ -50,7 +50,7 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
-        "pgfree": 140
+        "pgfree": 500
     }
 
 

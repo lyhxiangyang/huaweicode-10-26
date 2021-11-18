@@ -21,7 +21,7 @@ if __name__ == "__main__":
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
     # 预测CPU的模型路径
-    processcpu_modelpath = ""
+    processcpu_modelpath = R"tmp/modelcpath/process_cpu_model"
     # 预测内存泄露的模型路径
     servermemory_modelpath = ""
     # 预测内存带宽的模型路径
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
-        "pgfree": 140
+        "pgfree": 500
     }
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
