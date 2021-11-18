@@ -542,6 +542,8 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     wrfnumList = serverinformationDict['abnormalcores']
     # 得到某一时刻下
     predictDict["smincputime"] = getSingleMaxCPUTime(serverinformationDict)
+    predictDict["pgfree_mean"] = serverinformationDict["pgfree_mean"]
+    predictDict["used_mean"] = serverinformationDict["user_mean"]
 
 
     tpd = pd.DataFrame(data=predictDict)
