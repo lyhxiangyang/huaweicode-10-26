@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = ""
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/测试数据-Local-9km-异常数据"
+    spath = "tmp/总过程分析/测试数据-Local-9km"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据

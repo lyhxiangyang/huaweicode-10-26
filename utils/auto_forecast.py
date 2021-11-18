@@ -1,4 +1,4 @@
-
+import itertools
 import json
 import os.path
 from collections import defaultdict
@@ -212,20 +212,24 @@ def isCPUAbnormalsByThreshold(predictpd: pd.DataFrame, thresholdValue: Dict) -> 
 """
 得到这一个一个processpd对应的时间下，所有的cputime，以及通过预测有那几个核心是cpu异常
 判断是否使用阀值, 如果使用阀值， 那么阀值的大小都在thtrsholdValue中存储, 如果不使用阀值，那么modelfilepath就不为空
+返回值： 1. 异常的数量列表  2. 异常的核心列表 3. 异常的cpu最小值列表
 """
 
 
 def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThreshold: bool = False,
                                thresholdValue: Dict = None, modelfilepath: str = None) -> Union[
-    tuple[int, None], tuple[Any, list]]:
+    tuple[int, None, None], tuple[Any, list, list]]:
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
     if len(nowdf) == 0:
-        return 0, None
+        return 0, None, None
 
+    cpu_mean_fe = "cpu_mean"
     # 先得到总的CPUTIME的时间
-    cputime = nowdf["cpu"].sum()
+    cputime = nowdf[cpu_mean_fe].sum()
     # 核的编号
     cores_serialnumber = list(nowdf.loc[:, CPU_FEATURE])
+    # 核的cpu时间
+    cores_max_time = list(nowdf.loc[:, cpu_mean_fe])
     if isThreshold:
         predictflag = isCPUAbnormalsByThreshold(nowdf, thresholdValue)
     else:
@@ -235,8 +239,9 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
     # 获得异常的核
     assert len(predictflag) == len(cores_serialnumber)
     abnormalcores = [cores_serialnumber[i] for i, flag in enumerate(predictflag) if flag]
+    abnormalcoremaxtime = [cores_max_time[i] for i, flag in enumerate(predictflag) if flag]
     # 将所有的cputime和不正常的核心数据进行返回
-    return cputime, abnormalcores
+    return cputime, abnormalcores, abnormalcoremaxtime
 
 
 """
@@ -244,6 +249,10 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
 time, server_flag(可选), used, used_mean, pgfree, pgfree_mean, pgfree_min, pgfree_max, wrf_cpu, abnormalcore(是一个列表)
 返回值key 
 time    wrf_cpu    abnormalcores    faultyFlag   "used", "used_mean", "pgfree", "pgfree_mean", "pgfree_amin", "pgfree_amax"  coresnums
+serverinformationDict: 
+abnormalcores 是一个列表的列表，存储的是异常的核心数
+coresnums 是指多少个核心出现了异常
+coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
 """
 
 
@@ -257,12 +266,13 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     serverinformationDict = defaultdict(list)
     for stime in timecolumns:
         # 添加wrf的cpu时间
-        wrf_cpu_time, abnormalcores = getprocess_cputime_abcores(allprocesspds, stime, isThreshold=isThreshold,
+        wrf_cpu_time, abnormalcores, abnormalcoremaxtime = getprocess_cputime_abcores(allprocesspds, stime, isThreshold=isThreshold,
                                                                  thresholdValue=thresholdValue,
                                                                  modelfilepath=modelfilepath)
         # 不管返回值如何都进行直接的添加
         serverinformationDict["wrf_cpu"].append(wrf_cpu_time)
         serverinformationDict["abnormalcores"].append(abnormalcores)
+        serverinformationDict["coresmaxtime"].append(abnormalcoremaxtime)
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
@@ -437,6 +447,8 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
 """
 根据CPU异常，内存泄露异常以及多CPU异常判断
 coresList代表每个时间段
+
+这个预测会将孤立点去除
 """
 
 
@@ -459,13 +471,42 @@ def get_realpredict(predictDict: Dict, coresList: List) -> List:
             preflag.append(60)
             continue
         preflag.append(cpu_list[i])
+    # 去除那些孤立的点，如 00 异常 00中的异常 或者 1 1 0 1 1 中的正常
+    for i in range(2, len(preflag) - 2):
+        if preflag[i - 2] != 0 and preflag[i - 1] != 0 and preflag[i] == 0 and preflag[i + 1] != 0 and preflag[i + 2] != 0:
+            preflag[i] = preflag[i - 1] # 如果遇到这种情况，取得上一个数
+        if preflag[i - 2] == 0 and preflag[i - 1] == 0 and preflag[i] != 0 and preflag[i + 1] == 0 and preflag[i + 2] == 0:
+            preflag[i] = 0
     return preflag
+
+
+def getSingleMaxCPUTime(serverinformationDict: Dict) -> List[int]:
+    # 某一时刻的cpu列表
+    wrfnumList = serverinformationDict['coresmaxtime']
+    singlemintime = []
+    for itimecores in wrfnumList:
+        if itimecores is None:
+            singlemintime.append(-1)
+            continue
+        if len(itimecores) == 0:
+            singlemintime.append(0)
+            continue
+        else:
+            singlemintime.append(max(itimecores))
+            continue
+    return singlemintime
+
+
 
 
 """
 将得到的基本信息都得到之后，对结果进行分析
 如果isThreshold = True 那么就使用阀值预测，否则就使用模型预测，这个时候，模型路径不能为空
 coresnumber设置一下，主要是预测全CPU抢占
+serverinformationDict: 
+abnormalcores 是一个列表的列表，存储的是异常的核心数
+coresnums 是指多少个核心出现了异常
+coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
 """
 
 
@@ -497,6 +538,11 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     predictDict["coresnums"] = serverinformationDict["coresnums"]
     # 根据CPU信息和得到真是标签值
     predictDict["preFlag"] = get_realpredict(predictDict, serverinformationDict["abnormalcores"])
+    # 某一时刻的cpu列表
+    wrfnumList = serverinformationDict['abnormalcores']
+    # 得到某一时刻下
+    predictDict["smincputime"] = getSingleMaxCPUTime(serverinformationDict)
+
 
     tpd = pd.DataFrame(data=predictDict)
     tpd = PushLabelToFirst(tpd, "preFlag")
@@ -602,9 +648,37 @@ def harmonic_mean(data):  # 计算调和平均数
     return len(data) / total
 
 """
+得到时间段的信息
+返回实际预测时间段的个数  预测时间段的个数  以及相交的时间段个数
+"""
+def getTimePeriodInfo(predictpd: pd.DataFrame):
+    timeslist = predictpd[TIME_COLUMN_NAME]
+    realflag = predictpd[FAULT_FLAG]
+    preflag = predictpd["preFlag"]
+    assert len(realflag) == len(preflag) # 断言
+    # 得到realflag异常的时间段
+    tlist1 = [False if i == 0 else True for i in realflag]
+    tlist = [k for k, g in itertools.groupby(tlist1)] # 去除重复
+    realperiodLen = len([i for i in tlist if i]) # 找到异常的数值
+
+    # 得到preflag异常的时间段
+    tlist2 = [False if i == 0 else True for i in preflag]
+    tlist = [k for k, g in itertools.groupby(tlist)]
+    preperiodLen = len([i for i in tlist if i])
+
+    #
+    sameLen = 0
+    for i in range(0, len(tlist) - 3):
+        if tlist1[i] and tlist1[i + 1] and tlist1[i + 2] and tlist2[i] and tlist[i + 1] and tlist[i + 2]:
+            sameLen += 1
+
+    return realperiodLen, preperiodLen, sameLen
+
+
+
+"""
 将abnormalsList中的异常当做同一种类的异常, 其预测
 """
-
 
 def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
     infoDict = {}
@@ -661,7 +735,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         91, 92, 93, 94, 95
     })
 
-    # 预测不去除首位数据 ================================================
+    # 预测不去除首位数据 ===============================================================================================
     analyseDict = {}
     analyseDict[0] = getBasicInfo(predictpd, {0})
     analyseDict[10] = getBasicInfo(predictpd, {11, 12, 13, 14, 15})
@@ -684,7 +758,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "1. 不去除首位_统计数据.csv"))
 
-    # 预测全部异常去除首尾之后的数据 ===================================
+    # 预测全部异常去除首尾之后的数据 ==================================================================================
     tpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
     analyseDict = {}
     analyseDict[0] = getBasicInfo(tpd, {0})
@@ -704,11 +778,19 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65
     })
+    # ===============================================================================统计时间段信息
+    realperiodLen, preperiodLen, sameLen = getTimePeriodInfo(tpd)
+    writeinfo = ["实际时间段个数: {}".format(realperiodLen), "预测时间段个数：{}".format(preperiodLen), "预测准确时间段个数: {}".\
+        format(sameLen), "预测召回率: {:.2%}".format(sameLen / realperiodLen), "预测精确率: {:.2%}".format(sameLen / preperiodLen)]
+    # ===============================================================================
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "2. 去除首位_统计数据.csv"))
 
-    # 预测去除低等级之后的数据
+    with open(os.path.join(spath, "2. 去除首位_统计信息时间段.txt", "w")) as f:
+        f.writelines(writeinfo)
+
+    # 预测去除低等级之后的数据 包括首尾数据===============================================================================
     tpd = remobe_Abnormal_Head_Tail(predictPd=predictpd, windowsize=windowsize, abnormals={
         11, 12,
         21, 22,
@@ -740,6 +822,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "3. 去除首位_去除低强度_统计数据.csv"))
+    # ==================================================================================================
 
 """
 对server数据列表中pgfree进行滑动窗口的处理
