@@ -97,7 +97,7 @@ def featureExtractionPd(df: pd.DataFrame, extraFeature: List[str], windowSize: i
     # 得到的这个DataFrame是一个二级列名类似下面这种
     #	    system	                            ｜                      user
     #  sum	mean	amax	amin	quantile50  ｜ sum	mean	amax	amin	quantile50
-    featureExtractionDf = df.loc[:, extraFeature].rolling(window=windowSize, min_periods=1).agg(
+    featureExtractionDf = df.loc[:, extraFeature].rolling(window=windowSize, min_periods=1, center=True).agg(
         [np.mean, np.max, np.min, quantile(0.5)])
 
     # 将二级索引变成一级的
@@ -543,7 +543,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     # 得到某一时刻下
     predictDict["smincputime"] = getSingleMaxCPUTime(serverinformationDict)
     predictDict["pgfree_mean"] = serverinformationDict["pgfree_mean"]
-    predictDict["used_mean"] = serverinformationDict["user_mean"]
+    predictDict["used_mean"] = serverinformationDict["used_mean"]
 
 
     tpd = pd.DataFrame(data=predictDict)
@@ -782,14 +782,14 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     })
     # ===============================================================================统计时间段信息
     realperiodLen, preperiodLen, sameLen = getTimePeriodInfo(tpd)
-    writeinfo = ["实际时间段个数: {}".format(realperiodLen), "预测时间段个数：{}".format(preperiodLen), "预测准确时间段个数: {}".\
+    writeinfo = ["实际时间段个数: {}\n".format(realperiodLen), "预测时间段个数：{}\n".format(preperiodLen), "预测准确时间段个数: {}\n".\
         format(sameLen), "预测召回率: {:.2%}".format(sameLen / realperiodLen), "预测精确率: {:.2%}".format(sameLen / preperiodLen)]
     # ===============================================================================
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "2. 去除首位_统计数据.csv"))
 
-    with open(os.path.join(spath, "2. 去除首位_统计信息时间段.txt", "w")) as f:
+    with open(os.path.join(spath, "2. 去除首位_统计信息时间段.txt"), "w", encoding="utf-8") as f:
         f.writelines(writeinfo)
 
     # 预测去除低等级之后的数据 包括首尾数据===============================================================================
