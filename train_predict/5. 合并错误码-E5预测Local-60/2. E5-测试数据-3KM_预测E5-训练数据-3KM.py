@@ -6,28 +6,30 @@ from Classifiers.TrainToTest import ModelTrainAndTest
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DefineData import FAULT_FLAG
 
+
+
 trainNormalDataPath = [
-    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\E5正常数据\server数据处理\9.特征提取所有错误-处理首尾\0.csv",
+    R"D:\HuaweiMachine\huaweicode-11-26\tmp\tData-11-09\E5正常数据\server数据处理\9.特征提取所有错误-处理首尾\0.csv",
 ]
 
 trainAbnormalDataPath = [
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\51.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\52.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\53.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\54.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\55.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\61.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\62.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\63.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\64.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\65.csv"),
 ]
 
 testNormalDataPath = [
-    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\0.csv",
+    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\0.csv",
 ]
 
 testAbnormalDataPath = [
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\51.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\52.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\53.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\54.csv"),
-    (50, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\测试数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\55.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\61.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\62.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\63.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\64.csv"),
+    (60, R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\训练数据\多机-E5-server-3KM\9.特征提取所有错误-处理首尾\65.csv"),
 ]
 
 def get_List_pre_suffix(clist: List[str], prefix: str = "", suffix: str = "") -> List[str]:
@@ -108,16 +110,16 @@ if __name__ == "__main__":
         print("测试数据合并失败")
         exit(1)
 
-
-    # 深度为2， 特征名为 pgfree_mean
+    # 获得需要训练的特征
+    # 只使用pgfree_mean max_depth = 2
     max_depth = 2
     allfeatureload1_nosuffix = ["pgfree_mean"]
 
-    # 获得需要训练的特征
-    max_depth = 5
-    allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="pgfree_", suffix="_diff")
+    # 使用pgfree_开头的所有特征，max_depath = 5
+    # max_depth = 5
+    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="pgfree_", suffix="_diff")
 
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))
-    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix")
+    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix", maxdepth=max_depth)
 
