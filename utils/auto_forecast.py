@@ -16,12 +16,14 @@ from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE, CPU_FEAT
 from utils.FileSaveRead import saveDFListToFiles
 
 
-def getfilepd(ipath: str) -> pd.DataFrame:
+def getfilepd(ipath: str, features: List[str] = None) -> pd.DataFrame:
     if not os.path.exists(ipath):
         filename = os.path.basename(ipath)
         print("{} 文件不存在".format(filename))
         exit(1)
     tpd = pd.read_csv(ipath)
+    if features is not None:
+        return tpd[:, features]
     return tpd
 
 
@@ -90,15 +92,21 @@ def featureExtractionPd(df: pd.DataFrame, extraFeature: List[str], windowSize: i
     def quantile(n):
         def quantile_(x):
             return np.quantile(x, q=n)
-
-        quantile_.__name__ = 'quantile_%d' % (n * 100)
+        quantile_.__name__ = 'percentage%d' % (n * 100)
         return quantile_
 
     # 得到的这个DataFrame是一个二级列名类似下面这种
     #	    system	                            ｜                      user
     #  sum	mean	amax	amin	quantile50  ｜ sum	mean	amax	amin	quantile50
+    # 由于max和min的函数名字是amax和amin 所以需要修改，记得还原，防止引起不必要的麻烦
+    maxname = np.max.__name__
+    minname = np.min.__name__
+    np.max.__name__ = "max"
+    np.min.__name__ = "min"
     featureExtractionDf = df.loc[:, extraFeature].rolling(window=windowSize, min_periods=1, center=True).agg(
         [np.mean, np.max, np.min, quantile(0.5)])
+    np.max.__name__ = maxname
+    np.min.__name__ = minname
 
     # 将二级索引变成一级的
     featureExtractionDf.columns = ["_".join(x) for x in featureExtractionDf.columns]
@@ -138,8 +146,8 @@ def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumul
         print("pid: {} ".format(ipid), end="")
         idf: pd.DataFrame
         # 对每一个进程开始的前两个点和后两个点都去掉
-        assert len(idf) > 4
-        idf = idf.iloc[2:-2]
+        assert len(idf) > 6
+        idf = idf.iloc[3:-3]
         print("size: {}".format(idf.size))
         # 进行累计差分处理
         # subtractpd = subtractLastLineFromDataFrame(idf, columns=accumulateFeatures)

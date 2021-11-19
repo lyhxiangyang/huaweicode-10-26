@@ -9,7 +9,8 @@ from utils.DefineData import FAULT_FLAG
 
 
 trainNormalDataPath = [
-    R"D:\HuaweiMachine\huaweicode-11-26\tmp\tData-11-09\E5正常数据\server数据处理\9.特征提取所有错误-处理首尾\0.csv",
+    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\E5正常数据\server数据处理\9.特征提取所有错误-处理首尾\0.csv",
+    R"D:\HuaweiMachine\huaweicode-10-26\tmp\tData-11-09\E5正常数据\server数据处理\9.特征提取所有错误-处理首尾\0.csv",
 ]
 
 trainAbnormalDataPath = [

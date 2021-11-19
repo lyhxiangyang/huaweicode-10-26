@@ -156,6 +156,33 @@ def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, timeformat: 
     respd.append(tpd)
     return respd
 
+"""
+将
+"""
+def splitDataFrameByPID(df: pd.DataFrame, time_interval: int = 60, timeformat: str = '%Y-%m-%d %H:%M:%S') -> List[
+    pd.DataFrame]:
+    respd = []
+    beginLine = 0
+    sbeginLineTime = df.loc[beginLine, TIME_COLUMN_NAME]
+    ibeginTime = TranslateTimeToInt(sbeginLineTime, timeformat)
+    iLastLineTime = ibeginTime
+    for nowline in range(1, len(df)):
+        snowLineTime = df.loc[nowline, TIME_COLUMN_NAME]
+        inowLineTime = TranslateTimeToInt(snowLineTime, timeformat)
+        if inowLineTime - iLastLineTime == 0:
+            continue
+        # 误差在59 - 61s之间 或者等于0
+        if not (-time_interval - 1 <= inowLineTime - iLastLineTime <= time_interval + 1):
+            tpd = df.loc[beginLine: nowline - 1, :].reset_index(drop=True)
+            beginLine = nowline
+            respd.append(tpd)
+
+        iLastLineTime = inowLineTime
+    tpd = df.loc[beginLine: len(df), :].reset_index(drop=True)
+    respd.append(tpd)
+    return respd
+
+
 
 """
 将数据按照核心来进行划分
@@ -202,6 +229,9 @@ def abstractFaultPDDict(df: pd.DataFrame, extraFeature: List[str] = []) -> \
 """
 将一个process文件处理的过程
 主要目的是获得 time-core-pd以及time-core-pd-faulty
+onefile_Faulty_PD_Dict, time_core_pdDict, time_core_faultDict
+faulty-pd  Dict
+
 """
 
 
@@ -397,7 +427,11 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
     for i in range(0, len(pdbytime)):
         print("2.{} 第{}个时间段依照核心划分".format(i, i))
         tpd = pdbytime[i]
+        if len(tpd) <= 4:
+            continue
         tpd = subtractLastLineFromDataFrame(tpd, accumulationFeatures)
+        # 添加了一个平滑窗口
+        tpd[accumulationFeatures] = tpd[accumulationFeatures].rolling(window=6, min_periods=1, center=True).median()
         tpd['cpu'] = tpd['user'] + tpd['system']
         tpd = PushLabelToEnd(tpd, FAULT_FLAG)
         subcorepds.append((i, tpd))
