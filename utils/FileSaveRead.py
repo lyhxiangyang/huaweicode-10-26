@@ -93,7 +93,7 @@ def saveFaultyCoreDict(savepath: str, faulty_core_dict: Dict[int, Dict[int, pd.D
             ipd.to_csv(tfaultcorefile, index=False)
 
 
-def readFaultyCoreDict(savepath: str) -> Dict[int, Dict[int, pd.DataFrame]]:
+def readFaultyCoreDict(savepath: str, fistkey: List[int] = None, secondkey: List[int] = None) -> Dict[int, Dict[int, pd.DataFrame]]:
     if not os.path.exists(savepath):
         print("读取路径不存在")
         exit(1)
@@ -101,10 +101,14 @@ def readFaultyCoreDict(savepath: str) -> Dict[int, Dict[int, pd.DataFrame]]:
     faulty_core_dict = defaultdict(dict)
     for sfault in faultydirs:
         ifault = int(sfault)
+        if fistkey is not None and ifault not in fistkey:
+            continue
         tfaultpath = os.path.join(savepath, sfault)
         corefiles = os.listdir(tfaultpath)
         for scorefile in corefiles:
             icorename = int(os.path.splitext(scorefile)[0])
+            if secondkey is not None and icorename not in secondkey:
+                continue
             tfaultcorefile = os.path.join(tfaultpath, scorefile)
             faulty_core_dict[ifault][icorename] = pd.read_csv(tfaultcorefile)
     return faulty_core_dict

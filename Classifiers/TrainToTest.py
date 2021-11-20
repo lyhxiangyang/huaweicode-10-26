@@ -98,7 +98,7 @@ def testThree(testpd: pd.DataFrame, spath: str, modelpath: str = "Classifiers/sa
 
 
 def ModelTrainAndTest(trainedpd: pd.DataFrame, testpd: pd.DataFrame, spath: str,
-                      modelpath: str = "Classifiers/saved_model/tmp", trainAgain: bool = True,
+                      modelpath: str = "Classifiers/saved_model/tmp", trainAgain: bool = True, testAgain: bool = True,
                       selectedFeature: List[str] = None, maxdepth: int = 5):
     # 先生成模型 得到生成模型的准确率
     if not os.path.exists(spath):
@@ -107,7 +107,7 @@ def ModelTrainAndTest(trainedpd: pd.DataFrame, testpd: pd.DataFrame, spath: str,
         os.makedirs(modelpath)
     if trainAgain:
         TrainThree(trainedpd, spath, modelpath, selectedFeature=selectedFeature, maxdepth=maxdepth)
-
     print("模型训练完成".center(40, "*"))
-    print("开始对测试数据进行预测".center(40, "*"))
-    testThree(testpd, spath, modelpath)
+    if testAgain:
+        print("开始对测试数据进行预测".center(40, "*"))
+        testThree(testpd, spath, modelpath)

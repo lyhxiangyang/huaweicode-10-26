@@ -8,7 +8,6 @@ from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabel
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, TIME_INTERVAL, CPU_FEATURE, MODEL_TYPE
 from utils.FeatureExtraction import featureExtractionUsingFeatures
 from utils.FileSaveRead import saveDFListToFiles, saveCoreDFToFiles, saveFaultyDict
-from utils.auto_forecast import removeAllHeadTail
 
 """
 将时间格式转化为int
