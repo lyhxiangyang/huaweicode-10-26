@@ -586,7 +586,7 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
         subtractpdLists = []
         for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
             # 先将一些不可用的数据进行清除,比如一个进程只运行了两分钟
-            if len(ipd) <= 4:
+            if len(ipd) <= 6:
                 continue
             subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
             subtractpdLists.append(subtractpd)

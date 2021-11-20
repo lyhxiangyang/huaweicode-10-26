@@ -8,16 +8,16 @@ from utils.DefineData import FAULT_FLAG
 
 # 训练数据要使用所有的正常数据
 trainNormalDataPath = [
-    R"tmp\11-19-tData\训练数据-E5-3km\process\5. 每个核心上的数据进行合并\0.csv"
+    R"tmp\11-19-tData\训练数据-E5-3km\process\5. 每个核心上的异常信息进行合并\0.csv"
 ]
 # 只使用全CPU注入的异常来进行合并
 trainAbnormalDataPath = [
     # E5 10
-    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的数据进行合并/11.csv"),
-    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的数据进行合并/12.csv"),
-    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的数据进行合并/13.csv"),
-    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的数据进行合并/14.csv"),
-    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的数据进行合并/15.csv"),
+    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的异常信息进行合并/11.csv"),
+    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的异常信息进行合并/12.csv"),
+    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的异常信息进行合并/13.csv"),
+    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的异常信息进行合并/14.csv"),
+    (10, R"tmp/11-19-tData/训练数据-E5-3km/process/5. 每个核心上的异常信息进行合并/15.csv"),
 ]
 
 
