@@ -8,6 +8,7 @@ from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabel
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, TIME_INTERVAL, CPU_FEATURE, MODEL_TYPE
 from utils.FeatureExtraction import featureExtractionUsingFeatures
 from utils.FileSaveRead import saveDFListToFiles, saveCoreDFToFiles, saveFaultyDict
+from utils.auto_forecast import removeAllHeadTail
 
 """
 将时间格式转化为int
@@ -597,3 +598,29 @@ def getResultFromTimequantum(predictBegintime: str, predictEndtime: str, abnorma
     time_coreinformationtpd = time_coreinformationtpd.reset_index()
     time_coreinformationtpd = time_coreinformationtpd.rename(columns={"index": "time"})
     return time_coreinformationtpd
+
+
+"""
+提取一个核心上的各个错误，可以保证传入的DataFrame是一个核心上的数据
+会进行首尾数据的去除
+返回的是一个，
+"""
+def allMistakesOnExtractingOneCore(onecorePd: pd.DataFrame, windowsize: int = 3) -> Dict:
+    faultPdDict = {}
+    # 首先是去掉所有异常的首尾
+    ridForeAftPD = removeAllHeadTail(onecorePd, windowsize=windowsize)
+    for ifault, ipd in ridForeAftPD.groupby(FAULT_FLAG):
+        faultPdDict[ifault] = ipd
+    return faultPdDict
+"""
+将所有核上的数据进行提取
+"""
+def allMistakesOnExtractingAllCore(processpd: pd.DataFrame, windowsize: int = 3) -> Dict:
+    core_faultpdDict = {}
+    for icore, ipd in processpd.groupby(CPU_FEATURE):
+        faultPdDict = allMistakesOnExtractingOneCore(ipd, windowsize=windowsize)
+        core_faultpdDict[icore] = faultPdDict
+    return core_faultpdDict
+
+
+

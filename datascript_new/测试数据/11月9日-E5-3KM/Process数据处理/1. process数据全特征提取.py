@@ -4,37 +4,12 @@ from typing import Dict
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import getDFmean, mergeTwoDF
+from utils.DataScripts import getDFmean, mergeTwoDF, allMistakesOnExtractingAllCore
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles, saveFaultyCoreDict, saveFaultyDict
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
     predictAllAbnormal, analysePredictResult, removeAllHeadTail
-
-"""
-提取一个核心上的各个错误，可以保证传入的DataFrame是一个核心上的数据
-会进行首尾数据的去除
-返回的是一个，
-"""
-def allMistakesOnExtractingOneCore(onecorePd: pd.DataFrame, windowsize: int = 3) -> Dict:
-    faultPdDict = {}
-    # 首先是去掉所有异常的首尾
-    ridForeAftPD = removeAllHeadTail(onecorePd, windowsize=windowsize)
-    for ifault, ipd in ridForeAftPD.groupby(FAULT_FLAG):
-        faultPdDict[ifault] = ipd
-    return faultPdDict
-"""
-"""
-def allMistakesOnExtractingAllCore(processpd: pd.DataFrame, windowsize: int = 3) -> Dict:
-    core_faultpdDict = {}
-    for icore, ipd in processpd.groupby(CPU_FEATURE):
-        faultPdDict = allMistakesOnExtractingOneCore(ipd, windowsize=windowsize)
-        core_faultpdDict[icore] = faultPdDict
-    return core_faultpdDict
-
-
-
-
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
@@ -121,6 +96,7 @@ if __name__ == "__main__":
 
     # ============================================================================================= 提取每个核心上的错误错误码
     # core-fault-DataFrame
+    print("对process数据进行错误提取".center(40, "*"))
     allprocesspds, _ = mergeDataFrames(extraction_process_pds)
     core_faultpdDict = allMistakesOnExtractingAllCore(allprocesspds, windowsize=3)
     tpath = os.path.join(spath, "4. 提取每个cpu上的错误信息")
@@ -131,6 +107,6 @@ if __name__ == "__main__":
     for icore, faultpdDict in core_faultpdDict.items():
         allcore_faultpdDict = mergeTwoDF(allcore_faultpdDict, faultpdDict)
     # ===将错误保存
-    tpath = os.path.join(spath, "5. 每个核心上的数据进行合并")
+    tpath = os.path.join(spath, "5. 每个核心上的异常信息进行合并")
     saveFaultyDict(tpath, allcore_faultpdDict)
 
