@@ -284,7 +284,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
-    add_server_feature = ["time", "used", "used_mean", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max"]
+    add_server_feature = ["time", "used", "used_mean", "used_min", "used_max", "used_percentage50", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max", "pgfree_percentage50"]
     for ife in add_server_feature:
         serverinformationDict[ife] = list(allserverpds[ife])
 
@@ -420,7 +420,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         prelistflag = [60 if i > memoryleakValue else 0 for i in realmemoryleakValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
-        used_features = ["used_mean", "used_max", "used_min"]
+        used_features = ["used_mean", "used_max", "used_min", "used_percentage50"]
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
@@ -443,7 +443,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
         prelistflag = [50 if i > memorybandwidthValue else 0 for i in realmemorywidthValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
-        used_features = ["pgfree_mean", "pgfree_max", "pgfree_min"]
+        used_features = ["pgfree_mean", "pgfree_max", "pgfree_min", "pgfree_percentage50"]
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
@@ -549,7 +549,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     # 某一时刻的cpu列表
     wrfnumList = serverinformationDict['abnormalcores']
     # 得到某一时刻下
-    predictDict["smincputime"] = getSingleMaxCPUTime(serverinformationDict)
+    predictDict["smiaxcputime"] = getSingleMaxCPUTime(serverinformationDict)
     predictDict["pgfree_mean"] = serverinformationDict["pgfree_mean"]
     predictDict["used_mean"] = serverinformationDict["used_mean"]
 

@@ -180,5 +180,6 @@ if __name__ == "__main__":
         coresnumber=coresnumber
     )
     # 对结果进行分析
-    analysePredictResult(predictpd, tpath)
+    if isExistFaultFlag:
+        analysePredictResult(predictpd, tpath)
 

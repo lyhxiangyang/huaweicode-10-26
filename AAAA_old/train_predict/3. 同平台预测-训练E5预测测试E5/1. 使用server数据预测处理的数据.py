@@ -116,25 +116,7 @@ def setPDfaultFlag(df: pd.DataFrame, ff: int) -> pd.DataFrame:
 # 预测未处理数据
 if __name__ == "__main__":
     spath = "tmp/E5多机预测Local-标准化特征提取-合并错误"
-    # trainedPDList: list[Union[Union[TextFileReader, Series, DataFrame, None], Any]] = []
-    # for i in trainDataPath:
-    #     tpd = pd.read_csv(i)
-    #     trainedPDList.append(tpd)
-    # allTrainedPD, err = mergeDataFrames(trainedPDList)
-    # allTrainedPD: pd.DataFrame
-    # if err:
-    #     print("train合并出错")
-    #     exit(1)
-    #
-    # testPDList = []
-    # for i in testDataPath:
-    #     tpd = pd.read_csv(i)
-    #     testPDList.append(tpd)
-    # allTestPD, err = mergeDataFrames(testPDList)
-    # if err:
-    #     print("test合并出错")
-    #     exit(1)
-    #==================================================================读取训练的normal数据
+
     trainNormalList = []
     for i in trainNormalDataPath:
         tpd = pd.read_csv(i)
