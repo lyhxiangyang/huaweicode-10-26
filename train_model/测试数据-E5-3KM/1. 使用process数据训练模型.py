@@ -78,13 +78,13 @@ if __name__ == "__main__":
 
     #==================================================================将正常的训练中截取一部分和异常数据等长的数据
     # 获得测试数据的总长度
-    lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
-    tmplist = []
-    for ipd in trainNormalList:
-        ipd = sortByAbsValue(ipd, "cpu_mean", 60)
-        ipd = ipd.loc[0: lenAbnormalData, :]
-        tmplist.append(ipd)
-    trainNormalList = tmplist
+    # lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
+    # tmplist = []
+    # for ipd in trainNormalList:
+    #     ipd = sortByAbsValue(ipd, "cpu_mean", 60)
+    #     ipd = ipd.loc[0: lenAbnormalData, :]
+    #     tmplist.append(ipd)
+    # trainNormalList = tmplist
     #==================================================================en
 
     #==================================================================将所有的训练数据进行合并
@@ -93,9 +93,10 @@ if __name__ == "__main__":
         print("训练数据合并失败")
         exit(1)
 
+    # max_depth = 5
+    # allfeatureload1_nosuffix = ["cpu_mean", "cpu_max", "cpu_min", "cpu_percentage50"]
     # 获得需要训练的特征
     max_depth = 3
-    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="cpu_", suffix="_diff")
     allfeatureload1_nosuffix = ["cpu_mean"]
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))

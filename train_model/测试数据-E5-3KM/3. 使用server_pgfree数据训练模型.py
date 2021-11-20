@@ -63,11 +63,11 @@ if __name__ == "__main__":
 
     # 深度为2， 特征名为 pgfree_mean
     max_depth = 3
-    allfeatureload1_nosuffix = ["used_mean"]
+    allfeatureload1_nosuffix = ["pgfree_mean"]
 
     # 获得需要训练的特征
     # max_depth = 5
-    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="used_", suffix="_diff")
+    # allfeatureload1_nosuffix = get_List_pre_nosuffix(list(allTrainedPD.columns.array), prefix="pgfree_", suffix="_diff")
 
 
     print("选择的特征：{}".format(str(allfeatureload1_nosuffix)))

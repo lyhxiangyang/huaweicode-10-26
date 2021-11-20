@@ -284,7 +284,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
-    add_server_feature = ["time", "used", "used_mean", "pgfree", "pgfree_mean", "pgfree_amin", "pgfree_amax"]
+    add_server_feature = ["time", "used", "used_mean", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max"]
     for ife in add_server_feature:
         serverinformationDict[ife] = list(allserverpds[ife])
 
@@ -420,7 +420,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         prelistflag = [60 if i > memoryleakValue else 0 for i in realmemoryleakValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
-        used_features = ["used_mean", "used_amax", "used_amin"]
+        used_features = ["used_mean", "used_max", "used_min"]
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
@@ -443,7 +443,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
         prelistflag = [50 if i > memorybandwidthValue else 0 for i in realmemorywidthValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
-        used_features = ["pgfree_mean", "pgfree_amax", "pgfree_amin"]
+        used_features = ["pgfree_mean", "pgfree_max", "pgfree_min"]
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)

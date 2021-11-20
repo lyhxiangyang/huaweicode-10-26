@@ -78,13 +78,13 @@ if __name__ == "__main__":
 
     #==================================================================将正常的训练中截取一部分和异常数据等长的数据
     # 获得测试数据的总长度
-    lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
-    tmplist = []
-    for ipd in trainNormalList:
-        ipd = sortByAbsValue(ipd, "cpu_mean", 60)
-        ipd = ipd.loc[0: lenAbnormalData, :]
-        tmplist.append(ipd)
-    trainNormalList = tmplist
+    # lenAbnormalData = sum([len(ipd) for ipd in trainAbnormalList]) // 2
+    # tmplist = []
+    # for ipd in trainNormalList:
+    #     ipd = sortByAbsValue(ipd, "cpu_mean", 60)
+    #     ipd = ipd.loc[0: lenAbnormalData, :]
+    #     tmplist.append(ipd)
+    # trainNormalList = tmplist
     #==================================================================en
 
     #==================================================================将所有的训练数据进行合并
