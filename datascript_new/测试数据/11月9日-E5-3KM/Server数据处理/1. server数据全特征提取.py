@@ -3,14 +3,12 @@ import os
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import getDFmean, allMistakesOnExtractingOneCore
+from utils.DataScripts import getDFmean
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles, saveFaultyDict
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult
-
-
+    predictAllAbnormal, analysePredictResult, smooth_pgfree, allMistakesOnExtractingOneCore
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
