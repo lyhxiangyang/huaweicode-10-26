@@ -1,6 +1,8 @@
 # 运行此文件会出错
 import os
 
+import pandas as pd
+
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DataScripts import getDFmean
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
@@ -13,7 +15,7 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-E5-1km-异常数据"
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-HPC-1km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
@@ -27,7 +29,7 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/测试数据-E5-1km"
+    spath = "tmp/总过程分析/测试数据-HPC-1km"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据
@@ -38,6 +40,7 @@ if __name__ == "__main__":
     server_accumulate_feature = ["pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system"]
+    process_accumulate_feature = ["user", "system"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y/%m/%d %H:%M'
@@ -50,6 +53,16 @@ if __name__ == "__main__":
         "used": 120,  # 不要改key值
         "pgfree": 500
     }
+    # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
+    isFileMean = True
+    # 如果上面的是False，则使用下面的字典数据
+    processmeanVaule = {
+        "cpu": 60,
+    }
+    servermeanValue = {
+
+    }
+
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
     print("将数据从文件中读取".center(40, "*"))
@@ -69,16 +82,18 @@ if __name__ == "__main__":
         time_server_feature.append(FAULT_FLAG)
         time_process_feature.append(FAULT_FLAG)
 
-    # 正常进程数据
-    for ifile in normalprocessfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_process_feature]
-        normalprocesspds.append(tpd)
-    # 正常服务数据
-    for ifile in normalserverfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_server_feature]
-        normalserverpds.append(tpd)
+    # 如果为True 才能保证有normal数据
+    if isFileMean:
+        # 正常进程数据
+        for ifile in normalprocessfiles:
+            tpd = getfilepd(ifile)
+            tpd = tpd.loc[:, time_process_feature]
+            normalprocesspds.append(tpd)
+        # 正常服务数据
+        for ifile in normalserverfiles:
+            tpd = getfilepd(ifile)
+            tpd = tpd.loc[:, time_server_feature]
+            normalserverpds.append(tpd)
     # 预测进程数据
     for ifile in predictprocessfiles:
         tpd = getfilepd(ifile)
@@ -91,15 +106,17 @@ if __name__ == "__main__":
         predictserverpds.append(tpd)
     # ============================================================================================= 对读取到的数据进行差分，并且将cpu添加到要提取的特征中
     print("对读取到的原始数据进行差分".format(40, "*"))
-    # 对正常进程数据进行差分处理之后，得到cpu特征值
-    normalprocesspds = differenceProcess(normalprocesspds, process_feature)
-    add_cpu_column(normalprocesspds)
-    # 对异常数据进行差分处理之后，得到cpu特征值
-    predictprocesspds = differenceProcess(predictprocesspds, process_feature)
-    add_cpu_column(predictprocesspds)
+    if isFileMean:
+        # 对正常进程数据进行差分处理之后，得到cpu特征值
+        normalprocesspds = differenceProcess(normalprocesspds, process_accumulate_feature)
+        add_cpu_column(normalprocesspds)
+        # 对正常server进程数据进行差分处理之后，得到一些指标
+        normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
 
-    # 对正常server进程数据进行差分处理之后，得到一些指标
-    normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
+
+    # 对异常数据进行差分处理之后，得到cpu特征值
+    predictprocesspds = differenceProcess(predictprocesspds, process_accumulate_feature)
+    add_cpu_column(predictprocesspds)
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
 
@@ -110,11 +127,15 @@ if __name__ == "__main__":
     # 往进程指标中只使用"cpu"指标, 需要保证正常数据中的累计值都减去了
 
     print("先对正常数据的各个指标求平均值".center(40, "*"))
-    allnormalserverpd, _ = mergeDataFrames(normalserverpds)
-    allnormalprocesspd, _ = mergeDataFrames(normalprocesspds)
-    # 得到正常数据的平均值
-    normalserver_meanvalue = getDFmean(allnormalserverpd, server_feature)
-    normalprocess_meanvalue = getDFmean(allnormalprocesspd, process_feature)
+    if isFileMean:
+        allnormalserverpd, _ = mergeDataFrames(normalserverpds)
+        allnormalprocesspd, _ = mergeDataFrames(normalprocesspds)
+        # 得到正常数据的平均值
+        normalserver_meanvalue = getDFmean(allnormalserverpd, server_feature)
+        normalprocess_meanvalue = getDFmean(allnormalprocesspd, process_feature)
+    else:
+        normalserver_meanvalue = pd.Series(data=servermeanValue)
+        normalprocess_meanvalue = pd.Series(data=processmeanVaule)
     # 将这几个平均值进行保存
     tpath = os.path.join(spath, "1. 正常数据的平均值")
     if not os.path.exists(tpath):

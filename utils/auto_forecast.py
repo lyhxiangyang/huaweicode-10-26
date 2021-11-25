@@ -147,7 +147,7 @@ def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumul
         idf: pd.DataFrame
         # 对每一个进程开始的前两个点和后两个点都去掉
         assert len(idf) > 6
-        idf = idf.iloc[3:-3]
+        idf = idf.iloc[3:-3] ## 删除数据了
         print("size: {}".format(idf.size))
         # 进行累计差分处理
         # subtractpd = subtractLastLineFromDataFrame(idf, columns=accumulateFeatures)
