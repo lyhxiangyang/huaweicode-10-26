@@ -12,7 +12,8 @@ from Classifiers.ModelPred import select_and_pred
 from utils.DataFrameOperation import mergeDataFrames, SortLabels, PushLabelToFirst, PushLabelToEnd, \
     subtractLastLineFromDataFrame
 from utils.DataScripts import getDFmean, standardPDfromOriginal, TranslateTimeListStrToStr, standardPDfromOriginal1
-from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE, CPU_FEATURE, MODEL_TYPE
+from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE, CPU_FEATURE, MODEL_TYPE, CPU_ABNORMAL_TYPE, \
+    MEMORY_ABNORMAL_TYPE
 from utils.FileSaveRead import saveDFListToFiles
 
 
@@ -698,8 +699,8 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
     # per_normal 预测为正常的百分比
     # per_fault 预测为异常的百分比
     preflaglabel = "preFlag"
-    realflags = list(predictpd[FAULT_FLAG])
-    preflags = list(predictpd[preflaglabel])
+    realflags = list(predictpd[FAULT_FLAG]) # realflags可能是11 12 13这种代表各个强度的数值
+    preflags = list(predictpd[preflaglabel]) # preflags都是整数，比如10，20，30
     assert len(realflags) == len(preflags)
     rightflagSet = set([(i // 10) * 10 for i in abnormalsSet])  # 如果预测在这个集合中， 则认为预测正确
 
@@ -708,6 +709,8 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
     abnormal_rightabnormal_nums = 0 # 异常被预测为正确的个数
     abnormal_abnormal_nums = 0 # 异常被预测为!=0的数量
     abnormal_normal_nums = 0 # 异常被预测为正常的数量
+    abnormal_memory_nums = 0 # 异常被预测为内存异常的数量
+    abnormal_cpu_nums = 0 # 异常被预测为cpu异常的数量
 
     for i in range(len(realflags)):
         if realflags[i] in abnormalsSet:
@@ -724,12 +727,19 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
                 abnormal_abnormal_nums += 1
             if preflags[i] in rightflagSet:
                 abnormal_rightabnormal_nums += 1 # 异常预测正确
+            if preflags[i] in CPU_ABNORMAL_TYPE:
+                abnormal_cpu_nums += 1
+            if preflags[i] in MEMORY_ABNORMAL_TYPE:
+                abnormal_memory_nums += 1
+
 
     infoDict["num"] = real_abnormalnums
     infoDict["recall"] = -1 if real_abnormalnums == 0 else abnormal_rightabnormal_nums / real_abnormalnums
     infoDict["precison"] = -1 if pre_allabnormalnums == 0  else abnormal_rightabnormal_nums / pre_allabnormalnums
-    infoDict["pre_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_abnormal_nums / real_abnormalnums # 预测为异常的比例, 异常的发现率
-    infoDict["pre_normal"] = -1 if real_abnormalnums == 0 else abnormal_normal_nums / real_abnormalnums # 预测为正常的比例
+    infoDict["per_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_abnormal_nums / real_abnormalnums # 预测为异常的比例, 异常的发现率
+    infoDict["per_normal"] = -1 if real_abnormalnums == 0 else abnormal_normal_nums / real_abnormalnums # 预测为正常的比例
+    infoDict["cpu_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_cpu_nums / real_abnormalnums
+    infoDict["memory_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_memory_nums / real_abnormalnums
     infoDict["f-score"] =  harmonic_mean([infoDict["recall"], infoDict["precison"]])
     return infoDict
 
