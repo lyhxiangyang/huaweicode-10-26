@@ -1,4 +1,7 @@
 import os
+from typing import Set, Tuple
+
+import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DataScripts import getDFmean
@@ -21,23 +24,27 @@ if __name__ == "__main__":
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
     # 预测CPU的模型路径
-    processcpu_modelpath = ""
+    processcpu_modelpath = R"tmp/modelpath/singlefeature/process_cpu_model"
     # 预测内存泄露的模型路径
-    servermemory_modelpath = ""
+    servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
     # 预测内存带宽的模型路径
-    serverbandwidth_modelpath = ""
+    serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/总过程分析/训练数据-Local-3km"
     # 是否有存在faultFlag
     isExistFaultFlag = True
-    # 核心数据
-    coresnumber = 56
+    # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
+    coresnumber = 56  # 运行操作系统的实际核心数  如实填写
+    isManuallyspecifyCoreList = False
+    wrfruncoresnumber = 104  # wrf实际运行在的核心数，如果isManuallyspecifyCoreList = False将会手工推导演
+    coresSet = set(range(0, 103))  # wrf实际运行在的核心数
 
     # 需要对server数据进行处理的指标
     server_feature = ["used", "pgfree"]
     server_accumulate_feature = ["pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system"]
+    process_accumulate_feature = ["user", "system"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y/%m/%d %H:%M'
@@ -48,9 +55,18 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
-        "pgfree": 140
+        "pgfree": 130
     }
-
+    # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
+    isFileMean = True
+    # 如果上面的是False，则使用下面的字典数据
+    processmeanVaule = {
+        "cpu": 60,
+    }
+    servermeanValue = {
+        "used": 0,
+        "pgfree": 0
+    }
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
     print("将数据从文件中读取".center(40, "*"))
@@ -70,16 +86,18 @@ if __name__ == "__main__":
         time_server_feature.append(FAULT_FLAG)
         time_process_feature.append(FAULT_FLAG)
 
-    # 正常进程数据
-    for ifile in normalprocessfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_process_feature]
-        normalprocesspds.append(tpd)
-    # 正常服务数据
-    for ifile in normalserverfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_server_feature]
-        normalserverpds.append(tpd)
+    # 如果为True 才能保证有normal数据
+    if isFileMean:
+        # 正常进程数据
+        for ifile in normalprocessfiles:
+            tpd = getfilepd(ifile)
+            tpd = tpd.loc[:, time_process_feature]
+            normalprocesspds.append(tpd)
+        # 正常服务数据
+        for ifile in normalserverfiles:
+            tpd = getfilepd(ifile)
+            tpd = tpd.loc[:, time_server_feature]
+            normalserverpds.append(tpd)
     # 预测进程数据
     for ifile in predictprocessfiles:
         tpd = getfilepd(ifile)
@@ -92,15 +110,16 @@ if __name__ == "__main__":
         predictserverpds.append(tpd)
     # ============================================================================================= 对读取到的数据进行差分，并且将cpu添加到要提取的特征中
     print("对读取到的原始数据进行差分".format(40, "*"))
-    # 对正常进程数据进行差分处理之后，得到cpu特征值
-    normalprocesspds = differenceProcess(normalprocesspds, process_feature)
-    add_cpu_column(normalprocesspds)
-    # 对异常数据进行差分处理之后，得到cpu特征值
-    predictprocesspds = differenceProcess(predictprocesspds, process_feature)
-    add_cpu_column(predictprocesspds)
+    if isFileMean:
+        # 对正常进程数据进行差分处理之后，得到cpu特征值
+        normalprocesspds = differenceProcess(normalprocesspds, process_accumulate_feature)
+        add_cpu_column(normalprocesspds)
+        # 对正常server进程数据进行差分处理之后，得到一些指标
+        normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
 
-    # 对正常server进程数据进行差分处理之后，得到一些指标
-    normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
+    # 对异常数据进行差分处理之后，得到cpu特征值
+    predictprocesspds = differenceProcess(predictprocesspds, process_accumulate_feature)
+    add_cpu_column(predictprocesspds)
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
 
@@ -111,11 +130,15 @@ if __name__ == "__main__":
     # 往进程指标中只使用"cpu"指标, 需要保证正常数据中的累计值都减去了
 
     print("先对正常数据的各个指标求平均值".center(40, "*"))
-    allnormalserverpd, _ = mergeDataFrames(normalserverpds)
-    allnormalprocesspd, _ = mergeDataFrames(normalprocesspds)
-    # 得到正常数据的平均值
-    normalserver_meanvalue = getDFmean(allnormalserverpd, server_feature)
-    normalprocess_meanvalue = getDFmean(allnormalprocesspd, process_feature)
+    if isFileMean:
+        allnormalserverpd, _ = mergeDataFrames(normalserverpds)
+        allnormalprocesspd, _ = mergeDataFrames(normalprocesspds)
+        # 得到正常数据的平均值
+        normalserver_meanvalue = getDFmean(allnormalserverpd, server_feature)
+        normalprocess_meanvalue = getDFmean(allnormalprocesspd, process_feature)
+    else:
+        normalserver_meanvalue = pd.Series(data=servermeanValue)
+        normalprocess_meanvalue = pd.Series(data=processmeanVaule)
     # 将这几个平均值进行保存
     tpath = os.path.join(spath, "1. 正常数据的平均值")
     if not os.path.exists(tpath):
@@ -162,19 +185,40 @@ if __name__ == "__main__":
         thresholdValue=thresholdValueDict,
         modelfilepath=processcpu_modelpath
     )
-    # ============================================================================================= 对process数据和server数据合在一起进行预测
-    print("对server数据和process数据进行预测".center(40, "*"))
-    tpath = os.path.join(spath, "6. 最终预测结果")
-    # time  faultFlag  preFlag  mem_leak  mem_bandwidth
-    predictpd = predictAllAbnormal(
-        serverinformationDict=serverinformationDict,
-        spath=tpath,
-        isThreshold=isThreshold,
-        thresholdValue=thresholdValueDict,
-        Memory_bandwidth_modelpath=serverbandwidth_modelpath,
-        Memory_leaks_modelpath=servermemory_modelpath,
-        coresnumber=coresnumber
-    )
-    # 对结果进行分析
-    analysePredictResult(predictpd, tpath)
+    # ============================================================================================= 对使用到的核心数进行判断, 因为可能并不是全核心进行预测
+    print("使用到的核心数进行判断".center(40, "*"))
 
+
+    # 得到核心数和核心集合的函数
+    def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
+        coresSet = set(list(processpd[CPU_FEATURE]))
+        coresnum = len(coresSet)
+        return coresnum, coresSet
+
+
+    if not isManuallyspecifyCoreList:
+        wrfruncoresnumber, coresSet = getcores(allprocesspds)
+    print("系统核心数量{}".format(coresnumber))
+    print("wrf运行核心数量：{}".format(wrfruncoresnumber))
+    print("核心的位数：{}".format(coresSet))
+    with open(os.path.join(spath, "运行核心的数据.txt"), "w", encoding="utf-8") as f:
+        writeinfo = ["系统核心数量{}\n".format(coresnumber), "核心数量：{}\n".format(wrfruncoresnumber), "核心的位数：{}\n".format(coresSet)]
+        f.writelines(writeinfo)
+
+    # ============================================================================================= 对process数据和server数据合在一起进行预测
+    # 只有存在FaultFlag才能进行预测
+    if isExistFaultFlag:
+        print("对server数据和process数据进行预测".center(40, "*"))
+        tpath = os.path.join(spath, "6. 最终预测结果")
+        # time  faultFlag  preFlag  mem_leak  mem_bandwidth
+        predictpd = predictAllAbnormal(
+            serverinformationDict=serverinformationDict,
+            spath=tpath,
+            isThreshold=isThreshold,
+            thresholdValue=thresholdValueDict,
+            Memory_bandwidth_modelpath=serverbandwidth_modelpath,
+            Memory_leaks_modelpath=servermemory_modelpath,
+            coresnumber=wrfruncoresnumber
+        )
+        # 对结果进行分析
+        analysePredictResult(predictpd, tpath)

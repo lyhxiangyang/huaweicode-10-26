@@ -747,7 +747,7 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 # 主要分析三种情况，1. 不去除首位的，2. 去除首位  3. 去除低等级
 # 得到10 20 30 50 60 以及 将10 20 30当作cpu 一种情况
-def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int = 3):
+def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int = 3) -> object:
     # 先将{40, 70, 90} 这三种异常去除,并且去除其首尾数据
     predictpd = remobe_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
         41, 42, 43, 44, 45,

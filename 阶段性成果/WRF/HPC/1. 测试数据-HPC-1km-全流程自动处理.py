@@ -55,7 +55,7 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
-        "pgfree": 500
+        "pgfree": 130
     }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
     isFileMean = True
@@ -195,12 +195,12 @@ if __name__ == "__main__":
         return coresnum, coresSet
     if not isManuallyspecifyCoreList:
         wrfruncoresnumber, coresSet = getcores(allprocesspds)
-    print("核心数量：{}".format(wrfruncoresnumber))
+    print("系统核心数量{}".format(coresnumber))
+    print("wrf运行核心数量：{}".format(wrfruncoresnumber))
     print("核心的位数：{}".format(coresSet))
     with open(os.path.join(spath, "运行核心的数据.txt"), "w", encoding="utf-8") as f:
-        writeinfo = ["核心数量：{}\n".format(wrfruncoresnumber), "核心的位数：{}\n".format(coresSet)]
+        writeinfo = ["系统核心数量{}\n".format(coresnumber), "核心数量：{}\n".format(wrfruncoresnumber), "核心的位数：{}\n".format(coresSet)]
         f.writelines(writeinfo)
-
     # ============================================================================================= 对process数据和server数据合在一起进行预测
     # 只有存在FaultFlag才能进行预测
     if isExistFaultFlag:

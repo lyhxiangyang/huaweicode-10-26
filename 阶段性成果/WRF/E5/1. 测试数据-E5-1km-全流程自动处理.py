@@ -1,5 +1,5 @@
-# 运行此文件会出错
 import os
+from typing import Set, Tuple
 
 import pandas as pd
 
@@ -32,8 +32,11 @@ if __name__ == "__main__":
     spath = "tmp/总过程分析/测试数据-E5-1km"
     # 是否有存在faultFlag
     isExistFaultFlag = True
-    # 核心数据
-    coresnumber = 104
+    # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
+    coresnumber = 104 # 运行操作系统的实际核心数  如实填写
+    isManuallyspecifyCoreList = False
+    wrfruncoresnumber = 104 # wrf实际运行在的核心数，如果isManuallyspecifyCoreList = False将会手工推导演
+    coresSet = set(range(0, 103)) # wrf实际运行在的核心数
 
     # 需要对server数据进行处理的指标
     server_feature = ["used", "pgfree"]
@@ -60,9 +63,9 @@ if __name__ == "__main__":
         "cpu": 60,
     }
     servermeanValue = {
-
+        "used": 0,
+        "pgfree": 0
     }
-
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
     print("将数据从文件中读取".center(40, "*"))
@@ -182,19 +185,36 @@ if __name__ == "__main__":
         thresholdValue=thresholdValueDict,
         modelfilepath=processcpu_modelpath
     )
-    # ============================================================================================= 对process数据和server数据合在一起进行预测
-    print("对server数据和process数据进行预测".center(40, "*"))
-    tpath = os.path.join(spath, "6. 最终预测结果")
-    # time  faultFlag  preFlag  mem_leak  mem_bandwidth
-    predictpd = predictAllAbnormal(
-        serverinformationDict=serverinformationDict,
-        spath=tpath,
-        isThreshold=isThreshold,
-        thresholdValue=thresholdValueDict,
-        Memory_bandwidth_modelpath=serverbandwidth_modelpath,
-        Memory_leaks_modelpath=servermemory_modelpath,
-        coresnumber=coresnumber
-    )
-    # 对结果进行分析
-    analysePredictResult(predictpd, tpath)
+    # ============================================================================================= 对使用到的核心数进行判断, 因为可能并不是全核心进行预测
+    print("使用到的核心数进行判断".center(40, "*"))
+    # 得到核心数和核心集合的函数
+    def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
+        coresSet = set(list(processpd[CPU_FEATURE]))
+        coresnum = len(coresSet)
+        return coresnum, coresSet
+    if not isManuallyspecifyCoreList:
+        wrfruncoresnumber, coresSet = getcores(allprocesspds)
+    print("系统核心数量{}".format(coresnumber))
+    print("wrf运行核心数量：{}".format(wrfruncoresnumber))
+    print("核心的位数：{}".format(coresSet))
+    with open(os.path.join(spath, "运行核心的数据.txt"), "w", encoding="utf-8") as f:
+        writeinfo = ["系统核心数量{}\n".format(coresnumber), "核心数量：{}\n".format(wrfruncoresnumber), "核心的位数：{}\n".format(coresSet)]
+        f.writelines(writeinfo)
 
+    # ============================================================================================= 对process数据和server数据合在一起进行预测
+    # 只有存在FaultFlag才能进行预测
+    if isExistFaultFlag:
+        print("对server数据和process数据进行预测".center(40, "*"))
+        tpath = os.path.join(spath, "6. 最终预测结果")
+        # time  faultFlag  preFlag  mem_leak  mem_bandwidth
+        predictpd = predictAllAbnormal(
+            serverinformationDict=serverinformationDict,
+            spath=tpath,
+            isThreshold=isThreshold,
+            thresholdValue=thresholdValueDict,
+            Memory_bandwidth_modelpath=serverbandwidth_modelpath,
+            Memory_leaks_modelpath=servermemory_modelpath,
+            coresnumber=wrfruncoresnumber
+        )
+        # 对结果进行分析
+        analysePredictResult(predictpd, tpath)
