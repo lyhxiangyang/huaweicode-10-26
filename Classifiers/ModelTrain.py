@@ -60,6 +60,12 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     # Train the model
     model.fit(x_train, y_train)
 
+    # 将所有的标签值按照顺序存起来
+    alllabels = sorted(list(set(y)))
+    with open("{}".format(os.path.join(saved_model_path, "alllabels.txt")), "w") as f:
+        f.write("\n".join(alllabels))
+
+
     # Test the accuracy of the model
     y_eval = model.predict(x_test)
 
@@ -82,4 +88,8 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     f = open('%s\\header.txt' % saved_model_path, 'w')
     f.write('\n'.join(header))
     f.close()
+
+
+
+
     return accuracy
