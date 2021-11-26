@@ -159,12 +159,16 @@ if __name__ == "__main__":
     allTrainedPD = remove_Abnormal_Head_Tail(allprocesspds, abnormals={54, 55}) # 先去掉54和55及其首尾
     allTrainedPD = removeAllHeadTail(allTrainedPD) # 去掉剩下的首尾部分
     # ========只得到54 55 当作测试数据
-    fault_DataFrameDict = dict(list(allprocesspds.groupby(FAULT_FLAG)))
+    allTestPD = removeAllHeadTail(allprocesspds)
+    fault_DataFrameDict = dict(list(allTestPD.groupby(FAULT_FLAG)))
     allTestPD, _ = mergeDataFrames([fault_DataFrameDict[54], fault_DataFrameDict[55]])
 
     # 将标签纸更改一下
     allTrainedPD = changePDfaultFlag(allTrainedPD)
     allTestPD = changePDfaultFlag(allTestPD)
+
+    allTrainedPD.to_csv(os.path.join(spath, "训练数据.csv"))
+    allTestPD.to_csv(os.path.join(spath, "测试数据.csv"))
 
     # ============================================================================================= 模型的训练和预测
     allfeatureload1_nosuffix = list(allTestPD.columns)
