@@ -635,7 +635,7 @@ def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFr
 
 
 # 去除指定异常及其首尾数据
-def remobe_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
+def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
     dealflag = "faultFlag"
 
     def judge(x: pd.Series):
@@ -749,7 +749,7 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
 # 得到10 20 30 50 60 以及 将10 20 30当作cpu 一种情况
 def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int = 3) -> object:
     # 先将{40, 70, 90} 这三种异常去除,并且去除其首尾数据
-    predictpd = remobe_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
+    predictpd = remove_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
         41, 42, 43, 44, 45,
         71, 72, 73, 74, 75,
         91, 92, 93, 94, 95
@@ -811,7 +811,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         f.writelines(writeinfo)
 
     # 预测去除低等级之后的数据 包括首尾数据===============================================================================
-    tpd = remobe_Abnormal_Head_Tail(predictPd=predictpd, windowsize=windowsize, abnormals={
+    tpd = remove_Abnormal_Head_Tail(predictPd=predictpd, windowsize=windowsize, abnormals={
         11, 12,
         21, 22,
         31, 32,

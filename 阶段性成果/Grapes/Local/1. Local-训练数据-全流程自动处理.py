@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/Grapes/训练数据-Local-1km"
+    spath = "tmp/总过程分析/Grapes/训练数据-Local"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
