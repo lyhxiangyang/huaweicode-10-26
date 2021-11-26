@@ -42,6 +42,7 @@ def getuserfulfeature(clistnames: List[str]):
 
 
 # 将一个列表里面的pds进行标准化并且作为一个列表进行返回
+# 会修改原数据
 def standardLists(pds: List[pd.DataFrame], standardFeatures: List[str], meanValue, standardValue: int = 100) -> List[
     pd.DataFrame]:
     standardList = []

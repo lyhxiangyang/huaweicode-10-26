@@ -12,6 +12,23 @@ from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
     predictAllAbnormal, analysePredictResult, removeAllHeadTail, remove_Abnormal_Head_Tail
 
+
+
+
+"""
+将一个DataFrame里面的数值全部更改为对应的模数
+"""
+
+def changePDfaultFlag(df: pd.DataFrame) -> pd.DataFrame:
+    pdlists = []
+    for i, ipd in df.groupby(FAULT_FLAG):
+        ipd[FAULT_FLAG] = (i // 10) * 10
+        pdlists.append(ipd)
+    respd, _ = mergeDataFrames(pdlists)
+    return respd
+
+
+
 """
 全指标预测
 使用低强度的内存带宽异常预测高强度的内存带宽异常
@@ -116,8 +133,7 @@ if __name__ == "__main__":
     # 将所有的错误分离开来
     fault_DataFrameDict = dict(list(allfeatureMeanValue.groupby(FAULT_FLAG)))
     # 得到0
-    normalserver_meanvalue = fault_DataFrameDict[0].mean()
-
+    normalserver_meanvalue = fault_DataFrameDict[0][server_feature].mean()
 
     # ============================================================================================= 对要预测的数据进行标准化处理
     # 标准化process 和 server数据， 对于process数据，先将cpu想加在一起，然后在求平均值。
@@ -145,6 +161,10 @@ if __name__ == "__main__":
     # ========只得到54 55 当作测试数据
     fault_DataFrameDict = dict(list(allprocesspds.groupby(FAULT_FLAG)))
     allTestPD, _ = mergeDataFrames([fault_DataFrameDict[54], fault_DataFrameDict[55]])
+
+    # 将标签纸更改一下
+    allTrainedPD = changePDfaultFlag(allTrainedPD)
+    allTestPD = changePDfaultFlag(allTestPD)
 
     # ============================================================================================= 模型的训练和预测
     allfeatureload1_nosuffix = list(allTestPD.columns)
