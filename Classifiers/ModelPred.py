@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 
 import joblib
@@ -22,11 +23,11 @@ def model_pred(x_pred, model_type, saved_model_path=SaveModelPath):
 
 
 def select_and_pred(df, model_type, saved_model_path=SaveModelPath):
-    # Select needed features
-    f = open('%s\\header.txt' % saved_model_path, 'r')
-    features = f.read().splitlines()
-    df_selected = df[features]
+    # 读取头文件信息
+    with open("{}".format(os.path.join(saved_model_path, "header.txt")), "r") as f:
+        features = f.read().splitlines()
 
+    df_selected = df[features]
     # Use trained model to predict
     y_pred = model_pred(df_selected, model_type, saved_model_path=saved_model_path)
     return y_pred

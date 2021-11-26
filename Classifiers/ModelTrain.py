@@ -62,6 +62,7 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
 
     # 将所有的标签值按照顺序存起来
     alllabels = sorted(list(set(y)))
+    alllabels = [str(i) for i in alllabels]
     with open("{}".format(os.path.join(saved_model_path, "alllabels.txt")), "w") as f:
         f.write("\n".join(alllabels))
 
