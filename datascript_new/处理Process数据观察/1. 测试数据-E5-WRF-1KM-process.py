@@ -122,7 +122,11 @@ if __name__ == "__main__":
     for ipd in predictprocesspds:
         tpd = getProcessCoreSum(ipd, sumfeature=None)
         sumpds.append(tpd)
-    # 将读取到的数据进行保存
+    # =========================================================================================== 将process数据进行深层次处理
+    for ipd in sumpds:
+        ipd["cpu"] = ipd["user"] + ipd["system"]
+
+    # =========================================================================================== 将读取到的数据进行保存
     saveDFListToFiles(spath, sumpds)
 
 
