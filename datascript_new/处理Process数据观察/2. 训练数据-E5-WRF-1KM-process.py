@@ -67,7 +67,7 @@ if __name__ == "__main__":
     process_feature = ["user", "system", "iowait", "memory_percent", "rss", "vms", "shared",
                        "text", "lib", "data", "dirty", "read_count", "write_count", "read_bytes", "write_bytes",
                        "read_chars", "write_chars", "num_threads"]
-    process_accumulate_feature = ["user", "system"]
+    process_accumulate_feature = ["user", "system", "read_count", "write_count", "read_bytes", "write_bytes","read_chars", "write_chars"]
 
     # "user",
     # "system",
