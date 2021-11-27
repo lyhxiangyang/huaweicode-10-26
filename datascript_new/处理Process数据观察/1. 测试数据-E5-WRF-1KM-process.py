@@ -25,9 +25,9 @@ def getProcessCoreSum(processpd: pd.DataFrame, sumfeature: List[str] = None) -> 
         if FAULT_FLAG in sumfeature:
             sumfeature.remove(FAULT_FLAG)
     # 将指定指标求和 得到dataframe
-    sumfeaturepd = processpd.groupby(TIME_COLUMN_NAME)[sumfeature].sum()
+    sumfeaturepd = processpd.groupby(TIME_COLUMN_NAME, as_index=False)[sumfeature].sum()
     # 求出指定时间的FaultFlag的
-    flagpd = processpd.groupby(TIME_COLUMN_NAME)[FAULT_FLAG].first()
+    flagpd = processpd.groupby(TIME_COLUMN_NAME, as_index=False)[FAULT_FLAG].first()
     # 将两者合并在一起
     mergedpd = pd.merge(left=sumfeaturepd, right=flagpd, on=TIME_COLUMN_NAME)
     return mergedpd
@@ -57,12 +57,12 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\训练数据-E5-1km-异常数据"
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-E5-1km-异常数据"
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
     processcpu_modelpath = ""
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/processall_data/训练数据-E5-1km-异常数据"
+    spath = "tmp/processall_data/测试数据-E5-1km-异常数据"
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system", "iowait", "memory_percent", "rss", "vms", "shared",
                        "text", "lib", "data", "dirty", "read_count", "write_count", "read_bytes", "write_bytes",
@@ -118,12 +118,10 @@ if __name__ == "__main__":
     predictprocesspds = changeTimeTo_pdlists(predictprocesspds, process_time_format)
     # # =========================================================================================== 提取每个文件中的和
     # 需要读取特征的累计值
-
     sumpds = []
     for ipd in predictprocesspds:
         tpd = getProcessCoreSum(ipd, sumfeature=None)
         sumpds.append(tpd)
-
     # 将读取到的数据进行保存
     saveDFListToFiles(spath, sumpds)
 
