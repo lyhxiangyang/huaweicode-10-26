@@ -743,6 +743,19 @@ def getBasicInfo(predictpd: pd.DataFrame, abnormalsSet: Set) -> Dict:
     infoDict["memory_abnormal"] = -1 if real_abnormalnums == 0 else abnormal_memory_nums / real_abnormalnums
     infoDict["f-score"] =  harmonic_mean([infoDict["recall"], infoDict["precison"]])
     return infoDict
+"""
+输入：一个是实际标签值  一个是预测标签值
+实际标签值是一个包含各种强度11,12,13的int列表
+预测标签纸是不包含强度信息的int列表
+输出： 一个小数 表示预测的准确率
+"""
+def getAccuracy(realflags: List[int], preflags: List[int]) -> float:
+    assert len(realflags) == len(preflags)
+    # 得到预测对的数量
+    rightnumber = len([i for i in range(0, len(realflags)) if (realflags[i] // 10) * 10 == preflags[i]])
+    return rightnumber / len(realflags)
+
+
 
 
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
@@ -755,7 +768,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         71, 72, 73, 74, 75,
         91, 92, 93, 94, 95
     })
-
+    preflaglabel = "preFlag"
     # 预测不去除首位数据 ===============================================================================================
     analyseDict = {}
     analyseDict[0] = getBasicInfo(predictpd, {0})
@@ -778,6 +791,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "1. 不去除首位_统计数据.csv"))
+    accuracy1 = getAccuracy(list(predictpd[FAULT_FLAG]), list(predictpd[preflaglabel]))
 
     # 预测全部异常去除首尾之后的数据 ==================================================================================
     tpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
@@ -799,6 +813,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65
     })
+    accuracy2 = getAccuracy(list(tpd[FAULT_FLAG]), list(tpd[preflaglabel]))
     # ===============================================================================统计时间段信息
     realperiodLen, preperiodLen, sameLen = getTimePeriodInfo(tpd)
     writeinfo = ["实际时间段个数: {}\n".format(realperiodLen), "预测时间段个数：{}\n".format(preperiodLen), "预测准确时间段个数: {}\n".\
@@ -810,6 +825,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
 
     with open(os.path.join(spath, "2. 去除首位_统计信息时间段.txt"), "w", encoding="utf-8") as f:
         f.writelines(writeinfo)
+    # =============================================================================== 得到去除首尾之后的准确率
 
     # 预测去除低等级之后的数据 包括首尾数据===============================================================================
     tpd = remove_Abnormal_Head_Tail(predictPd=predictpd, windowsize=windowsize, abnormals={
@@ -840,10 +856,22 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize:  int =
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65
     })
+    accuracy3 = getAccuracy(list(tpd[FAULT_FLAG]), list(tpd[preflaglabel]))
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
     tpd.to_csv(os.path.join(spath, "3. 去除首位_去除低强度_统计数据.csv"))
     # ==================================================================================================
+    # 将三种情况得到的准确率写入
+    writeinfo = ["实际时间段个数: {}\n".format(realperiodLen), "预测时间段个数：{}\n".format(preperiodLen), "预测准确时间段个数: {}\n". \
+        format(sameLen), "预测召回率: {:.2%}\n".format(sameLen / realperiodLen),
+                 "预测精确率: {:.2%}\n".format(sameLen / preperiodLen)]
+    writeinfo = [
+        "不去除首尾准确率：{:.2%}\n".format(accuracy1),
+        "去除首尾准确率：{:.2%}\n".format(accuracy2),
+        "去除首尾_去除低强度：{:.2%}\n".format(accuracy3),
+    ]
+    with open(os.path.join(spath, "4. 准确率.txt"), "w", encoding="utf-8") as f:
+        f.writelines(writeinfo)
 
 """
 对server数据列表中pgfree进行滑动窗口的处理
