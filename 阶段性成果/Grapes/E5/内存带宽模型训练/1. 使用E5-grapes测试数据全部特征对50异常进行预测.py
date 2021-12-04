@@ -41,7 +41,9 @@ if __name__ == "__main__":
     predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\grapes数据\测试数据-E5-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/Grapes/全指标预测测试数据-E5"
+    spath = "tmp/Grapes-tmp"
+    if not os.path.exists(spath):
+        os.makedirs(spath)
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
