@@ -55,7 +55,7 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
-        "pgfree": 130
+        "pgfree": 500
     }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
     isFileMean = True
