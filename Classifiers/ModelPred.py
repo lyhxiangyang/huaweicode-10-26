@@ -26,6 +26,16 @@ def select_and_pred(df, model_type, saved_model_path=SaveModelPath):
     # 读取头文件信息
     with open("{}".format(os.path.join(saved_model_path, "header.txt")), "r") as f:
         features = f.read().splitlines()
+    # 判断有哪些特征值
+    columns = set(df.columns.array)
+    fessets = set(features)
+    if not fessets.issubset(columns):
+        print("预测过程中选择特征不存在")
+        print("=================不存在特征如下")
+        print(fessets - columns)
+        print("=================")
+        exit(1)
+
 
     df_selected = df[features]
     # Use trained model to predict

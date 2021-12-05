@@ -255,6 +255,9 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
 
 
 """
+
+输入：addserverfeatures 包含所需要添加的server特征值 可能包含time 和 faultFlag， 最后返回的dict中将会包含这写特征值的扩展特征值
+
 将server文件和process结合，根据时间对数据进行分析，最后得到一个Dict，包含如下信息
 time, server_flag(可选), used, used_mean, pgfree, pgfree_mean, pgfree_min, pgfree_max, wrf_cpu, abnormalcore(是一个列表)
 返回值key 
@@ -268,7 +271,24 @@ coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
 
 def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, spath: str = None,
                                   isThreshold: bool = False, thresholdValue: Dict = None,
-                                  modelfilepath: str = None) -> Dict:
+                                  modelfilepath: str = None, addserverfeatures=None) -> Dict:
+    if addserverfeatures is None:
+        addserverfeatures = ["used", "pgfree"]
+    if TIME_COLUMN_NAME in addserverfeatures:
+        addserverfeatures.remove(TIME_COLUMN_NAME)
+    if FAULT_FLAG in addserverfeatures:
+        addserverfeatures.remove(FAULT_FLAG)
+
+    # 往dict中添加所需要的特征值
+    add_server_feature = [TIME_COLUMN_NAME]
+    for i in addserverfeatures:
+        addserverfeatures.append(i)
+        addserverfeatures.append("{}_mean".format(i))
+        addserverfeatures.append("{}_min".format(i))
+        addserverfeatures.append("{}_max".format(i))
+        addserverfeatures.append("{}_percentage50".format(i))
+
+
     if spath is not None and not os.path.exists(spath):
         os.makedirs(spath)
     # 将allserverpds里面所有的时间搜集起来
@@ -286,7 +306,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
-    add_server_feature = ["time", "used", "used_mean", "used_min", "used_max", "used_percentage50", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max", "pgfree_percentage50"]
+    # add_server_feature = ["time", "used", "used_mean", "used_min", "used_max", "used_percentage50", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max", "pgfree_percentage50"]
     for ife in add_server_feature:
         serverinformationDict[ife] = list(allserverpds[ife])
 
@@ -415,14 +435,27 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 
 def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False, thresholdValue: Dict = None,
-                         Memory_leaks_modelpath: str = None) -> List:
+                         Memory_leaks_modelpath: str = None, mem_leak_features=None) -> List:
+    if mem_leak_features is None:
+        mem_leak_features = ["used"]
+    if TIME_COLUMN_NAME in mem_leak_features:
+        mem_leak_features.remove(TIME_COLUMN_NAME)
+    if FAULT_FLAG in mem_leak_features:
+        mem_leak_features.remove(FAULT_FLAG)
+
     if isThreshold:
         memoryleakValue = thresholdValue["used"]
         realmemoryleakValue = serverinformationDict["used_mean"]
         prelistflag = [60 if i > memoryleakValue else 0 for i in realmemoryleakValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
-        used_features = ["used_mean", "used_max", "used_min", "used_percentage50"]
+        used_features = [] # 得到预测内存泄露的特征值
+        for i in mem_leak_features:
+            used_features.append("{}_mean".format(i))
+            used_features.append("{}_min".format(i))
+            used_features.append("{}_max".format(i))
+            used_features.append("{}_percentage50".format(i))
+
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
@@ -434,18 +467,33 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
 """
 对内存带宽进行预测
 有两种方式，一种是通过阀值，一种是通过模型， 如果是通过模型则需要生成一个dataFrame传递进去
+
+mem_bandwidth_features: 预测内存带宽所需要的特征值
 """
 
 
 def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = False, thresholdValue: Dict = None,
-                             Memory_bandwidth_modelpath: str = None) -> List:
+                             Memory_bandwidth_modelpath: str = None, mem_bandwidth_features=None) -> List:
+    if mem_bandwidth_features is None:
+        mem_bandwidth_features = ["pgfree"]
+    if TIME_COLUMN_NAME in mem_bandwidth_features:
+        mem_bandwidth_features.remove(TIME_COLUMN_NAME)
+    if FAULT_FLAG in mem_bandwidth_features:
+        mem_bandwidth_features.remove(FAULT_FLAG)
+
     if isThreshold:
         memorybandwidthValue = thresholdValue["pgfree"]
         realmemorywidthValue = serverinformationDict["pgfree_mean"]
         prelistflag = [50 if i > memorybandwidthValue else 0 for i in realmemorywidthValue]
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
-        used_features = ["pgfree_mean", "pgfree_max", "pgfree_min", "pgfree_percentage50"]
+        # used_features = ["pgfree_mean", "pgfree_max", "pgfree_min", "pgfree_percentage50"]
+        used_features = [] # 得到预测内存泄露的特征值
+        for i in mem_bandwidth_features:
+            used_features.append("{}_mean".format(i))
+            used_features.append("{}_min".format(i))
+            used_features.append("{}_max".format(i))
+            used_features.append("{}_percentage50".format(i))
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
@@ -517,13 +565,22 @@ serverinformationDict:
 abnormalcores 是一个列表的列表，存储的是异常的核心数
 coresnums 是指多少个核心出现了异常
 coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
+
+输入参数：
+
 """
 
 
 def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: bool = False,
                        thresholdValue: Dict = None,
                        Memory_bandwidth_modelpath: str = None, Memory_leaks_modelpath: str = None,
-                       coresnumber: int = 0) -> pd.DataFrame:
+                       coresnumber: int = 0,
+                       mem_leak_features=None,
+                       mem_bandwidth_features=None) -> pd.DataFrame:
+    if mem_bandwidth_features is None:
+        mem_bandwidth_features = ["pgfree"]
+    if mem_leak_features is None:
+        mem_leak_features = ["used"]
     predictDict = {}
     predictDict[TIME_COLUMN_NAME] = serverinformationDict[TIME_COLUMN_NAME]
     if FAULT_FLAG in serverinformationDict.keys():
@@ -535,14 +592,16 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         serverinformationDict=serverinformationDict,
         isThreshold=isThreshold,
         thresholdValue=thresholdValue,
-        Memory_leaks_modelpath=Memory_leaks_modelpath
+        Memory_leaks_modelpath=Memory_leaks_modelpath,
+        mem_leak_features=mem_leak_features,
     )
     # 对内存带宽进行预测
     predictDict["mem_bandwidth"] = predict_memory_bandwidth(
         serverinformationDict=serverinformationDict,
         isThreshold=isThreshold,
         thresholdValue=thresholdValue,
-        Memory_bandwidth_modelpath=Memory_bandwidth_modelpath
+        Memory_bandwidth_modelpath=Memory_bandwidth_modelpath,
+        mem_bandwidth_features=mem_bandwidth_features,
     )
     # 得到核的数量
     predictDict["coresnums"] = serverinformationDict["coresnums"]
