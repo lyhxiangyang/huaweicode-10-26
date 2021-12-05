@@ -51,8 +51,48 @@ if __name__ == "__main__":
     coresSet = set(range(0, 103))  # wrf实际运行在的核心数
 
     # 需要对server数据进行处理的指标
-    server_feature = ["used", "pgfree"]
-    server_accumulate_feature = ["pgfree"]
+    server_feature = [
+        # "time",
+        "user",
+        "nice",
+        "system",
+        "idle",
+        "iowait",
+        "irq",
+        "softirq",
+        "steal",
+        "guest",
+        "guest_nice",
+        "ctx_switches",
+        "interrupts",
+        "soft_interrupts",
+        "syscalls",
+        "freq",
+        "load1",
+        "load5",
+        "load15",
+        "total",
+        "available",
+        "percent",
+        "used",
+        "free",
+        "active",
+        "inactive",
+        "buffers",
+        "cached",
+        "handlesNum",
+        "pgpgin",
+        "pgpgout",
+        "fault",
+        "majflt",
+        "pgscank",
+        "pgsteal",
+        "pgfree",
+        # "faultFlag",
+    ]
+    server_accumulate_feature = ['idle', 'iowait', 'interrupts', 'user', 'system', 'ctx_switches', 'soft_interrupts', 'irq',
+                  'softirq', 'steal', 'syscalls', 'handlesNum', 'pgpgin', 'pgpgout', 'fault', 'majflt', 'pgscank',
+                  'pgsteal', 'pgfree']
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system"]
     process_accumulate_feature = ["user", "system"]

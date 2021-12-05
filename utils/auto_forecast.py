@@ -501,6 +501,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
         tpd = pd.DataFrame(data=savedict)
         prelistflag = select_and_pred(tpd, MODEL_TYPE[0], saved_model_path=Memory_bandwidth_modelpath)
 
+    prelistflag = [50 if i == 50 else 0 for i in prelistflag]
     return prelistflag
 
 
