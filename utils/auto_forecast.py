@@ -451,6 +451,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
         used_features = [] # 得到预测内存泄露的特征值
         for i in mem_leak_features:
+            used_features.append("{}".format(i))
             used_features.append("{}_mean".format(i))
             used_features.append("{}_min".format(i))
             used_features.append("{}_max".format(i))
@@ -490,6 +491,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
         # used_features = ["pgfree_mean", "pgfree_max", "pgfree_min", "pgfree_percentage50"]
         used_features = [] # 得到预测内存泄露的特征值
         for i in mem_bandwidth_features:
+            used_features.append("{}".format(i))
             used_features.append("{}_mean".format(i))
             used_features.append("{}_min".format(i))
             used_features.append("{}_max".format(i))
