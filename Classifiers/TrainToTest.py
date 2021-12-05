@@ -9,6 +9,7 @@ from Classifiers.ModelTrain import model_train, getTestRealLabels, getTestPreLab
 from utils.DataFrameOperation import PushLabelToFirst, PushLabelToEnd
 from utils.DefineData import MODEL_TYPE, FAULT_FLAG, TIME_COLUMN_NAME
 from utils.GetMetrics import get_metrics
+import joblib
 
 
 def TrainThree(trainedpd: pd.DataFrame, spath: str, modelpath: str = "Classifiers/saved_model/tmp",
@@ -111,3 +112,25 @@ def ModelTrainAndTest(trainedpd: pd.DataFrame, testpd: pd.DataFrame, spath: str,
     if testAgain:
         print("开始对测试数据进行预测".center(40, "*"))
         testThree(testpd, spath, modelpath)
+
+def show_threshold(filepath):
+    f = open(filepath, 'rb')
+    model = joblib.load(f)
+    f.close()
+    print('node features  :', model.tree_.feature)
+    print('node thresholds:', model.tree_.threshold)
+
+
+def change_threshold(filepath, node, value):
+    f = open(filepath, 'rb')
+    model = joblib.load(f)
+    f.close()
+    model.tree_.threshold[node] = value
+    joblib.dump(model, filepath)
+    print('features and thresholds after modification:')
+    show_threshold(filepath)
+
+# if __name__ == '__main__':
+#     file = r'hjx\decision_tree.pkl'
+#     show_threshold(file)
+#     change_threshold(file, 0, 106)
