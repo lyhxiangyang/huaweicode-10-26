@@ -62,7 +62,7 @@ if __name__ == "__main__":
     process_time_format = '%Y/%m/%d %H:%M'
 
     # 预测是否使用阀值, True为使用阀值预测 必须指定thresholdValueDict， False代表使用模型进行预测, 必须设置好模型的路径
-    isThreshold = False # 不使用阈值，使用模型
+    isThreshold = False  # 不使用阈值，使用模型
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # 来自E5测试数据自身
     servermeanValue = {
         "used": 56000000000,  # 56Bilion
-        "pgfree": 56000000, # 这个pgfree是不准的
+        "pgfree": 56000000,  # 这个pgfree是不准的
     }
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
@@ -200,12 +200,10 @@ if __name__ == "__main__":
         isThreshold=isThreshold,
         thresholdValue=thresholdValueDict,
         modelfilepath=processcpu_modelpath,
-        addserverfeatures = server_feature,
+        addserverfeatures=server_feature,
     )
     # ============================================================================================= 对使用到的核心数进行判断, 因为可能并不是全核心进行预测
     print("使用到的核心数进行判断".center(40, "*"))
-
-
     # 得到核心数和核心集合的函数
     def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
         coresSet = set(list(processpd[CPU_FEATURE]))

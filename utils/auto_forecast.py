@@ -282,11 +282,11 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     # 往dict中添加所需要的特征值
     add_server_feature = [TIME_COLUMN_NAME]
     for i in addserverfeatures:
-        addserverfeatures.append(i)
-        addserverfeatures.append("{}_mean".format(i))
-        addserverfeatures.append("{}_min".format(i))
-        addserverfeatures.append("{}_max".format(i))
-        addserverfeatures.append("{}_percentage50".format(i))
+        add_server_feature.append(i)
+        add_server_feature.append("{}_mean".format(i))
+        add_server_feature.append("{}_min".format(i))
+        add_server_feature.append("{}_max".format(i))
+        add_server_feature.append("{}_percentage50".format(i))
 
 
     if spath is not None and not os.path.exists(spath):
