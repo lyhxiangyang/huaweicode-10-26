@@ -1081,12 +1081,6 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
     timeperiodDictPd = pd.DataFrame(data=timeperiodDict)
     return timeperiodDictPd
 
-
-
-
-
-
-
 """
 对server数据列表中pgfree进行滑动窗口的处理
 """
