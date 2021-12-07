@@ -443,10 +443,9 @@ coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
 coresallprobability: 是每个时刻中预测每个核为异常的概率, 是一个core-概率的字典结构
 """
 def getCPU_Abnormal_Probability(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
-    coresallprobability = serverinformationDict["coresallprobability"]
-    coresallprobability: Dict
-    abnormalcores = serverinformationDict["abnormalcores"] # 如果这里出现了None， 那么表明这个时刻不存在
-    assert len(abnormalcores) == len(coresallprobability)
+    coresallprobabilityList = serverinformationDict["coresallprobability"]
+    abnormalcoresList = serverinformationDict["abnormalcores"] # 如果这里出现了None， 那么表明这个时刻不存在
+    assert len(abnormalcoresList) == len(coresallprobabilityList)
     # 根据核心获得核心的概率函数
     def getProbability(abnormalcores: List[int], coresallprobability: Dict ) -> List:
         resList = []
@@ -454,14 +453,16 @@ def getCPU_Abnormal_Probability(serverinformationDict: Dict, coresnumber: int = 
             resList.append(coresallprobability[icore])
         return resList
     minprobabilityList = []
-    for i in range(0, len(abnormalcores)):
-        if abnormalcores[i] is None:
+    for i in range(0, len(abnormalcoresList)):
+        tprobabilityDict = coresallprobabilityList[i]
+        tabnormalcores = abnormalcoresList[i]
+        if tabnormalcores is None:
             minprobabilityList.append(-1)
             continue
-        if len(abnormalcores[i]) == 0: # 正常情况
-            minprobabilityList.append(min(coresallprobability.values()))
+        if len(tabnormalcores) == 0: # 正常情况
+            minprobabilityList.append(min(tprobabilityDict.values()))
             continue
-        minp = min(getProbability(abnormalcores=abnormalcores, coresallprobability=coresallprobability))
+        minp = min(getProbability(abnormalcores=tabnormalcores, coresallprobability=tprobabilityDict))
         minprobabilityList.append(minp)
     return minprobabilityList
 
