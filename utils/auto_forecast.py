@@ -446,11 +446,11 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
     if FAULT_FLAG in mem_leak_features:
         mem_leak_features.remove(FAULT_FLAG)
 
+    prelistflag_probability = None  # 使用阈值的时候预测的概率只能为None
     if isThreshold:
         memoryleakValue = thresholdValue["used"]
         realmemoryleakValue = serverinformationDict["used_mean"]
         prelistflag = [60 if i > memoryleakValue else 0 for i in realmemoryleakValue]
-        prelistflag_probability = None # 使用阈值的时候预测的概率只能为None
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
         used_features = []  # 得到预测内存泄露的特征值
@@ -467,7 +467,9 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         # 得到预测值
         prelistflag = select_and_pred(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
         # 得到预测的概率
-        prelistflag_probability = select_and_pred_probability(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
+        prelistflag_probabilityDict = select_and_pred_probability(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
+        if 50 in prelistflag_probabilityDict.keys():
+            prelistflag_probability = prelistflag_probabilityDict[50]
     return prelistflag, prelistflag_probability
 
 """
@@ -604,7 +606,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     # 对CPU进行预测
     predictDict["CPU_Abnormal"] = predictcpu(serverinformationDict, coresnumber)
     # 对内存泄露进行预测
-    predictDict["mem_leak"], _ = predict_memory_leaks(
+    predictDict["mem_leak"], predictDict["内存泄露异常概率"] = predict_memory_leaks(
         serverinformationDict=serverinformationDict,
         isThreshold=isThreshold,
         thresholdValue=thresholdValue,

@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from typing import Dict
 
 import joblib
@@ -30,6 +31,7 @@ def model_pred_probability(x_pred, model_type, saved_model_path=SaveModelPath):
     y_pred = model.predict_proba(x_pred)
     return y_pred
 
+# 返回一个字典结构 异常-List[准确率]
 def select_and_pred_probability(df, model_type, saved_model_path=SaveModelPath):
     # 读取头文件信息
     with open("{}".format(os.path.join(saved_model_path, "header.txt")), "r") as f:
@@ -44,9 +46,16 @@ def select_and_pred_probability(df, model_type, saved_model_path=SaveModelPath):
         print("=================")
         exit(1)
     df_selected = df[features]
-    # Use trained model to predict
-    y_pred = model_pred_probability(df_selected, model_type, saved_model_path=saved_model_path)
-    return y_pred
+    # 得到所有的lables
+    classes = [0]
+    with open("{}".format(os.path.join(saved_model_path, "alllabels.txt")), "r") as f:
+        classes = f.read().splitlines()
+    y_pred_probability = model_pred_probability(df_selected, model_type, saved_model_path=saved_model_path)
+    classes_probability_Dict = defaultdict(list)
+    for iline in y_pred_probability:
+        for icolumns, iclass in enumerate(classes):
+            classes_probability_Dict[iclass].append(iline[icolumns])
+    return classes_probability_Dict
 
 """
 进行预测
