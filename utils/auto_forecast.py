@@ -2,12 +2,12 @@ import itertools
 import json
 import os.path
 from collections import defaultdict
-from typing import List, Dict, Union, Any, Set, Tuple
+from typing import List, Dict, Union, Any, Set, Tuple, Optional
 
 import numpy as np
 import pandas as pd
 
-from Classifiers.ModelPred import select_and_pred
+from Classifiers.ModelPred import select_and_pred, select_and_pred_probability
 from utils.DataFrameOperation import mergeDataFrames, SortLabels, PushLabelToFirst, PushLabelToEnd, \
     subtractLastLineFromDataFrame
 from utils.DataScripts import TranslateTimeListStrToStr, standardPDfromOriginal1
@@ -437,7 +437,8 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 
 def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False, thresholdValue: Dict = None,
-                         Memory_leaks_modelpath: str = None, mem_leak_features=None, memory_leaks_modeltype=0) -> List:
+                         Memory_leaks_modelpath: str = None, mem_leak_features=None, memory_leaks_modeltype=0) -> tuple[
+    Union[list[int], Any], Optional[Any]]:
     if mem_leak_features is None:
         mem_leak_features = ["used"]
     if TIME_COLUMN_NAME in mem_leak_features:
@@ -449,6 +450,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         memoryleakValue = thresholdValue["used"]
         realmemoryleakValue = serverinformationDict["used_mean"]
         prelistflag = [60 if i > memoryleakValue else 0 for i in realmemoryleakValue]
+        prelistflag_probability = None # 使用阈值的时候预测的概率只能为None
     else:
         # 先构造一个字典，然后生成dataFrame, 调用接口进行预测
         used_features = []  # 得到预测内存泄露的特征值
@@ -462,10 +464,11 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         savedict = dict(
             [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key in used_features])
         tpd = pd.DataFrame(data=savedict)
+        # 得到预测值
         prelistflag = select_and_pred(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
-
-    return prelistflag
-
+        # 得到预测的概率
+        prelistflag_probability = select_and_pred_probability(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
+    return prelistflag, prelistflag_probability
 
 """
 对内存带宽进行预测
@@ -601,7 +604,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     # 对CPU进行预测
     predictDict["CPU_Abnormal"] = predictcpu(serverinformationDict, coresnumber)
     # 对内存泄露进行预测
-    predictDict["mem_leak"] = predict_memory_leaks(
+    predictDict["mem_leak"], _ = predict_memory_leaks(
         serverinformationDict=serverinformationDict,
         isThreshold=isThreshold,
         thresholdValue=thresholdValue,

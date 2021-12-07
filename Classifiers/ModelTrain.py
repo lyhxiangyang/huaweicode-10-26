@@ -89,8 +89,4 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     f = open('%s\\header.txt' % saved_model_path, 'w')
     f.write('\n'.join(header))
     f.close()
-
-
-
-
     return accuracy
