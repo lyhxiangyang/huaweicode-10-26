@@ -36,10 +36,13 @@ if __name__ == "__main__":
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
     # 预测CPU的模型路径
     processcpu_modelpath = R"tmp/modelpath/singlefeature/process_cpu_model"
+    processcpu_modeltype = 0
     # 预测内存泄露的模型路径
     servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
+    servermemory_modeltype = 0
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/grapemodels/memory_bandwidth_model-local"
+    serverbandwidth_modeltype = 1
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/总过程分析/Grapes/测试数据-Local"
     # 是否有存在faultFlag
@@ -241,6 +244,7 @@ if __name__ == "__main__":
         thresholdValue=thresholdValueDict,
         modelfilepath=processcpu_modelpath,
         addserverfeatures=server_feature,
+        modeltype=processcpu_modeltype,
     )
     # ============================================================================================= 对使用到的核心数进行判断, 因为可能并不是全核心进行预测
     print("使用到的核心数进行判断".center(40, "*"))
@@ -276,6 +280,8 @@ if __name__ == "__main__":
             Memory_leaks_modelpath=servermemory_modelpath,
             coresnumber=wrfruncoresnumber,
             mem_bandwidth_features=server_feature,
+            memory_leaks_modeltype=servermemory_modeltype,
+            memory_bandwidth_modeltype=serverbandwidth_modeltype,
         )
         # 对结果进行分析
         analysePredictResult(predictpd, tpath)

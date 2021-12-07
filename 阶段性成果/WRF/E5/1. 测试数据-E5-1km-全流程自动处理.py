@@ -28,6 +28,10 @@ if __name__ == "__main__":
     servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
+    # 使用哪个模型
+    processcpu_modeltype = 0
+    servermemory_modeltype = 0
+    serverbandwidth_modeltype = 0
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/总过程分析/测试数据-E5-1km"
     # 是否有存在faultFlag
@@ -183,7 +187,8 @@ if __name__ == "__main__":
         spath=tpath,
         isThreshold=isThreshold,
         thresholdValue=thresholdValueDict,
-        modelfilepath=processcpu_modelpath
+        modelfilepath=processcpu_modelpath,
+        modeltype=processcpu_modeltype,
     )
     # ============================================================================================= 对使用到的核心数进行判断, 因为可能并不是全核心进行预测
     print("使用到的核心数进行判断".center(40, "*"))
@@ -214,7 +219,9 @@ if __name__ == "__main__":
             thresholdValue=thresholdValueDict,
             Memory_bandwidth_modelpath=serverbandwidth_modelpath,
             Memory_leaks_modelpath=servermemory_modelpath,
-            coresnumber=wrfruncoresnumber
+            coresnumber=wrfruncoresnumber,
+            memory_leaks_modeltype=servermemory_modeltype,
+            memory_bandwidth_modeltype=serverbandwidth_modeltype,
         )
         # 对结果进行分析
         analysePredictResult(predictpd, tpath)
