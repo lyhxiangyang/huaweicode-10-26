@@ -1006,7 +1006,8 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         pd = pd.copy()
         respdList = []
         for i in pos:
-            respdList.append(pd.loc[i[0]:i[1]])
+            # loc和使用[]是不一样的
+            respdList.append(pd[i[0]:i[1]])
         return respdList
 
     # 判断两个DataFrame是否交叉，如果交叉返回True，DataFrame  否则 False，DataFrame
