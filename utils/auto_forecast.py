@@ -992,6 +992,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         i = 0
         while i < len(flags):
             if flags[i] == 0:
+                i += 1
                 continue
             beginpos = i
             while i < len(flags) and flags[i] != 0:
