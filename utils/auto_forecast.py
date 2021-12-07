@@ -647,7 +647,8 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         predictDict[FAULT_FLAG] = serverinformationDict[FAULT_FLAG]
     # 对CPU进行预测
     predictDict["CPU_Abnormal"] = predictcpu(serverinformationDict, coresnumber)
-    predictDict["CPU异常概率"] = getCPU_Abnormal_Probability(serverinformationDict, coresnumber)
+    if not isThreshold:
+        predictDict["CPU异常概率"] = getCPU_Abnormal_Probability(serverinformationDict, coresnumber)
     # 对内存泄露进行预测
     predictDict["mem_leak"], predict_probability = predict_memory_leaks(
         serverinformationDict=serverinformationDict,
@@ -1092,6 +1093,23 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         prelabels = max(labels, key=labels.count)
         alllabeslList = sorted(list(set(labels)))
         return prelabels, alllabeslList
+    """
+    得到概率
+    参数： iprepd-预测到的时间段  tcrosspd-交叉的时间段 trealpd-实际的时间段
+    返回值 0: CPU概率   1: 内存泄露概率   2: 内存带宽异常
+    
+    """
+    def getProbability (iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
+        memleakprobability = list(iprepd["内存泄露概率"])
+        cpuprobability = list(["CPU异常概率"])
+        membanwidthprobability = list(iprepd["内存带宽异常概率"])
+
+        minmemleakprobability = min(memleakprobability)
+        mincpuprobability = min(cpuprobability)
+        minmembanwidthprobability = min(membanwidthprobability)
+
+        return [minmemleakprobability, mincpuprobability, minmembanwidthprobability]
+
 
 
     # ====================================================================================================== 函数部分结束
@@ -1122,6 +1140,16 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
 
         # 判断是否有真实标签值与其重叠
         iscross, tcrosspd, trealpd = determineDataframeListOverlap(iprepd, realTimePeriodAbnormalPds)
+        # 得到概率g
+        relist = getProbability(iprepd=iprepd, tcrosspd=tcrosspd, trealpd=trealpd)
+        minmemleakprobability = relist[0]
+        mincpuprobability = relist[1]
+        minmembanwidthprobability = relist[2]
+
+        timeperiodDict["内存泄露概率"].append(minmemleakprobability)
+        timeperiodDict["内存带宽抢占概率"].append(minmembanwidthprobability)
+        timeperiodDict["CPU异常概率"].append(mincpuprobability)
+
         realcrossBeginTime = str(-1)
         realcrossEndTime = str(-1)
         crossTime = 0
