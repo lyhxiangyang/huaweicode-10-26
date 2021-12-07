@@ -1003,6 +1003,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
 
     # 根据位置的起始位置得到DataFrame
     def getDataFramesFromPos(pd: pd.DataFrame, pos: List[Tuple[int, int]]) -> List[pd.DataFrame]:
+        pd = pd.copy()
         respdList = []
         for i in pos:
             respdList.append(pd.loc[i[0]:i[1]])
@@ -1016,7 +1017,12 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         overlapTime = list(df1times & df2times)
         if len(overlapTime) == 0:
             return False, None
-        return True, df1.loc[overlapTime]
+        # 获得时间
+        def f1(x):
+            if x in overlapTime:
+                return True
+            return False
+        return True, df1.loc[df1[TIME_COLUMN_NAME].apply(f1)]
 
     # 判断一个DataFrame的时间是否与一个时间列表交叉，如果交叉返回交叉的True, DataFrame 否则 False，DataFrame
     # 返回是否交叉  返回交叉的部分  返回匹配到交叉的部分
