@@ -606,7 +606,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     # 对CPU进行预测
     predictDict["CPU_Abnormal"] = predictcpu(serverinformationDict, coresnumber)
     # 对内存泄露进行预测
-    predictDict["mem_leak"], predictDict["内存泄露异常概率"] = predict_memory_leaks(
+    predictDict["mem_leak"], predict_probability = predict_memory_leaks(
         serverinformationDict=serverinformationDict,
         isThreshold=isThreshold,
         thresholdValue=thresholdValue,
@@ -614,6 +614,8 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         mem_leak_features=mem_leak_features,
         memory_leaks_modeltype=memory_leaks_modeltype
     )
+    if predict_probability is not None:
+        predictDict["内存泄露概率"] = predict_probgability
     # 对内存带宽进行预测
     predictDict["mem_bandwidth"] = predict_memory_bandwidth(
         serverinformationDict=serverinformationDict,
