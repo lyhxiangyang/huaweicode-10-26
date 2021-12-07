@@ -221,16 +221,17 @@ def isCPUAbnormalsByThreshold(predictpd: pd.DataFrame, thresholdValue: Dict) -> 
 """
 得到这一个一个processpd对应的时间下，所有的cputime，以及通过预测有那几个核心是cpu异常
 判断是否使用阀值, 如果使用阀值， 那么阀值的大小都在thtrsholdValue中存储, 如果不使用阀值，那么modelfilepath就不为空
-返回值： 1. 异常的数量列表  2. 异常的核心列表 3. 异常的cpu最小值列表
+返回值： 1. 异常的数量列表  2. 异常的核心列表 3. 异常的cpu最小值列表 4. 所有核心上的预测为10的概率是一个core-概率的字典结构
 """
 
 
 def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThreshold: bool = False,
                                thresholdValue: Dict = None, modelfilepath: str = None, modeltype=0) -> Union[
-    tuple[int, None, None], tuple[Any, list, list]]:
+    tuple[int, None, None, None], tuple[Any, list, list, Optional[Any]]]:
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
+    predictflag_probability = None # 存储概率的列表
     if len(nowdf) == 0:
-        return 0, None, None
+        return 0, None, None, None
 
     cpu_mean_fe = "cpu_mean"
     # 先得到总的CPUTIME的时间
@@ -243,6 +244,10 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
         predictflag = isCPUAbnormalsByThreshold(nowdf, thresholdValue)
     else:
         predictflag = select_and_pred(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+        predictflag_probabilityDict = select_and_pred_probability(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+        if 10 in predictflag_probabilityDict.keys():
+            predictflag_probability = predictflag_probabilityDict[10]
+            predictflag_probability = dict(zip(cores_serialnumber, predictflag_probability))
         predictflag = [True if i != 0 else False for i in predictflag]
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
@@ -250,7 +255,7 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
     abnormalcores = [cores_serialnumber[i] for i, flag in enumerate(predictflag) if flag]
     abnormalcoremaxtime = [cores_max_time[i] for i, flag in enumerate(predictflag) if flag]
     # 将所有的cputime和不正常的核心数据进行返回
-    return cputime, abnormalcores, abnormalcoremaxtime
+    return cputime, abnormalcores, abnormalcoremaxtime, predictflag_probability
 
 
 """
@@ -265,6 +270,7 @@ serverinformationDict:
 abnormalcores 是一个列表的列表，存储的是异常的核心数
 coresnums 是指多少个核心出现了异常
 coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
+coresallprobability: 是每个时刻中预测每个核为异常的概率
 """
 
 
@@ -296,7 +302,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     serverinformationDict = defaultdict(list)
     for stime in timecolumns:
         # 添加wrf的cpu时间
-        wrf_cpu_time, abnormalcores, abnormalcoremaxtime = getprocess_cputime_abcores(allprocesspds, stime,
+        wrf_cpu_time, abnormalcores, abnormalcoremaxtime, predictflag_probability = getprocess_cputime_abcores(allprocesspds, stime,
                                                                                       isThreshold=isThreshold,
                                                                                       thresholdValue=thresholdValue,
                                                                                       modelfilepath=modelfilepath,
@@ -305,6 +311,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
         serverinformationDict["wrf_cpu"].append(wrf_cpu_time)
         serverinformationDict["abnormalcores"].append(abnormalcores)
         serverinformationDict["coresmaxtime"].append(abnormalcoremaxtime)
+        serverinformationDict["coresallprobability"].append(predictflag_probability) # 所有核心上的概率
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
@@ -428,6 +435,35 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             exit(1)
         ilastlist = ilist
     return iscpu
+"""
+serverinformationDict: 
+abnormalcores 是一个列表的列表，存储的是异常的核心数
+coresnums 是指多少个核心出现了异常
+coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
+coresallprobability: 是每个时刻中预测每个核为异常的概率, 是一个core-概率的字典结构
+"""
+def getCPU_Abnormal_Probability(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
+    coresallprobability = serverinformationDict["coresallprobability"]
+    coresallprobability: Dict
+    abnormalcores = serverinformationDict["abnormalcores"] # 如果这里出现了None， 那么表明这个时刻不存在
+    assert len(abnormalcores) == len(coresallprobability)
+    # 根据核心获得核心的概率函数
+    def getProbability(abnormalcores: List[int], coresallprobability: Dict ) -> List:
+        resList = []
+        for icore in abnormalcores:
+            resList.append(coresallprobability[icore])
+        return resList
+    minprobabilityList = []
+    for i in range(0, len(abnormalcores)):
+        if abnormalcores[i] is None:
+            minprobabilityList.append(-1)
+            continue
+        if len(abnormalcores[i]) == 0: # 正常情况
+            minprobabilityList.append(min(coresallprobability.values()))
+            continue
+        minp = min(getProbability(abnormalcores=abnormalcores, coresallprobability=coresallprobability))
+        minprobabilityList.append(minp)
+    return minprobabilityList
 
 
 """
@@ -610,6 +646,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         predictDict[FAULT_FLAG] = serverinformationDict[FAULT_FLAG]
     # 对CPU进行预测
     predictDict["CPU_Abnormal"] = predictcpu(serverinformationDict, coresnumber)
+    predictDict["CPU异常概率"] = getCPU_Abnormal_Probability(serverinformationDict, coresnumber)
     # 对内存泄露进行预测
     predictDict["mem_leak"], predict_probability = predict_memory_leaks(
         serverinformationDict=serverinformationDict,
