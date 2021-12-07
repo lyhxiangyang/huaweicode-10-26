@@ -615,7 +615,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         memory_leaks_modeltype=memory_leaks_modeltype
     )
     if predict_probability is not None:
-        predictDict["内存泄露概率"] = predict_probgability
+        predictDict["内存泄露概率"] = predict_probability
     # 对内存带宽进行预测
     predictDict["mem_bandwidth"] = predict_memory_bandwidth(
         serverinformationDict=serverinformationDict,
