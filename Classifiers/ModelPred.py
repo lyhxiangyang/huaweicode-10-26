@@ -50,6 +50,7 @@ def select_and_pred_probability(df, model_type, saved_model_path=SaveModelPath):
     classes = [0]
     with open("{}".format(os.path.join(saved_model_path, "alllabels.txt")), "r") as f:
         classes = f.read().splitlines()
+        classes = [int(i) for i in classes]
     y_pred_probability = model_pred_probability(df_selected, model_type, saved_model_path=saved_model_path)
     classes_probability_Dict = defaultdict(list)
     for iline in y_pred_probability:

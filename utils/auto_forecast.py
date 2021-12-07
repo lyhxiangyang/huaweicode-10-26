@@ -468,8 +468,8 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         prelistflag = select_and_pred(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
         # 得到预测的概率
         prelistflag_probabilityDict = select_and_pred_probability(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
-        if 50 in prelistflag_probabilityDict.keys():
-            prelistflag_probability = prelistflag_probabilityDict[50]
+        if 60 in prelistflag_probabilityDict.keys():
+            prelistflag_probability = prelistflag_probabilityDict[60]
     return prelistflag, prelistflag_probability
 
 """
@@ -482,7 +482,7 @@ mem_bandwidth_features: 预测内存带宽所需要的特征值
 
 def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = False, thresholdValue: Dict = None,
                              Memory_bandwidth_modelpath: str = None, mem_bandwidth_features=None,
-                             memory_bandwidth_modeltype=0) -> List:
+                             memory_bandwidth_modeltype=0) -> tuple[list[int], Optional[Any]]:
     if mem_bandwidth_features is None:
         mem_bandwidth_features = ["pgfree"]
     if TIME_COLUMN_NAME in mem_bandwidth_features:
@@ -490,6 +490,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
     if FAULT_FLAG in mem_bandwidth_features:
         mem_bandwidth_features.remove(FAULT_FLAG)
 
+    prelistflag_probability = None  # 使用阈值的时候预测的概率只能为None
     if isThreshold:
         memorybandwidthValue = thresholdValue["pgfree"]
         realmemorywidthValue = serverinformationDict["pgfree_mean"]
@@ -509,9 +510,13 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
         tpd = pd.DataFrame(data=savedict)
         prelistflag = select_and_pred(tpd, MODEL_TYPE[memory_bandwidth_modeltype],
                                       saved_model_path=Memory_bandwidth_modelpath)
-
+        # 得到预测的概率
+        prelistflag_probabilityDict = select_and_pred_probability(tpd, MODEL_TYPE[memory_bandwidth_modeltype],
+                                      saved_model_path=Memory_bandwidth_modelpath)
+        if 50 in prelistflag_probabilityDict.keys():
+            prelistflag_probability = prelistflag_probabilityDict[50]
     prelistflag = [50 if i == 50 else 0 for i in prelistflag]
-    return prelistflag
+    return prelistflag, prelistflag_probability
 
 
 """
@@ -617,7 +622,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     if predict_probability is not None:
         predictDict["内存泄露概率"] = predict_probability
     # 对内存带宽进行预测
-    predictDict["mem_bandwidth"] = predict_memory_bandwidth(
+    predictDict["mem_bandwidth"], predict_probability = predict_memory_bandwidth(
         serverinformationDict=serverinformationDict,
         isThreshold=isThreshold,
         thresholdValue=thresholdValue,
@@ -625,6 +630,8 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         mem_bandwidth_features=mem_bandwidth_features,
         memory_bandwidth_modeltype=memory_bandwidth_modeltype,
     )
+    if predict_probability is not None:
+        predictDict["内存带宽异常概率"] = predict_probability
     # 得到核的数量
     predictDict["coresnums"] = serverinformationDict["coresnums"]
     # 根据CPU信息和得到真是标签值
@@ -845,11 +852,11 @@ def getAccuracy(realflags: List[int], preflags: List[int], excludeflags=None) ->
         excludeflags = []
     assert len(realflags) == len(preflags)
     # 得到预测对的数量
-    rightnumber = len([i for i in range(0, len(realflags)) if (realflags[i] // 10) * 10 == preflags[i]])
+    # rightnumber = len([i for i in range(0, len(realflags)) if (realflags[i] // 10) * 10 == preflags[i]])
     allnumber = 0
     rightnumber = 0
     for i in range(0, len(realflags)):
-        if i in excludeflags:
+        if realflags[i] in excludeflags:
             continue
         allnumber += 1
         if (realflags[i] // 10) * 10 == preflags[i]:
