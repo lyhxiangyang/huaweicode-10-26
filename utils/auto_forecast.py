@@ -1068,7 +1068,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         timeperiodDict["检测所有标记"].append(",".join([str(i) for i in preAllLabels]))
 
         # 判断是否有真实标签值与其重叠
-        iscross, tcrosspd, trealpd = determineDataframeListOverlap(iprepd, preTimePeriodAbnormalPds)
+        iscross, tcrosspd, trealpd = determineDataframeListOverlap(iprepd, realTimePeriodAbnormalPds)
         realcrossBeginTime = str(-1)
         realcrossEndTime = str(-1)
         crossTime = 0
