@@ -5,7 +5,7 @@ import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
-from utils.FeatureSelection import getPValueFromTwoDF
+from utils.FeatureSelection import getPValueFromTwoDF, getFeatureNameByBenjamini_Yekutiel
 from utils.auto_forecast import getfilespath, getfilepd, differenceServer
 
 """
@@ -13,17 +13,22 @@ from utils.auto_forecast import getfilespath, getfilepd, differenceServer
 """
 def getServerDiffFeatures(normalserverPD: pd.DataFrame, abnormalserverPD: pd.DataFrame, abnormaltype: int) -> List[str]:
     specialAbnormalPd = dict(list(abnormalserverPD.groupby(FAULT_FLAG)))[abnormaltype] # 指定异常类型
+    print("正常数据长度：".format(len(normalserverPD)))
     # 得到各个特征对应的pvalue值
     feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
-    # 根据pvlue对各个特征值排序 从小到大排序
-    feature_pvalueList = sorted(feature_pvalueDict.items(), key=lambda item: item[1], reverse=True)
-    print(feature_pvalueList)
-    return feature_pvalueList
+    selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
+    selectFeatureList = sorted(selectFeatureDict.items(), key=lambda item: item[1], reverse=True)
+    notselectFeatureList = sorted(notselectFeatureDict.items(), key=lambda item: item[1], reverse=True)
+    print("选择的特征".center(40, "*"))
+    print(selectFeatureList)
+    print("没有选择的特征".center(40, "*"))
+    print(notselectFeatureList)
+    return selectFeatureList
 
 
 
 if __name__ == "__main__":
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-E5-1km-异常数据"
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\训练数据-E5-1km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
 
@@ -80,7 +85,8 @@ if __name__ == "__main__":
     predictserverpds = []
     normalserverpds = []
     # 添加上时间和FAULT_FLAG
-    time_server_feature = server_feature.copy().extend([TIME_COLUMN_NAME, FAULT_FLAG])
+    time_server_feature = server_feature.copy()
+    time_server_feature.extend([TIME_COLUMN_NAME, FAULT_FLAG])
     for ifile in predictserverfiles:
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_server_feature]
