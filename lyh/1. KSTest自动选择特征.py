@@ -17,11 +17,14 @@ def getServerDiffFeatures(normalserverPD: pd.DataFrame, abnormalserverPD: pd.Dat
     # 得到各个特征对应的pvalue值
     feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
     selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
-    selectFeatureList = sorted(selectFeatureDict.items(), key=lambda item: item[1], reverse=True)
-    notselectFeatureList = sorted(notselectFeatureDict.items(), key=lambda item: item[1], reverse=True)
+    selectFeatureList = sorted(selectFeatureDict.items(), key=lambda item: item[1], reverse=False)
+    notselectFeatureList = sorted(notselectFeatureDict.items(), key=lambda item: item[1], reverse=False)
+    print("特征总个数:{}".format(len(selectFeatureList) + len(notselectFeatureList)))
     print("选择的特征".center(40, "*"))
+    print("个数: {}".format(len(selectFeatureList)))
     print(selectFeatureList)
     print("没有选择的特征".center(40, "*"))
+    print("个数：{}".format(len(notselectFeatureList)))
     print(notselectFeatureList)
     return selectFeatureList
 
