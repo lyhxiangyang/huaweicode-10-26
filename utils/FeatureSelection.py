@@ -19,7 +19,7 @@ from statsmodels.stats.multitest import multipletests
 
 
 def getPvalueFromTwoDataFrame(dataFrame1: pd.DataFrame, dataFrame2: pd.DataFrame) -> Union[
-    Tuple[None, bool],Tuple[Dict[Any, float], bool]]:
+    Tuple[None, bool], Tuple[Dict[Any, float], bool]]:
     # 首先保证两个数据
     if not utils.DataFrameOperation.judgeSameFrames([dataFrame1, dataFrame2]):
         return None, True
@@ -131,6 +131,7 @@ def getUsefulFeatureFromAllDataFrames(normalpd: pd.DataFrame, abnormalpd: List[p
 选择有用的标签
 """
 
+
 def getUsefulFeatureFromNormalAndAbnormal(normalpd: pd.DataFrame, abnormalpd: List[pd.DataFrame]) -> Union[
     tuple[None, bool], tuple[list, bool]]:
     allPdList = [normalpd]
@@ -157,3 +158,42 @@ def getUsefulFeatureFromNormalAndAbnormal(normalpd: pd.DataFrame, abnormalpd: Li
     userfulFeatureList.sort()
     return userfulFeatureList, False
 
+
+# ===============================================================================  下面是2021-12-8日写的和KSTest新的有关的函数
+
+"""
+从两个列表中相比较，等到PValue
+"""
+
+
+def getPValueFromTwoList(l1: List[float], l2: List[float]) -> float:
+    return stats.kstest(l1, l2)[1]
+
+
+"""
+函数功能：比较两个DataFrame之间指定的特征值之间的pvalue 
+"""
+
+
+def getPValueFromTwoDF(dataFrame1: pd.DataFrame, dataFrame2: pd.DataFrame, compareFeatures: List[str] = None) -> Dict:
+    if compareFeatures is None:
+        # 默认情况下是所有的列
+        # 首先保证两个数据特征值是相等的
+        assert utils.DataFrameOperation.judgeSameFrames([dataFrame1, dataFrame2])
+        compareFeatures = list(dataFrame1.columns)
+    # 如果两个DataFrame中有time和faultFlag 那么要去掉
+    if TIME_COLUMN_NAME in compareFeatures:
+        compareFeatures.remove(TIME_COLUMN_NAME)
+    if FAULT_FLAG in compareFeatures:
+        compareFeatures.remove(FAULT_FLAG)
+    # 判断所选择的特征一定在这两个dataFrame中
+    assert set(compareFeatures).issubset(set(dataFrame1.columns))
+    assert set(compareFeatures).issubset(set(dataFrame2.columns))
+
+    # 到这一步可以保证所有的特征在两个DataFrame中都存在, 并且不存在time和faultflag
+    # ===
+    resDict = {}
+    for featurename in dataFrame1.columns.array:
+        tPvalue = getPValueFromTwoList(list(dataFrame1[featurename]), list(dataFrame2[featurename]))
+        resDict[featurename] = tPvalue
+    return resDict

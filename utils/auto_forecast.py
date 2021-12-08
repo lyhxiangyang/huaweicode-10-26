@@ -1140,15 +1140,16 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
 
         # 判断是否有真实标签值与其重叠
         iscross, tcrosspd, trealpd = determineDataframeListOverlap(iprepd, realTimePeriodAbnormalPds)
-        # 得到概率g
-        relist = getProbability(iprepd=iprepd, tcrosspd=tcrosspd, trealpd=trealpd)
-        minmemleakprobability = relist[0]
-        mincpuprobability = relist[1]
-        minmembanwidthprobability = relist[2]
+        # 得到概率
+        if "内存泄露概率" in iprepd.columns:
+            relist = getProbability(iprepd=iprepd, tcrosspd=tcrosspd, trealpd=trealpd)
+            minmemleakprobability = relist[0]
+            mincpuprobability = relist[1]
+            minmembanwidthprobability = relist[2]
 
-        timeperiodDict["内存泄露概率"].append(minmemleakprobability)
-        timeperiodDict["内存带宽抢占概率"].append(minmembanwidthprobability)
-        timeperiodDict["CPU异常概率"].append(mincpuprobability)
+            timeperiodDict["内存泄露概率"].append(minmemleakprobability)
+            timeperiodDict["内存带宽抢占概率"].append(minmembanwidthprobability)
+            timeperiodDict["CPU异常概率"].append(mincpuprobability)
 
         realcrossBeginTime = str(-1)
         realcrossEndTime = str(-1)
