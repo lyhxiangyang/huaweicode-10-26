@@ -83,7 +83,7 @@ def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltyp
     # print(abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(["max", "mean"]).dropna())
     abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(
         ["max", "mean"]).dropna().to_csv(os.path.join(spath, "2. 异常数据中正常值平均值和最大值的比较.csv"))
-    meanValue = abnormal_pdDict[0].mean()
+    meanValue = abnormal_pdDict[0][columnsFeas].mean()
     specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=meanValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
 
     normalserverPD.to_csv(os.path.join(spath, "3. 归一化后正常数据中正常值.csv"))
