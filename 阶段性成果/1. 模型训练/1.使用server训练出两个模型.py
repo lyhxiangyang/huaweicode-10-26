@@ -4,7 +4,7 @@ from typing import Set, Tuple
 import pandas as pd
 
 from Classifiers.TrainToTest import ModelTrainAndTest
-from utils.DataFrameOperation import mergeDataFrames
+from utils.DataFrameOperation import mergeDataFrames, changePDfaultFlag
 from utils.DataScripts import getDFmean, getFaultDataFrame
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles
@@ -206,6 +206,7 @@ if __name__ == "__main__":
     tpath = os.path.join(spath, "4. 训练内存泄露模型中间数据")
     # 得到异常数据中的内存泄露数据used指标
     abnormalTrainData = getFaultDataFrame(alldealedserverpds, [61,62,63,64,65])
+    abnormalTrainData = changePDfaultFlag(abnormalTrainData)
     allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None,testAgain=False, spath=tpath, selectedFeature=model_memLeak_features,
                       modelpath=servermemory_modelpath, maxdepth=maxdepth)
@@ -213,10 +214,11 @@ if __name__ == "__main__":
     print("训练内存带宽模型".center(40, "*"))
     tpath = os.path.join(spath, "5. 训练内存带宽模型中间数据")
     abnormalTrainData = getFaultDataFrame(alldealedserverpds, [51, 52, 53, 54, 55])
+    abnormalTrainData = changePDfaultFlag(abnormalTrainData)
     allTrainedPD, _ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath,
-                      selectedFeature=model_memLeak_features,
-                      modelpath=servermemory_modelpath, maxdepth=maxdepth)
+                      selectedFeature=model_memBandwidth_features,
+                      modelpath=serverbandwidth_modelpath, maxdepth=maxdepth)
 
 
 

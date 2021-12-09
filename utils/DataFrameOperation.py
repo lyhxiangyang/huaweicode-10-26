@@ -296,3 +296,17 @@ def sortByAbsValue(tpd: pd.DataFrame, featurename: str, value: int = 100):
     tpd = tpd.drop(sortlabel, axis=1)
     tpd = tpd.reset_index(drop=True)
     return tpd
+
+"""
+将一个DataFrame里面的数值全部更改为对应的模数
+"""
+
+def changePDfaultFlag(df: pd.DataFrame) -> pd.DataFrame:
+    pdlists = []
+    for i, ipd in df.groupby(FAULT_FLAG):
+        ipd[FAULT_FLAG] = (i // 10) * 10
+        pdlists.append(ipd)
+    respd, _ = mergeDataFrames(pdlists)
+    return respd
+
+
