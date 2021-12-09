@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Dict
 
 import pandas as pd
 
@@ -11,7 +11,7 @@ from utils.auto_forecast import getfilespath, getfilepd, differenceServer, remov
 """
 比较两个server的DataFrame 异常为abnormal
 """
-def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserverPD: pd.DataFrame, abnormaltype: int) -> List[str]:
+def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserverPD: pd.DataFrame, abnormaltype: int) -> Dict[str, float]:
     # 将所有的异常的首尾去掉
     abnormalserverPD = removeAllHeadTail(abnormalserverPD, windowsize=3)
     abnormal_pdDict = dict(list(abnormalserverPD.groupby(FAULT_FLAG))) # 指定异常类型
@@ -30,13 +30,13 @@ def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserve
     print("没有选择的特征".center(40, "*"))
     print("个数：{}".format(len(notselectFeatureList)))
     print(notselectFeatureList)
-    return selectFeatureList
+    return selectFeatureDict
 
-def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltype: int) -> List[str]:
+def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltype: int) -> Dict[str, float]:
     abnormalserverPD = removeAllHeadTail(abnormalserverPD, windowsize=3)
     abnormal_pdDict = dict(list(abnormalserverPD.groupby(FAULT_FLAG))) # 指定异常类型
     specialAbnormalPd  = abnormal_pdDict[abnormaltype] # 异常类型
-    normalserverPD = abnormalserverPD[0]
+    normalserverPD = abnormal_pdDict[0]
     print("正常数据长度：{}".format(len(normalserverPD)))
     print("异常特征长度：{}".format(len(specialAbnormalPd)))
     # =====================================================得到特征选择
@@ -51,7 +51,7 @@ def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltyp
     print("没有选择的特征".center(40, "*"))
     print("个数：{}".format(len(notselectFeatureList)))
     print(notselectFeatureList)
-    return selectFeatureList
+    return selectFeatureDict
 
 
 if __name__ == "__main__":
@@ -132,15 +132,15 @@ if __name__ == "__main__":
     # getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
 
     print("将两组数据中的正常和正常进行对比: ".center(20, "#"))
-    normal_normal_selectFeatureList = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 0)
+    normal_normal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 0)
 
 
     print("将一组数据中的正常和异常进行对比：".center(20, "#"))
-    selectFeatureList = getServerDiffFeaturesFromOneData(allabnormalserverpd, 55)
+    selectFeatureDict = getServerDiffFeaturesFromOneData(allabnormalserverpd, 55)
 
     print("去掉正常和正常时选择的指标：".center(20, "#"))
     print("选择的指标：")
-    print("{}".format(list(set(selectFeatureList) - set(normal_normal_selectFeatureList))))
+    print("{}".format(list(set(selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
 
 
 
