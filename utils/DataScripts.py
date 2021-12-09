@@ -616,3 +616,20 @@ def removeTimeAndfaultFlagFromList(listfeas: List, inplace: bool = False,
         listfeas = listfeas.copy()
     [listfeas.remove(ifea) for ifea in removeFea if ifea in removeFea]
     return listfeas
+
+
+def getFaultDataFrame(df: pd.DataFrame, faults: List[int])->pd.DataFrame:
+    rightline = df[FAULT_FLAG].apply(lambda x: True if x in faults else False)
+    return df[rightline]
+
+
+
+
+
+
+
+
+
+
+
+
