@@ -212,7 +212,7 @@ if __name__ == "__main__":
                       modelpath=servermemory_modelpath, maxdepth=maxdepth)
     # 将训练的正常数据和异常数据进行保存
     normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
-    abnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
+    allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
     allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
 
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
                       modelpath=serverbandwidth_modelpath, maxdepth=maxdepth)
     # 将训练的正常数据和异常数据进行保存
     normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
-    abnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
+    allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
     allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
 
 
