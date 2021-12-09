@@ -38,7 +38,7 @@ def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltyp
     specialAbnormalPd  = abnormal_pdDict[abnormaltype] # 异常类型
     normalserverPD = abnormal_pdDict[0]
     print("正常数据长度：{}".format(len(normalserverPD)))
-    print("异常特征长度：{}".format(len(specialAbnormalPd)))
+    print("异常特征{} 长度：{}".format(abnormaltype, len(specialAbnormalPd)))
     # =====================================================得到特征选择
     feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
     selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
@@ -62,6 +62,8 @@ if __name__ == "__main__":
     normaldirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\E5-3km-正常数据"
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
+
+    abnormalType = 55
 
     # 特征值
     server_feature = [
@@ -131,16 +133,20 @@ if __name__ == "__main__":
     allabnormalserverpd, _ = mergeDataFrames(predictserverpds)
     # getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
 
-    print("将两组数据中的正常和正常进行对比: ".center(80, "#"))
+    print("将两组数据中的正常和正常进行对比: ".center(80, "-"))
     normal_normal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 0)
 
+    print("将一组数据中的正常和异常进行对比：".center(80, "-"))
+    selectFeatureDict = getServerDiffFeaturesFromOneData(allabnormalserverpd, abnormalType)
 
-    print("将一组数据中的正常和异常进行对比：".center(80, "#"))
-    selectFeatureDict = getServerDiffFeaturesFromOneData(allabnormalserverpd, 55)
-
-    print("去掉正常和正常时选择的指标：".center(80, "#"))
-    print("选择的指标：")
+    print("去掉正常和正常时选择的指标：")
     print("{}".format(list(set(selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
+
+    print("将两组数组中正常和异常进行对比".center(80, "-"))
+    normal_abnormal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
+    print("去掉正常和正常时选择的指标：")
+    print("{}".format(list(set(normal_abnormal_selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
+
 
 
 
