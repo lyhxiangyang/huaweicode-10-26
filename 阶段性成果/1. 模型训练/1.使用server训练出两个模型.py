@@ -141,6 +141,13 @@ if __name__ == "__main__":
     normalserver_meanvalue.to_csv(os.path.join(tpath, "meanvalue_server.csv"))
 
     # ============================================================================================= 对要预测的数据进行标准化处理
+    # 如果normal数据存在，也要对normal数据进行特征处理
+    if isFileMean:
+        standard_normal_server_pds = standardLists(pds=normalserverpds, standardFeatures=server_feature,
+                                            meanValue=normalserver_meanvalue, standardValue=100)
+        standard_normal_process_pds = standardLists(pds=normalprocesspds, standardFeatures=process_feature,
+                                             meanValue=normalprocess_meanvalue, standardValue=60)
+
     # 标准化process 和 server数据， 对于process数据，先将cpu想加在一起，然后在求平均值。
     print("标准化要预测的process和server数据".center(40, "*"))
     standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=server_feature,
@@ -153,16 +160,33 @@ if __name__ == "__main__":
     saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
     saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
     # ============================================================================================= 对process数据和server数据进行秒数的处理，将秒数去掉
+    # 如果normal数据存在 也要进行处理
+    if isFileMean:
+        standard_normal_server_pds = changeTimeTo_pdlists(standard_normal_server_pds, server_time_format)
+        standard_normal_process_pds = changeTimeTo_pdlists(standard_normal_process_pds, process_time_format)
+
     standard_server_pds = changeTimeTo_pdlists(standard_server_pds, server_time_format)
     standard_process_pds = changeTimeTo_pdlists(standard_process_pds, process_time_format)
     # ============================================================================================= 对process数据和server数据进行特征提取
-    print("对process数据进行特征处理".center(40, "*"))
-    tpath = os.path.join(spath, "3. process特征提取数据")
+    # 如果normal数据存在也要对normal数据进行特征处理
+    if isFileMean:
+        print("对正常数据process数据进行特征处理".center(40, "*"))
+        tpath = os.path.join(spath, "3.1 正常数据process特征提取数据")
+        # 将cpu特征添加到process_feature中 accumulateFeatures是个没用的指标
+        extraction_normal_process_pds = processpdsList(standard_normal_process_pds, extractFeatures=process_feature,
+                                                accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
+        print("对正常数据server数据进行特征处理".center(40, "*"))
+        tpath = os.path.join(spath, "4.1 正常数据server特征提取数据")
+        extraction_normal_server_pds = serverpdsList(standard_normal_server_pds, extractFeatures=server_feature,
+                                              windowsSize=3, spath=tpath)
+
+    print("对异常数据process数据进行特征处理".center(40, "*"))
+    tpath = os.path.join(spath, "3.2 异常数据process特征提取数据")
     # 将cpu特征添加到process_feature中 accumulateFeatures是个没用的指标
     extraction_process_pds = processpdsList(standard_process_pds, extractFeatures=process_feature,
                                             accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
-    print("对server数据进行特征处理".center(40, "*"))
-    tpath = os.path.join(spath, "4. server特征提取数据")
+    print("对异常数据server数据进行特征处理".center(40, "*"))
+    tpath = os.path.join(spath, "4.2 异常数据server特征提取数据")
     extraction_server_pds = serverpdsList(standard_server_pds, extractFeatures=server_feature,
                                           windowsSize=3, spath=tpath)
 
@@ -174,7 +198,7 @@ if __name__ == "__main__":
 
     # 如果isnormalDataFromNormal=True 得到正常数据中的正常数据 否则得到异常数据中的数据
     if isnormalDataFromNormal:
-        normalTrainData, _ = mergeDataFrames(normalserverpds)
+        normalTrainData, _ = mergeDataFrames(extraction_normal_server_pds)
     else:
         normalTrainData = getFaultDataFrame(alldealedserverpds, [0])
     # ------
