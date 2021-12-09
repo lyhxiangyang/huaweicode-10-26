@@ -89,8 +89,10 @@ def standardPDfromOriginal(df: pd.DataFrame, standardFeatures=None, meanValue=No
     standardDf = PushLabelToFirst(standardDf, TIME_COLUMN_NAME)
     standardDf = PushLabelToEnd(standardDf, FAULT_FLAG)
     return standardDf
+
+
 def standardPDfromOriginal1(df: pd.DataFrame, standardFeatures=None, meanValue=None,
-                           standardValue: int = 100) -> pd.DataFrame:
+                            standardValue: int = 100, standardValueType: str = "int64") -> pd.DataFrame:
     if standardFeatures is None:
         standardFeatures = []
     # 如果为空 代表使用自己的mean
@@ -100,7 +102,7 @@ def standardPDfromOriginal1(df: pd.DataFrame, standardFeatures=None, meanValue=N
     meanValue = meanValue[~meanValue.isin([0])]
     #
     columnnames = list(set(meanValue.index) & set(standardFeatures))
-    df.loc[:, columnnames] = (df.loc[:, columnnames] / meanValue * standardValue).astype("int64")
+    df.loc[:, columnnames] = (df.loc[:, columnnames] / meanValue * standardValue).astype(standardValueType)
     return df
 
 
@@ -156,9 +158,12 @@ def splitDataFrameByTime(df: pd.DataFrame, time_interval: int = 60, timeformat: 
     respd.append(tpd)
     return respd
 
+
 """
 将
 """
+
+
 def splitDataFrameByPID(df: pd.DataFrame, time_interval: int = 60, timeformat: str = '%Y-%m-%d %H:%M:%S') -> List[
     pd.DataFrame]:
     respd = []
@@ -181,7 +186,6 @@ def splitDataFrameByPID(df: pd.DataFrame, time_interval: int = 60, timeformat: s
     tpd = df.loc[beginLine: len(df), :].reset_index(drop=True)
     respd.append(tpd)
     return respd
-
 
 
 """
@@ -599,6 +603,16 @@ def getResultFromTimequantum(predictBegintime: str, predictEndtime: str, abnorma
     return time_coreinformationtpd
 
 
+"""
+去除一个列表中的TIME和faultFlag
+"""
 
 
-
+def removeTimeAndfaultFlagFromList(listfeas: List, inplace: bool = False,
+                                   removeFea=None):
+    if removeFea is None:
+        removeFea = [FAULT_FLAG, TIME_COLUMN_NAME]
+    if not inplace:
+        listfeas = listfeas.copy()
+    [listfeas.remove(ifea) for ifea in removeFea if ifea in removeFea]
+    return listfeas

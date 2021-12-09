@@ -4,6 +4,7 @@ from typing import List, Dict
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
+from utils.DataScripts import standardPDfromOriginal1, removeTimeAndfaultFlagFromList
 from utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 from utils.FeatureSelection import getPValueFromTwoDF, getFeatureNameByBenjamini_Yekutiel
 from utils.auto_forecast import getfilespath, getfilepd, differenceServer, removeAllHeadTail
@@ -17,7 +18,23 @@ def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserve
     abnormal_pdDict = dict(list(abnormalserverPD.groupby(FAULT_FLAG))) # 指定异常类型
     specialAbnormalPd  = abnormal_pdDict[abnormaltype]
     print("正常数据长度：{}".format(len(normalserverPD)))
-    print("异常特征长度：{}".format(len(specialAbnormalPd)))
+    print("异常{}特征长度：{}".format(abnormaltype, len(specialAbnormalPd)))
+
+    # =============================================================================================================归一化
+    columnsFeas = removeTimeAndfaultFlagFromList(list(normalserverPD.columns))
+    # ==============正常数据的归一化
+    print("正常数据平均值和最大值的比较".center(40, "*"))
+    print(normalserverPD[columnsFeas].rolling(window=len(normalserverPD[columnsFeas]), min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna())
+    # 正常上数据使用最大值
+    maxValue = normalserverPD[columnsFeas].max()
+    normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    # ===============异常数据归一化  使用异常里面的正常数据的最大值
+    print("异常数据中正常值的平均值和最大值的比较".center(40, "*"))
+    print(abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(["max", "mean"]).dropna())
+    maxValue = abnormal_pdDict[0].max()
+    specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    # =============================================================================================================归一化结束
+
     # 得到各个特征对应的pvalue值
     feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
     selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
@@ -39,6 +56,22 @@ def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltyp
     normalserverPD = abnormal_pdDict[0]
     print("正常数据长度：{}".format(len(normalserverPD)))
     print("异常特征{} 长度：{}".format(abnormaltype, len(specialAbnormalPd)))
+
+    # =============================================================================================================归一化
+    columnsFeas = removeTimeAndfaultFlagFromList(list(normalserverPD.columns))
+    # ==============正常数据的归一化
+    print("正常数据平均值和最大值的比较".center(40, "*"))
+    print(normalserverPD[columnsFeas].rolling(window=len(normalserverPD[columnsFeas]), min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna())
+    # 正常上数据使用最大值
+    maxValue = normalserverPD[columnsFeas].max()
+    normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    # ===============异常数据归一化  使用异常里面的正常数据的最大值
+    print("异常数据中正常值的平均值和最大值的比较".center(40, "*"))
+    print(abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(["max", "mean"]).dropna())
+    maxValue = abnormal_pdDict[0].max()
+    specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    # =============================================================================================================归一化结束
+
     # =====================================================得到特征选择
     feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
     selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
@@ -143,7 +176,7 @@ if __name__ == "__main__":
     print("{}".format(list(set(selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
 
     print("将两组数组中正常和异常进行对比".center(80, "-"))
-    normal_abnormal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
+    normal_abnormal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, abnormalType)
     print("去掉正常和正常时选择的指标：")
     print("{}".format(list(set(normal_abnormal_selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
 
