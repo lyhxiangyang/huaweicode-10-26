@@ -52,7 +52,7 @@ if __name__ == "__main__":
     process_time_format = '%Y/%m/%d %H:%M'
 
     # 预测是否使用阀值, True为使用阀值预测 必须指定thresholdValueDict， False代表使用模型进行预测, 必须设置好模型的路径
-    isThreshold = True
+    isThreshold = False
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值

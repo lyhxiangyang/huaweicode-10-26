@@ -203,7 +203,7 @@ if __name__ == "__main__":
         normalTrainData = getFaultDataFrame(alldealedserverpds, [0])
     # ------
     print("训练内存泄露模型".center(40, "*"))
-    tpath = os.path.join(spath, "4. 训练内存泄露模型中间数据")
+    tpath = os.path.join(spath, "5. 训练内存泄露模型中间数据")
     # 得到异常数据中的内存泄露数据used指标
     allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [61,62,63,64,65])
     abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
 
     print("训练内存带宽模型".center(40, "*"))
-    tpath = os.path.join(spath, "5. 训练内存带宽模型中间数据")
+    tpath = os.path.join(spath, "6. 训练内存带宽模型中间数据")
     allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [51, 52, 53, 54, 55])
     abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
     allTrainedPD, _ = mergeDataFrames([normalTrainData, abnormalTrainData])
