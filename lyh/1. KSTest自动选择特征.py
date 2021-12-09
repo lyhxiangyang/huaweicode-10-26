@@ -28,7 +28,7 @@ def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserve
     print("正常数据平均值和最大值的比较".center(40, "*"))
     # print(normalserverPD[columnsFeas].rolling(window=len(normalserverPD[columnsFeas]), min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna())
     normalserverPD[columnsFeas].rolling(window=len(normalserverPD[columnsFeas]),
-                                        min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna().to_csv("1. 正常数据平均值和最大值的比较.csv")
+                                        min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna().to_csv(os.path.join(spath, "1. 正常数据平均值和最大值的比较.csv"))
     # 正常上数据使用最大值
     maxValue = normalserverPD[columnsFeas].max()
     normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
