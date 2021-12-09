@@ -30,15 +30,15 @@ def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserve
     normalserverPD[columnsFeas].rolling(window=len(normalserverPD[columnsFeas]),
                                         min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna().to_csv(os.path.join(spath, "1. 正常数据平均值和最大值的比较.csv"))
     # 正常上数据使用最大值
-    maxValue = normalserverPD[columnsFeas].max()
-    normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    meanValue = normalserverPD[columnsFeas].mean()
+    normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=meanValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
     # ===============异常数据归一化  使用异常里面的正常数据的最大值
     print("异常数据中正常值的平均值和最大值的比较".center(40, "*"))
     # print(abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(["max", "mean"]).dropna())
     abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(
         ["max", "mean"]).dropna().to_csv(os.path.join(spath, "2. 异常数据中正常值的平均值和最大值的比较.csv"))
-    maxValue = abnormal_pdDict[0].max()
-    specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    meanValue = abnormal_pdDict[0].mean()
+    specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=meanValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
 
     normalserverPD.to_csv(os.path.join(spath, "3. 归一化后正常数据中正常值.csv"))
     specialAbnormalPd.to_csv(os.path.join(spath, "4. 归一化后异常数据中{}异常值.csv".format(abnormaltype)))
@@ -76,15 +76,15 @@ def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltyp
     normalserverPD[columnsFeas].rolling(window=len(normalserverPD[columnsFeas]),
                                         min_periods=len(normalserverPD[columnsFeas])).agg(["max", "mean"]).dropna().to_csv(os.path.join(spath, "1. 异常数据中正常值平均值和最大值的比较.csv"))
     # 正常上数据使用最大值
-    maxValue = normalserverPD[columnsFeas].max()
-    normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    meanValue = normalserverPD[columnsFeas].mean()
+    normalserverPD = standardPDfromOriginal1(df=normalserverPD, meanValue=meanValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
     # ===============异常数据归一化  使用异常里面的正常数据的最大值
     print("异常数据中正常值的平均值和最大值的比较".center(40, "*"))
     # print(abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(["max", "mean"]).dropna())
     abnormal_pdDict[0].rolling(window=len(abnormal_pdDict[0]), min_periods=len(abnormal_pdDict[0])).agg(
         ["max", "mean"]).dropna().to_csv(os.path.join(spath, "2. 异常数据中正常值平均值和最大值的比较.csv"))
-    maxValue = abnormal_pdDict[0].max()
-    specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=maxValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
+    meanValue = abnormal_pdDict[0].mean()
+    specialAbnormalPd = standardPDfromOriginal1(df=specialAbnormalPd, meanValue=meanValue, standardFeatures=columnsFeas, standardValue=1, standardValueType="float")
 
     normalserverPD.to_csv(os.path.join(spath, "3. 归一化后正常数据中正常值.csv"))
     specialAbnormalPd.to_csv(os.path.join(spath, "4. 归一化后异常数据中{}异常值".format(abnormaltype)))
@@ -187,17 +187,17 @@ if __name__ == "__main__":
     allabnormalserverpd, _ = mergeDataFrames(predictserverpds)
     # getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
 
-    tpath = os.path.join(spath, "两组数据正常-正常")
+    tpath = os.path.join(spath, "1.两组数据正常-正常")
     print("将两组数据中的正常和正常进行对比: ".center(80, "-"))
     normal_normal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 0, spath=tpath)
 
-    tpath = os.path.join(spath, "一组数据正常和异常")
+    tpath = os.path.join(spath, "2.一组数据正常和异常")
     print("将一组数据中的正常和异常进行对比：".center(80, "-"))
     selectFeatureDict = getServerDiffFeaturesFromOneData(allabnormalserverpd, abnormalType, spath=tpath)
     print("去掉正常和正常时选择的指标：")
     print("{}".format(list(set(selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
 
-    tpath = os.path.join(spath, "两组数据正常和异常")
+    tpath = os.path.join(spath, "3.两组数据正常和异常")
     print("将两组数组中正常和异常进行对比".center(80, "-"))
     normal_abnormal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, abnormalType, spath=tpath)
     print("去掉正常和正常时选择的指标：")
