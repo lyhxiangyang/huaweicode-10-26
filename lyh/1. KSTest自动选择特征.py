@@ -131,14 +131,14 @@ if __name__ == "__main__":
     allabnormalserverpd, _ = mergeDataFrames(predictserverpds)
     # getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
 
-    print("将两组数据中的正常和正常进行对比: ".center(20, "#"))
+    print("将两组数据中的正常和正常进行对比: ".center(80, "#"))
     normal_normal_selectFeatureDict = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 0)
 
 
-    print("将一组数据中的正常和异常进行对比：".center(20, "#"))
+    print("将一组数据中的正常和异常进行对比：".center(80, "#"))
     selectFeatureDict = getServerDiffFeaturesFromOneData(allabnormalserverpd, 55)
 
-    print("去掉正常和正常时选择的指标：".center(20, "#"))
+    print("去掉正常和正常时选择的指标：".center(80, "#"))
     print("选择的指标：")
     print("{}".format(list(set(selectFeatureDict.keys()) - set(normal_normal_selectFeatureDict.keys()))))
 
