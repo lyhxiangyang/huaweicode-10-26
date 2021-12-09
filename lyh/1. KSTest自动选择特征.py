@@ -6,14 +6,18 @@ import pandas as pd
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 from utils.FeatureSelection import getPValueFromTwoDF, getFeatureNameByBenjamini_Yekutiel
-from utils.auto_forecast import getfilespath, getfilepd, differenceServer
+from utils.auto_forecast import getfilespath, getfilepd, differenceServer, removeAllHeadTail
 
 """
 比较两个server的DataFrame 异常为abnormal
 """
-def getServerDiffFeatures(normalserverPD: pd.DataFrame, abnormalserverPD: pd.DataFrame, abnormaltype: int) -> List[str]:
-    specialAbnormalPd = dict(list(abnormalserverPD.groupby(FAULT_FLAG)))[abnormaltype] # 指定异常类型
-    print("正常数据长度：".format(len(normalserverPD)))
+def getServerDiffFeaturesFromTwoData(normalserverPD: pd.DataFrame, abnormalserverPD: pd.DataFrame, abnormaltype: int) -> List[str]:
+    # 将所有的异常的首尾去掉
+    abnormalserverPD = removeAllHeadTail(abnormalserverPD, windowsize=3)
+    abnormal_pdDict = dict(list(abnormalserverPD.groupby(FAULT_FLAG))) # 指定异常类型
+    specialAbnormalPd  = abnormal_pdDict[abnormaltype]
+    print("正常数据长度：{}".format(len(normalserverPD)))
+    print("异常特征长度：{}".format(len(specialAbnormalPd)))
     # 得到各个特征对应的pvalue值
     feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
     selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
@@ -28,6 +32,26 @@ def getServerDiffFeatures(normalserverPD: pd.DataFrame, abnormalserverPD: pd.Dat
     print(notselectFeatureList)
     return selectFeatureList
 
+def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltype: int) -> List[str]:
+    abnormalserverPD = removeAllHeadTail(abnormalserverPD, windowsize=3)
+    abnormal_pdDict = dict(list(abnormalserverPD.groupby(FAULT_FLAG))) # 指定异常类型
+    specialAbnormalPd  = abnormal_pdDict[abnormaltype] # 异常类型
+    normalserverPD = abnormalserverPD[0]
+    print("正常数据长度：{}".format(len(normalserverPD)))
+    print("异常特征长度：{}".format(len(specialAbnormalPd)))
+    # =====================================================得到特征选择
+    feature_pvalueDict = getPValueFromTwoDF(normalserverPD, specialAbnormalPd)
+    selectFeatureDict, notselectFeatureDict = getFeatureNameByBenjamini_Yekutiel(feature_pvalueDict, fdr=0.05)
+    selectFeatureList = sorted(selectFeatureDict.items(), key=lambda item: item[1], reverse=False)
+    notselectFeatureList = sorted(notselectFeatureDict.items(), key=lambda item: item[1], reverse=False)
+    print("特征总个数:{}".format(len(selectFeatureList) + len(notselectFeatureList)))
+    print("选择的特征".center(40, "*"))
+    print("个数: {}".format(len(selectFeatureList)))
+    print(selectFeatureList)
+    print("没有选择的特征".center(40, "*"))
+    print("个数：{}".format(len(notselectFeatureList)))
+    print(notselectFeatureList)
+    return selectFeatureList
 
 
 if __name__ == "__main__":
@@ -105,7 +129,19 @@ if __name__ == "__main__":
     # ============================================================================================= 不进行标准化 直接合并判断
     allnormalserverpd, _ = mergeDataFrames(normalserverpds)
     allabnormalserverpd, _ = mergeDataFrames(predictserverpds)
-    getServerDiffFeatures(allnormalserverpd, allabnormalserverpd, 55)
+    # getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 55)
+
+    print("将两组数据中的正常和正常进行对比: ".center(20, "#"))
+    normal_normal_selectFeatureList = getServerDiffFeaturesFromTwoData(allnormalserverpd, allabnormalserverpd, 0)
+
+
+    print("将一组数据中的正常和异常进行对比：".center(20, "#"))
+    selectFeatureList = getServerDiffFeaturesFromOneData(allabnormalserverpd, 55)
+
+    print("去掉正常和正常时选择的指标：".center(20, "#"))
+    print("选择的指标：")
+    print("{}".format(list(set(selectFeatureList) - set(normal_normal_selectFeatureList))))
+
 
 
 
