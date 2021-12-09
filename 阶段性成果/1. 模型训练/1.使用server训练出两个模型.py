@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\测试数据-E5-3km-异常数据"
+    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\训练数据-E5-3km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
@@ -205,20 +205,29 @@ if __name__ == "__main__":
     print("训练内存泄露模型".center(40, "*"))
     tpath = os.path.join(spath, "4. 训练内存泄露模型中间数据")
     # 得到异常数据中的内存泄露数据used指标
-    abnormalTrainData = getFaultDataFrame(alldealedserverpds, [61,62,63,64,65])
-    abnormalTrainData = changePDfaultFlag(abnormalTrainData)
+    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [61,62,63,64,65])
+    abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
     allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None,testAgain=False, spath=tpath, selectedFeature=model_memLeak_features,
                       modelpath=servermemory_modelpath, maxdepth=maxdepth)
+    # 将训练的正常数据和异常数据进行保存
+    normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
+    abnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
+    allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
+
 
     print("训练内存带宽模型".center(40, "*"))
     tpath = os.path.join(spath, "5. 训练内存带宽模型中间数据")
-    abnormalTrainData = getFaultDataFrame(alldealedserverpds, [51, 52, 53, 54, 55])
-    abnormalTrainData = changePDfaultFlag(abnormalTrainData)
+    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [51, 52, 53, 54, 55])
+    abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
     allTrainedPD, _ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath,
                       selectedFeature=model_memBandwidth_features,
                       modelpath=serverbandwidth_modelpath, maxdepth=maxdepth)
+    # 将训练的正常数据和异常数据进行保存
+    normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
+    abnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
+    allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
 
 
 
