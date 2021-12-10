@@ -211,6 +211,7 @@ if __name__ == "__main__":
     allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None,testAgain=False, spath=tpath, selectedFeature=model_memLeak_features,
                       modelpath=servermemory_modelpath, maxdepth=maxdepth)
+    # change_threshold(os.path.join(servermemory_modelpath, "decision_tree.pkl"), 0, 56.8)
     # 将训练的正常数据和异常数据进行保存
     normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
     allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
@@ -247,7 +248,9 @@ if __name__ == "__main__":
     allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath, selectedFeature=model_cpu_features,
                       modelpath=processcpu_modelpath, maxdepth=maxdepth)
+    change_threshold(os.path.join(processcpu_modelpath, "decision_tree.pkl"), 0, 56.8)
     normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
     allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
     allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
+
 
