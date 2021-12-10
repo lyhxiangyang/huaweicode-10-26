@@ -3,34 +3,42 @@ from typing import Set, Tuple
 
 import pandas as pd
 
-from Classifiers.TrainToTest import ModelTrainAndTest, change_threshold
-from utils.DataFrameOperation import mergeDataFrames, changePDfaultFlag
-from utils.DataScripts import getDFmean, getFaultDataFrame
+from utils.DataFrameOperation import mergeDataFrames
+from utils.DataScripts import getDFmean
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult, removeAllHeadTail, removeProcessAllHeadTail
+    predictAllAbnormal, analysePredictResult
+
+
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\训练数据-E5-3km-异常数据"
+    predictdirpath = R"DATA\正常和异常数据\训练数据-Local-1km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
-    normaldirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\E5-3km-正常数据"
+    normaldirpath = R"DATA\正常和异常数据\Local-3km-正常数据"
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
-    # 预测CPU的模型路径 保存的路径
+    # 预测CPU的模型路径
     processcpu_modelpath = R"tmp/modelpath/singlefeature/process_cpu_model"
     # 预测内存泄露的模型路径
     servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/模型训练路径"
+    spath = "tmp/总过程分析/训练数据-Local-1km"
+    # 是否有存在faultFlag
+    isExistFaultFlag = True
+    # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
+    coresnumber = 56  # 运行操作系统的实际核心数  如实填写
+    isManuallyspecifyCoreList = False
+    wrfruncoresnumber = 104  # wrf实际运行在的核心数，如果isManuallyspecifyCoreList = False将会手工推导演
+    coresSet = set(range(0, 103))  # wrf实际运行在的核心数
 
     # 需要对server数据进行处理的指标
     server_feature = ["used", "pgfree"]
@@ -43,6 +51,13 @@ if __name__ == "__main__":
     server_time_format = '%Y/%m/%d %H:%M'
     process_time_format = '%Y/%m/%d %H:%M'
 
+    # 预测是否使用阀值, True为使用阀值预测 必须指定thresholdValueDict， False代表使用模型进行预测, 必须设置好模型的路径
+    isThreshold = True
+    thresholdValueDict = {
+        "process_cpu_mean": 57,
+        "used": 120,  # 不要改key值
+        "pgfree": 130
+    }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
     isFileMean = True
     # 如果上面的是False，则使用下面的字典数据
@@ -53,18 +68,6 @@ if __name__ == "__main__":
         "used": 0,
         "pgfree": 0
     }
-    isnormalDataFromNormal = True # 判断是否使用来自normal数据中的  必须保证有正常数据
-    # 训练模型的指标
-    maxdepth = 5
-    model_memLeak_features = ["used_mean"] # 训练内存泄漏模型需要的指标
-    model_memBandwidth_features = ["pgfree_mean"]
-    model_cpu_features = ["cpu_mean"]
-
-
-
-    # 如果使用了手工指定的平均值，那么正常数据的来源必须是异常数据
-    if not isFileMean:
-        isnormalDataFromNormal = False # 如果平均值不来自文件 代表没有正常值 那么将会使用默认使用异常文件中的正常数据
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
     print("将数据从文件中读取".center(40, "*"))
@@ -77,8 +80,12 @@ if __name__ == "__main__":
     time_server_feature = server_feature.copy()
     time_process_feature = process_feature.copy()
     # 加入时间是为了process和server的对应， 加入pid 是为了进行分类。加入CPU是为了预测哪个CPU出现了异常
-    time_server_feature.extend([TIME_COLUMN_NAME, FAULT_FLAG])
-    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG])
+    time_server_feature.extend([TIME_COLUMN_NAME])
+    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
+    # flagFault要视情况而定
+    if isExistFaultFlag:
+        time_server_feature.append(FAULT_FLAG)
+        time_process_feature.append(FAULT_FLAG)
 
     # 如果为True 才能保证有normal数据
     if isFileMean:
@@ -111,7 +118,6 @@ if __name__ == "__main__":
         # 对正常server进程数据进行差分处理之后，得到一些指标
         normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
 
-
     # 对异常数据进行差分处理之后，得到cpu特征值
     predictprocesspds = differenceProcess(predictprocesspds, process_accumulate_feature)
     add_cpu_column(predictprocesspds)
@@ -142,13 +148,6 @@ if __name__ == "__main__":
     normalserver_meanvalue.to_csv(os.path.join(tpath, "meanvalue_server.csv"))
 
     # ============================================================================================= 对要预测的数据进行标准化处理
-    # 如果normal数据存在，也要对normal数据进行标准化
-    if isFileMean:
-        standard_normal_server_pds = standardLists(pds=normalserverpds, standardFeatures=server_feature,
-                                            meanValue=normalserver_meanvalue, standardValue=100)
-        standard_normal_process_pds = standardLists(pds=normalprocesspds, standardFeatures=process_feature,
-                                             meanValue=normalprocess_meanvalue, standardValue=60)
-
     # 标准化process 和 server数据， 对于process数据，先将cpu想加在一起，然后在求平均值。
     print("标准化要预测的process和server数据".center(40, "*"))
     standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=server_feature,
@@ -161,93 +160,65 @@ if __name__ == "__main__":
     saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
     saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
     # ============================================================================================= 对process数据和server数据进行秒数的处理，将秒数去掉
-    # 如果normal数据存在 也要进行处理
-    if isFileMean:
-        standard_normal_server_pds = changeTimeTo_pdlists(standard_normal_server_pds, server_time_format)
-        standard_normal_process_pds = changeTimeTo_pdlists(standard_normal_process_pds, process_time_format)
-
     standard_server_pds = changeTimeTo_pdlists(standard_server_pds, server_time_format)
     standard_process_pds = changeTimeTo_pdlists(standard_process_pds, process_time_format)
     # ============================================================================================= 对process数据和server数据进行特征提取
-    # 如果normal数据存在也要对normal数据进行特征处理
-    if isFileMean:
-        print("对正常数据process数据进行特征处理".center(40, "*"))
-        tpath = os.path.join(spath, "3.1 正常数据process特征提取数据")
-        # 将cpu特征添加到process_feature中 accumulateFeatures是个没用的指标
-        extraction_normal_process_pds = processpdsList(standard_normal_process_pds, extractFeatures=process_feature,
-                                                accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
-        print("对正常数据server数据进行特征处理".center(40, "*"))
-        tpath = os.path.join(spath, "4.1 正常数据server特征提取数据")
-        extraction_normal_server_pds = serverpdsList(standard_normal_server_pds, extractFeatures=server_feature,
-                                              windowsSize=3, spath=tpath)
-
-    print("对异常数据process数据进行特征处理".center(40, "*"))
-    tpath = os.path.join(spath, "3.2 异常数据process特征提取数据")
-    # 将cpu特征添加到process_feature中 accumulateFeatures是个没用的指标
+    print("对process数据进行特征处理".center(40, "*"))
+    tpath = os.path.join(spath, "3. process特征提取数据")
+    # 将cpu特征添加到process_feature中
     extraction_process_pds = processpdsList(standard_process_pds, extractFeatures=process_feature,
                                             accumulateFeatures=process_feature, windowsSize=3, spath=tpath)
-    print("对异常数据server数据进行特征处理".center(40, "*"))
-    tpath = os.path.join(spath, "4.2 异常数据server特征提取数据")
+    print("对server数据进行特征处理".center(40, "*"))
+    tpath = os.path.join(spath, "4. server特征提取数据")
     extraction_server_pds = serverpdsList(standard_server_pds, extractFeatures=server_feature,
                                           windowsSize=3, spath=tpath)
 
-    # ============================================================================================= 训练内存泄漏模型和内存带宽模型
-    # 正常的数据处理
+    # ============================================================================================= 将process数据和server数据合在一起，按照server时间进行预测
+    print("将提取之后的server数据和process数据进行合并".center(40, "*"))
+    tpath = os.path.join(spath, "5. server和process合并")
     allserverpds, _ = mergeDataFrames(extraction_server_pds)
-    # 对server数据中异常开始前后的是某些数据进行剔除
-    alldealedserverpds = removeAllHeadTail(allserverpds)
-
-    # 如果isnormalDataFromNormal=True 得到正常数据中的正常数据 否则得到异常数据中的数据
-    if isnormalDataFromNormal:
-        normalTrainData, _ = mergeDataFrames(extraction_normal_server_pds)
-    else:
-        normalTrainData = getFaultDataFrame(alldealedserverpds, [0])
-    # ------
-    print("训练内存泄露模型".center(40, "*"))
-    tpath = os.path.join(spath, "5. 训练内存泄露模型中间数据")
-    # 得到异常数据中的内存泄露数据used指标
-    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [61,62,63,64,65])
-    abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
-    allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
-    ModelTrainAndTest(allTrainedPD, None,testAgain=False, spath=tpath, selectedFeature=model_memLeak_features,
-                      modelpath=servermemory_modelpath, maxdepth=maxdepth)
-    # 将训练的正常数据和异常数据进行保存
-    normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
-    allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
-    allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
-
-
-    print("训练内存带宽模型".center(40, "*"))
-    tpath = os.path.join(spath, "6. 训练内存带宽模型中间数据")
-    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [52, 53, 54, 55])
-    abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
-    allTrainedPD, _ = mergeDataFrames([normalTrainData, abnormalTrainData])
-    ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath,
-                      selectedFeature=model_memBandwidth_features,
-                      modelpath=serverbandwidth_modelpath, maxdepth=maxdepth)
-    # 将训练的正常数据和异常数据进行保存
-    normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
-    allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
-    allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
-    change_threshold(os.path.join(servermemory_modelpath, "decision_tree.pkl"), 0, 120)
-
-    # ============================================================================================= 训练内存泄漏模型和内存带宽模型
-    # 正常的数据处理
-    print("训练CPU异常模型".center(40, "*"))
-    tpath = os.path.join(spath, "7. 训练CPU异常模型中间数据")
     allprocesspds, _ = mergeDataFrames(extraction_process_pds)
-    allprocesspds = removeProcessAllHeadTail(allprocesspds, windowsize=3) # 出去异常前后两个点
-    if isnormalDataFromNormal:
-        normalTrainData, _ = mergeDataFrames(extraction_normal_process_pds)
-    else:
-        normalTrainData = getFaultDataFrame(allprocesspds, [0])
+    serverinformationDict = deal_serverpds_and_processpds(
+        allserverpds=allserverpds,
+        allprocesspds=allprocesspds,
+        spath=tpath,
+        isThreshold=isThreshold,
+        thresholdValue=thresholdValueDict,
+        modelfilepath=processcpu_modelpath
+    )
+    # ============================================================================================= 对使用到的核心数进行判断, 因为可能并不是全核心进行预测
+    print("使用到的核心数进行判断".center(40, "*"))
 
-    allabnormalTrainData = getFaultDataFrame(allprocesspds, [11, 12, 13, 14, 15])
-    abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
-    allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
-    ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath, selectedFeature=model_cpu_features,
-                      modelpath=processcpu_modelpath, maxdepth=maxdepth)
-    normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
-    allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
-    allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
 
+    # 得到核心数和核心集合的函数
+    def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
+        coresSet = set(list(processpd[CPU_FEATURE]))
+        coresnum = len(coresSet)
+        return coresnum, coresSet
+
+
+    if not isManuallyspecifyCoreList:
+        wrfruncoresnumber, coresSet = getcores(allprocesspds)
+    print("系统核心数量{}".format(coresnumber))
+    print("wrf运行核心数量：{}".format(wrfruncoresnumber))
+    print("核心的位数：{}".format(coresSet))
+    with open(os.path.join(spath, "运行核心的数据.txt"), "w", encoding="utf-8") as f:
+        writeinfo = ["系统核心数量{}\n".format(coresnumber), "核心数量：{}\n".format(wrfruncoresnumber), "核心的位数：{}\n".format(coresSet)]
+        f.writelines(writeinfo)
+    # ============================================================================================= 对process数据和server数据合在一起进行预测
+    # 只有存在FaultFlag才能进行预测
+    if isExistFaultFlag:
+        print("对server数据和process数据进行预测".center(40, "*"))
+        tpath = os.path.join(spath, "6. 最终预测结果")
+        # time  faultFlag  preFlag  mem_leak  mem_bandwidth
+        predictpd = predictAllAbnormal(
+            serverinformationDict=serverinformationDict,
+            spath=tpath,
+            isThreshold=isThreshold,
+            thresholdValue=thresholdValueDict,
+            Memory_bandwidth_modelpath=serverbandwidth_modelpath,
+            Memory_leaks_modelpath=servermemory_modelpath,
+            coresnumber=wrfruncoresnumber
+        )
+        # 对结果进行分析
+        analysePredictResult(predictpd, tpath)

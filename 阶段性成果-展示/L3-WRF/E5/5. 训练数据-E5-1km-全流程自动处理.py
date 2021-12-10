@@ -15,11 +15,11 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\grapes数据\训练数据-Local-异常数据"
+    predictdirpath = R"DATA\正常和异常数据\训练数据-E5-1km-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
-    # 指定正常server和process文件路径 如果isFileMean == False 下面三个变量不需要被指定
-    normaldirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\Local-3km-正常数据"
+    # 指定正常server和process文件路径
+    normaldirpath = R"DATA\正常和异常数据\E5-3km-正常数据"
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
     # 预测CPU的模型路径
@@ -29,12 +29,12 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/Grapes/训练数据-Local"
+    spath = "tmp/总过程分析/训练数据-E5-1KM"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
-    coresnumber = 56  # 运行操作系统的实际核心数  如实填写
-    isManuallyspecifyCoreList = False # 默认自动生成
+    coresnumber = 104  # 运行操作系统的实际核心数  如实填写
+    isManuallyspecifyCoreList = False
     wrfruncoresnumber = 104  # wrf实际运行在的核心数，如果isManuallyspecifyCoreList = False将会手工推导演
     coresSet = set(range(0, 103))  # wrf实际运行在的核心数
 
@@ -54,18 +54,17 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         "used": 120,  # 不要改key值
-        "pgfree": 130
+        "pgfree": 500
     }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
-    isFileMean = False # 不从文件中读取
+    isFileMean = True
     # 如果上面的是False，则使用下面的字典数据
     processmeanVaule = {
         "cpu": 60,
     }
-    # Local训练数据下面的平均值为下面
     servermeanValue = {
-        "used": 50000000000,
-        "pgfree": 12989787,
+        "used": 0,
+        "pgfree": 0
     }
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
@@ -222,3 +221,4 @@ if __name__ == "__main__":
         )
         # 对结果进行分析
         analysePredictResult(predictpd, tpath)
+

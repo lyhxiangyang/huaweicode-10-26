@@ -1,19 +1,13 @@
 import os
-from typing import Set, Tuple
 
 import pandas as pd
 
 from Classifiers.TrainToTest import ModelTrainAndTest
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import getDFmean
-from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
+from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles
-from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
-    standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult, removeAllHeadTail, remove_Abnormal_Head_Tail
-
-
-
+from utils.auto_forecast import getfilespath, getfilepd, differenceServer, \
+    standardLists, changeTimeTo_pdlists, serverpdsList, removeAllHeadTail, remove_Abnormal_Head_Tail
 
 """
 将一个DataFrame里面的数值全部更改为对应的模数
@@ -38,14 +32,12 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\grapes数据\测试数据-Local-异常数据"
+    predictdirpath = R"DATA\正常和异常数据\grapes数据\测试数据-E5-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
-    predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
-    # 指定正常server和process文件路径 如果isFileMean == False 下面三个变量不需要被指定
-    normaldirpath = R"C:\Users\lWX1084330\Desktop\正常和异常数据\Local-3km-正常数据"
-    normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/Grapes/全指标预测测试数据-Local"
+    spath = "tmp/Grapes-tmp"
+    if not os.path.exists(spath):
+        os.makedirs(spath)
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
@@ -119,9 +111,8 @@ if __name__ == "__main__":
         tpd = getfilepd(ifile)
         tpd = tpd.loc[:, time_server_feature]
         predictserverpds.append(tpd)
-    # ============================================================================================= 对读取到的数据进行差分，并且将cpu添加到要提取的特征中 OK
+    # ============================================================================================= 进行差分OK
     print("对读取到的原始数据进行差分".format(40, "*"))
-
 
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
@@ -134,6 +125,12 @@ if __name__ == "__main__":
     fault_DataFrameDict = dict(list(allfeatureMeanValue.groupby(FAULT_FLAG)))
     # 得到0
     normalserver_meanvalue = fault_DataFrameDict[0][server_feature].mean()
+    normalserver_meanvalue:pd.Series
+    normalserver_meanvalue.to_csv(os.path.join(spath, "平均值修改前.csv"))
+    # 将used和pgfree修改为指定值
+    normalserver_meanvalue["used"] = 56000000000
+    normalserver_meanvalue["pgfree"] = 56000000
+    normalserver_meanvalue.to_csv(os.path.join(spath, "平均值修改后.csv"))
 
     # ============================================================================================= 对要预测的数据进行标准化处理
     # 标准化process 和 server数据， 对于process数据，先将cpu想加在一起，然后在求平均值。
@@ -173,7 +170,7 @@ if __name__ == "__main__":
     # ============================================================================================= 模型的训练和预测
     allfeatureload1_nosuffix = list(allTestPD.columns)
     max_depth = 5
-    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="Classifiers/saved_model/tmp_load1_nosuffix", maxdepth=max_depth)
+    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="tmp/grapemodels/memory_bandwidth_model", maxdepth=max_depth)
 
 
 
