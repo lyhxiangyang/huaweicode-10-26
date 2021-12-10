@@ -241,7 +241,7 @@ if __name__ == "__main__":
     else:
         normalTrainData = getFaultDataFrame(allprocesspds, [0])
 
-    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [11, 12, 13, 14, 15])
+    allabnormalTrainData = getFaultDataFrame(allprocesspds, [11, 12, 13, 14, 15])
     abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
     allTrainedPD,_ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath, selectedFeature=model_cpu_features,
@@ -249,101 +249,4 @@ if __name__ == "__main__":
     normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
     allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
     allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
