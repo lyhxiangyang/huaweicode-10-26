@@ -763,7 +763,6 @@ def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFr
     removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
     return removepd
 
-
 # 去除指定异常及其首尾数据
 def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
     dealflag = "faultFlag"

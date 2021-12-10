@@ -3,7 +3,7 @@ from typing import Set, Tuple
 
 import pandas as pd
 
-from Classifiers.TrainToTest import ModelTrainAndTest
+from Classifiers.TrainToTest import ModelTrainAndTest, change_threshold
 from utils.DataFrameOperation import mergeDataFrames, changePDfaultFlag
 from utils.DataScripts import getDFmean, getFaultDataFrame
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
     print("训练内存带宽模型".center(40, "*"))
     tpath = os.path.join(spath, "6. 训练内存带宽模型中间数据")
-    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [51, 52, 53, 54, 55])
+    allabnormalTrainData = getFaultDataFrame(alldealedserverpds, [52, 53, 54, 55])
     abnormalTrainData = changePDfaultFlag(allabnormalTrainData)
     allTrainedPD, _ = mergeDataFrames([normalTrainData, abnormalTrainData])
     ModelTrainAndTest(allTrainedPD, None, testAgain=False, spath=tpath,
@@ -228,6 +228,7 @@ if __name__ == "__main__":
     normalTrainData.to_csv(os.path.join(tpath, "0.正常训练数据.csv"))
     allabnormalTrainData.to_csv(os.path.join(tpath, "0.异常训练数据.csv"))
     allTrainedPD.to_csv(os.path.join(tpath, "0.正常异常合并训练数据.csv"))
+    change_threshold(os.path.join(servermemory_modelpath, "decision_tree.pkl"), 0, 120)
 
 
 
