@@ -763,6 +763,23 @@ def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFr
     removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
     return removepd
 
+# 去除进程数据中所有异常的首尾
+# 保证这个进程数据包含pid选项
+def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFrame:
+    removepds = []
+    for ipid, ipd in processPd.groupby(PID_FEATURE):
+        if len(ipd) <= 6:
+            continue
+        tpd = removeAllHeadTail(ipd, windowsize=windowsize)
+        removepds.append(tpd)
+    allpd, _ = mergeDataFrames(removepds)
+    return allpd
+
+
+
+
+    return removepd
+
 # 去除指定异常及其首尾数据
 def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
     dealflag = "faultFlag"

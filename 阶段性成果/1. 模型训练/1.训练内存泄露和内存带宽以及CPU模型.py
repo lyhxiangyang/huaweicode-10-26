@@ -10,7 +10,7 @@ from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_F
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult, removeAllHeadTail
+    predictAllAbnormal, analysePredictResult, removeAllHeadTail, removeProcessAllHeadTail
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
@@ -236,6 +236,7 @@ if __name__ == "__main__":
     print("训练CPU异常模型".center(40, "*"))
     tpath = os.path.join(spath, "7. 训练CPU异常模型中间数据")
     allprocesspds, _ = mergeDataFrames(extraction_process_pds)
+    allprocesspds = removeProcessAllHeadTail(allprocesspds, windowsize=3) # 出去异常前后两个点
     if isnormalDataFromNormal:
         normalTrainData, _ = mergeDataFrames(extraction_normal_process_pds)
     else:
