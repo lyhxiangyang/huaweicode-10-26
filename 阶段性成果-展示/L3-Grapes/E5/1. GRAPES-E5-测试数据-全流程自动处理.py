@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # 预测内存泄露的模型路径
     servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
     # 预测内存带宽的模型路径
-    serverbandwidth_modelpath = R"tmp/grapemodels/memory_bandwidth_model"
+    serverbandwidth_modelpath = R"tmp/modelpath/grape_e5_memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/总过程分析/Grapes/测试数据-E5"
     # 是否有存在faultFlag

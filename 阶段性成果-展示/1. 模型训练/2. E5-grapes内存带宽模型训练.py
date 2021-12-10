@@ -34,8 +34,11 @@ if __name__ == "__main__":
     # 其中单个server文件我默认是连续的
     predictdirpath = R"DATA\正常和异常数据\grapes数据\测试数据-E5-异常数据"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
+
+    # 模型保存路径
+    bandwidth_modelpath = R"tmp/modelpath/grape_e5_memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/Grapes-tmp"
+    spath = "tmp/模型训练中间数据/2.E5-GRAPES-内存带宽"
     if not os.path.exists(spath):
         os.makedirs(spath)
     # 是否有存在faultFlag
@@ -170,7 +173,7 @@ if __name__ == "__main__":
     # ============================================================================================= 模型的训练和预测
     allfeatureload1_nosuffix = list(allTestPD.columns)
     max_depth = 5
-    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath="tmp/grapemodels/memory_bandwidth_model", maxdepth=max_depth)
+    ModelTrainAndTest(allTrainedPD, allTestPD, spath=spath, selectedFeature=allfeatureload1_nosuffix, modelpath=bandwidth_modelpath, maxdepth=max_depth)
 
 
 

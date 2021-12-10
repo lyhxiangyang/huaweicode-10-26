@@ -41,7 +41,7 @@ if __name__ == "__main__":
     servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
     servermemory_modeltype = 0
     # 预测内存带宽的模型路径
-    serverbandwidth_modelpath = R"tmp/grapemodels/memory_bandwidth_model-local"
+    serverbandwidth_modelpath = R"tmp/modelpath/grape_local_memory_bandwidth_model"
     serverbandwidth_modeltype = 1
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/总过程分析/Grapes/测试数据-Local"

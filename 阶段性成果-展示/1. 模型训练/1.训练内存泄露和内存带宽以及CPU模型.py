@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # 预测内存带宽的模型路径
     serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/模型训练路径"
+    spath = "tmp/模型训练中间数据/1.训练三种模型"
 
     # 需要对server数据进行处理的指标
     server_feature = ["used", "pgfree"]
