@@ -66,8 +66,8 @@ if __name__ == "__main__":
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
     process_feature = ["user", "system", "iowait", "memory_percent", "rss", "vms", "shared",
                        "text", "lib", "data", "dirty", "read_count", "write_count", "read_bytes", "write_bytes",
-                       "read_chars", "write_chars", "num_threads"]
-    process_accumulate_feature = ["user", "system", "read_count", "write_count", "read_bytes", "write_bytes","read_chars", "write_chars"]
+                       "read_chars", "write_chars", "num_threads", "voluntary", "involuntary"]
+    process_accumulate_feature = ["user", "system", "read_count", "write_count", "read_bytes", "write_bytes","read_chars", "write_chars", "voluntary", "involuntary"]
 
     # "user",
     # "system",

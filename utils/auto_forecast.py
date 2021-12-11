@@ -1117,7 +1117,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
     """
     def getProbability (iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
         memleakprobability = list(iprepd["内存泄露概率"])
-        cpuprobability = list(["CPU异常概率"])
+        cpuprobability = list(iprepd["CPU异常概率"])
         membanwidthprobability = list(iprepd["内存带宽异常概率"])
 
         minmemleakprobability = min(memleakprobability)
