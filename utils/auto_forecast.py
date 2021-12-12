@@ -647,8 +647,6 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         predictDict[FAULT_FLAG] = serverinformationDict[FAULT_FLAG]
     # 对CPU进行预测
     predictDict["CPU_Abnormal"] = predictcpu(serverinformationDict, coresnumber)
-    if not isThreshold:
-        predictDict["CPU异常概率"] = getCPU_Abnormal_Probability(serverinformationDict, coresnumber)
     # 对内存泄露进行预测
     predictDict["mem_leak"], predict_probability = predict_memory_leaks(
         serverinformationDict=serverinformationDict,
@@ -658,8 +656,6 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         mem_leak_features=mem_leak_features,
         memory_leaks_modeltype=memory_leaks_modeltype
     )
-    if predict_probability is not None:
-        predictDict["内存泄露概率"] = predict_probability
     # 对内存带宽进行预测
     predictDict["mem_bandwidth"], predict_probability = predict_memory_bandwidth(
         serverinformationDict=serverinformationDict,
@@ -669,12 +665,11 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
         mem_bandwidth_features=mem_bandwidth_features,
         memory_bandwidth_modeltype=memory_bandwidth_modeltype,
     )
-    if predict_probability is not None:
-        predictDict["内存带宽异常概率"] = predict_probability
     # 得到核的数量
     predictDict["coresnums"] = serverinformationDict["coresnums"]
     # 根据CPU信息和得到真是标签值
     predictDict["preFlag"] = get_realpredict(predictDict, serverinformationDict["abnormalcores"])
+    predictDict["概率"] = getProbability(list(predictDict["preFlag"]))
     # 某一时刻的cpu列表
     wrfnumList = serverinformationDict['abnormalcores']
     # 得到某一时刻下
@@ -1116,15 +1111,9 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
     
     """
     def getProbability (iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
-        memleakprobability = list(iprepd["内存泄露概率"])
-        cpuprobability = list(iprepd["CPU异常概率"])
-        membanwidthprobability = list(iprepd["内存带宽异常概率"])
-
-        minmemleakprobability = min(memleakprobability)
-        mincpuprobability = min(cpuprobability)
-        minmembanwidthprobability = min(membanwidthprobability)
-
-        return [minmemleakprobability, mincpuprobability, minmembanwidthprobability]
+        nowtimeProbabilityList = list(iprepd["概率"])
+        nowtimeProbability = iprepd["概率"].mean()
+        return nowtimeProbability
 
 
 
@@ -1157,15 +1146,8 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         # 判断是否有真实标签值与其重叠
         iscross, tcrosspd, trealpd = determineDataframeListOverlap(iprepd, realTimePeriodAbnormalPds)
         # 得到概率
-        if "内存泄露概率" in iprepd.columns:
-            relist = getProbability(iprepd=iprepd, tcrosspd=tcrosspd, trealpd=trealpd)
-            minmemleakprobability = relist[0]
-            mincpuprobability = relist[1]
-            minmembanwidthprobability = relist[2]
-
-            timeperiodDict["内存泄露概率"].append(minmemleakprobability)
-            timeperiodDict["内存带宽抢占概率"].append(minmembanwidthprobability)
-            timeperiodDict["CPU异常概率"].append(mincpuprobability)
+        nowtimeProbability = getProbability(iprepd=iprepd, tcrosspd=tcrosspd, trealpd=trealpd)
+        timeperiodDict["概率"].append(nowtimeProbability)
 
         realcrossBeginTime = str(-1)
         realcrossEndTime = str(-1)
@@ -1237,3 +1219,78 @@ def allMistakesOnExtractingAllCore(processpd: pd.DataFrame, windowsize: int = 2)
         faultPdDict = allMistakesOnExtractingOneCore(ipd, windowsize=windowsize)
         core_faultpdDict[icore] = faultPdDict
     return core_faultpdDict
+
+"""
+根据预测标签值得到概率
+0-> 代表不同  1->代表相同
+"""
+def getProbability(preFlags: List[int]) -> List[float]:
+
+    def getBeforeData(preFlags: List[int], ipos: int, judgelen: int) -> List[int]:
+        res = []
+        for bpos in range(ipos - judgelen, ipos, 1):
+            if bpos < 0:
+                res.append(0)
+                continue
+            if preFlags[ipos] == preFlags[bpos]:
+                res.append(1)
+            else:
+                res.append(0)
+        return res
+    def getAfterData(preFlags: List[int], ipos: int, judgelen: int) -> List[int]:
+        res = []
+        for bpos in range(ipos + 1, ipos + judgelen + 1, 1):
+            if bpos >= len(preFlags):
+                res.append(0) # 不同
+                continue
+            if preFlags[ipos] == preFlags[bpos]:
+                res.append(1)
+            else:
+                res.append(0)
+        return res
+    """
+    传入是否重复
+    """
+    def getp(isSameFlags: List[int], probabilities: List[float]) -> float:
+        assert len(isSameFlags) == len(probabilities)
+        return sum( isSameFlags[i] * probabilities[i] for i in range(0, len(isSameFlags)))
+
+    # 得到时间概率的逻辑部分
+    probabilityList = []
+    preprobability = [0.1, 0.2, 0.3, 0.4]
+    reverseprobability = list(reversed(preprobability))  # 概率相反
+    judgeLen = len(preprobability) # 概率的长度
+    for ipos, iflag in enumerate(preFlags):
+        bD = getBeforeData(preFlags, ipos, judgeLen)
+        aD = getAfterData(preFlags, ipos, judgeLen)
+        nowprobability = 0.1 + 0.45 * (getp(bD, preprobability)) + 0.45 * (getp(aD, reverseprobability))
+        probabilityList.append(nowprobability)
+    return probabilityList
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

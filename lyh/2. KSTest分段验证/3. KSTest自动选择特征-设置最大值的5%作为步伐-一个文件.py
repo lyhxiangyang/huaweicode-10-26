@@ -95,7 +95,6 @@ def cutOneDataframe(onepd: pd.DataFrame, serverfeature: List[str], feaMaxValue: 
 
 
 def cutDataframeLists(pds: List[pd.DataFrame], serverfeature: List[str], feaMaxValue: pd.Series, percentstep: float):
-    respds = []
     for ipd in pds:
         cutOneDataframe(ipd, serverfeature=serverfeature, feaMaxValue=feaMaxValue, percentstep=percentstep)
 
