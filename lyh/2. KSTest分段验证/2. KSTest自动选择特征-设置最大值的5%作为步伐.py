@@ -8,6 +8,7 @@ from utils.DataFrameOperation import mergeDataFrames
 from utils.DataScripts import standardPDfromOriginal1, removeTimeAndfaultFlagFromList
 from utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, CPU_FEATURE
 from utils.FeatureSelection import getPValueFromTwoDF, getFeatureNameByBenjamini_Yekutiel
+from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceServer, removeAllHeadTail, smooth_dfs
 
 """
@@ -54,7 +55,7 @@ def cutOneDataframe(onepd: pd.DataFrame, serverfeature: List[str], feaMaxValue: 
         columnname = x.name
         maxvalues = feaMaxValue[columnname]
         steps = maxvalues * percentstep
-        bins = list(np.arange(1, maxvalues, steps))
+        bins = list(np.arange(0, maxvalues, steps))
         bins.append((maxvalues))
         labels = bins[0: -1]
         return pd.cut(x, bins=bins, labels=labels, right=False)
@@ -172,13 +173,12 @@ if __name__ == "__main__":
                       percentstep=defaultPercentstep)
     cutDataframeLists(difference_abnormal_serverpds, serverfeature=server_feature, feaMaxValue=servermaxValue,
                       percentstep=defaultPercentstep)
+    saveDFListToFiles(os.path.join(spath, "正常server"), difference_normal_serverpds)
+    saveDFListToFiles(os.path.join(spath, "异常server"), difference_abnormal_serverpds)
     # ============================================================================================= KSTest进行比较
     allnormalpds, _ = mergeDataFrames(difference_normal_serverpds)
     allabnormalpds, _ = mergeDataFrames(difference_abnormal_serverpds)
-
     # 将文件保存
-    allnormalpds.to_csv(os.path.join(spath, "正常文件标准化.csv"))
-    allabnormalpds.to_csv(os.path.join(spath, "异常文件标准化.csv"))
     getServerDiffFeaturesFromTwoData(normalserverPD=allnormalpds, abnormalserverPD=allabnormalpds, abnormaltype=55)
 
 
