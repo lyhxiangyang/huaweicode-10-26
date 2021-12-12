@@ -10,7 +10,7 @@ import pandas as pd
 from Classifiers.ModelPred import select_and_pred, select_and_pred_probability
 from utils.DataFrameOperation import mergeDataFrames, SortLabels, PushLabelToFirst, PushLabelToEnd, \
     subtractLastLineFromDataFrame
-from utils.DataScripts import TranslateTimeListStrToStr, standardPDfromOriginal1
+from utils.DataScripts import TranslateTimeListStrToStr, standardPDfromOriginal1, removeTimeAndfaultFlagFromList
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE, CPU_FEATURE, MODEL_TYPE, CPU_ABNORMAL_TYPE, \
     MEMORY_ABNORMAL_TYPE
 
@@ -1187,6 +1187,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
 
 """
 对server数据列表中pgfree进行滑动窗口的处理
+会将传入参数的列表中dataframe本身数值进行修改
 """
 
 
@@ -1196,6 +1197,17 @@ def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List
         if pgfree_name in ipd.columns.array:
             ipd[pgfree_name] = ipd[pgfree_name].rolling(window=smoothwinsize, min_periods=1, center=True).median()
     return serverpds
+# 将dataframe中指定指标进行平滑，默认是使用除了time和faultflag
+# 会将serverpds本身的值进行修改
+def smooth_dfs(serverpds: List[pd.DataFrame], smoothwinsize: int = 7, features: List[str] = None) -> List[pd.DataFrame]:
+    if features is None:
+        features = list(serverpds[0].columns.array)
+    # 去除特征值中的time和faultFlag
+    removeTimeAndfaultFlagFromList(features, inplace=True)
+    for ipd in serverpds:
+        ipd[features] = ipd[features].rolling(window=smoothwinsize, min_periods=1, center=True).median
+
+
 
 
 """

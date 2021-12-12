@@ -75,3 +75,8 @@ def getFeatureNameByBenjamini_Yekutiel(dictPvalues: Dict[str, float], fdr: float
         else:
             notselectFeatureDict[nowfeaturename] = pvals_corrected[i]
     return selectFeatureDict, notselectFeatureDict
+
+
+# KSTest验证时使用下面的函数
+
+
