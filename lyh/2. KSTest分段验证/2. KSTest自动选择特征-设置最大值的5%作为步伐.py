@@ -1,6 +1,7 @@
 import os
 from typing import List, Dict, Tuple, Set
 
+import numpy as np
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
@@ -52,8 +53,8 @@ def cutOneDataframe(onepd: pd.DataFrame, serverfeature: List[str], feaMaxValue: 
         # 得到最大值
         columnname = x.name
         maxvalues = feaMaxValue[columnname]
-        steps = int(1 / percentstep)  # 分成多少步
-        bins = list(range(0, maxvalues, steps))
+        steps = maxvalues * percentstep
+        bins = list(np.arange(0, maxvalues, steps))
         labels = bins[0:-1]
         return pd.cut(x, bins=bins, labels=labels, right=False)
 

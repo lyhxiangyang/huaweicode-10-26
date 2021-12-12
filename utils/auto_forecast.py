@@ -1205,7 +1205,7 @@ def smooth_dfs(serverpds: List[pd.DataFrame], smoothwinsize: int = 7, features: 
     # 去除特征值中的time和faultFlag
     removeTimeAndfaultFlagFromList(features, inplace=True)
     for ipd in serverpds:
-        ipd[features] = ipd[features].rolling(window=smoothwinsize, min_periods=1, center=True).median
+        ipd[features] = ipd[features].rolling(window=smoothwinsize, min_periods=1, center=True).median()
 
 
 
