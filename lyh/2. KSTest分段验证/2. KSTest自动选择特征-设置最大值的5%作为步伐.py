@@ -54,8 +54,9 @@ def cutOneDataframe(onepd: pd.DataFrame, serverfeature: List[str], feaMaxValue: 
         columnname = x.name
         maxvalues = feaMaxValue[columnname]
         steps = maxvalues * percentstep
-        bins = list(np.arange(0, maxvalues, steps))
-        labels = bins[0:-1]
+        bins = list(np.arange(1, maxvalues, steps))
+        bins.append((maxvalues))
+        labels = bins[0: -1]
         return pd.cut(x, bins=bins, labels=labels, right=False)
 
     onepd[serverfeature] = onepd[serverfeature].apply(oneColumnsFunction)
@@ -130,7 +131,7 @@ if __name__ == "__main__":
                                  'pgsteal', 'pgfree']
     # 每个特征值的取值返回，如果在这里，就按照这个范围进行使用，否则不在这个范围内的数值，会自动进行推导求出返回。
     # 格式为featurename: (lengthstep) lengthstep代表着多少长度以内视为同一个数字
-    defaultPercentstep = 0.05  # 默认使用最大的值的0.05作为一个步
+    defaultPercentstep = 0.1  # 默认使用最大的值的0.05作为一个步
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
     print("将数据从文件中读取".center(40, "*"))
@@ -161,6 +162,10 @@ if __name__ == "__main__":
     allserverpd, _ = mergeDataFrames(difference_abnormal_serverpds + difference_normal_serverpds)
     serverminValue = allserverpd[server_feature].min()
     servermaxValue = allserverpd[server_feature].max()
+
+    # 将max的值都增大5%
+    servermaxValue = servermaxValue * 1.05
+    servermaxValue = servermaxValue + 1
 
     # ============================================================================================= 将每一列的最大值的5% 或者 其他数值作为一步
     cutDataframeLists(difference_normal_serverpds, serverfeature=server_feature, feaMaxValue=servermaxValue,
