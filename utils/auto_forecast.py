@@ -1050,7 +1050,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
 """
 
 
-def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
+def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "time", realFlagName: str="faultFlag", testFlagName:str="preFlag", probabilityName: str="概率") -> pd.DataFrame:
     # ========================================================================================================== 函数部分
     # 找到一个列表中连续不为0的数据的位置, 返回的是每段不为0的起始位置[4,9), 左闭右开
     def findAbnormalPos(flags: List[int]) -> List[Tuple[int, int]]:
@@ -1079,8 +1079,8 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
     # 判断两个DataFrame是否交叉，如果交叉返回True，DataFrame  否则 False，DataFrame
     def determineTwoDataframeOverlap(df1: pd.DataFrame, df2: pd.DataFrame) -> Union[
         tuple[bool, None], tuple[bool, Any]]:
-        df1times = set(df1[TIME_COLUMN_NAME])
-        df2times = set(df2[TIME_COLUMN_NAME])
+        df1times = set(df1[timeLabelName])
+        df2times = set(df2[timeLabelName])
         overlapTime = list(df1times & df2times)
         if len(overlapTime) == 0:
             return False, None
@@ -1089,7 +1089,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
             if x in overlapTime:
                 return True
             return False
-        return True, df1.loc[df1[TIME_COLUMN_NAME].apply(f1)]
+        return True, df1.loc[df1[timeLabelName].apply(f1)]
 
     # 判断一个DataFrame的时间是否与一个时间列表交叉，如果交叉返回交叉的True, DataFrame 否则 False，DataFrame
     # 返回是否交叉  返回交叉的部分  返回匹配到交叉的部分
@@ -1113,15 +1113,14 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
     
     """
     def getProbability (iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
-        nowtimeProbabilityList = list(iprepd["概率"])
-        nowtimeProbability = iprepd["概率"].mean()
+        nowtimeProbability = iprepd[probabilityName].mean()
         return nowtimeProbability
 
     # ====================================================================================================== 函数部分结束
     # =================================================================================================得到时间段的逻辑部分
-    preflaglabel = "preFlag"
-    reallabels = list(predictpd[FAULT_FLAG])
-    prelabels = list(predictpd[preflaglabel])
+    testLabelName = testFlagName
+    reallabels = list(predictpd[realFlagName])
+    prelabels = list(predictpd[testLabelName])
     # =================================================================================================得到真实标签的分类
     beginpos_endpos_list = findAbnormalPos(reallabels)
     realTimePeriodAbnormalPds = getDataFramesFromPos(predictpd, beginpos_endpos_list)
@@ -1133,13 +1132,13 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
     timeperiodDict = defaultdict(list)
     for iprepd in preTimePeriodAbnormalPds:
         assert len(iprepd) != 0
-        prebegintime = iprepd[TIME_COLUMN_NAME].iloc[0] # 预测开始时间
+        prebegintime = iprepd[timeLabelName].iloc[0] # 预测开始时间
         timeperiodDict["检测开始时间"].append(prebegintime)
-        preendtime = iprepd[TIME_COLUMN_NAME].iloc[-1] # 预测结束时间
+        preendtime = iprepd[timeLabelName].iloc[-1] # 预测结束时间
         timeperiodDict["检测结束时间"].append(preendtime)
         preLastime = len(iprepd) # 预测持续时间
         timeperiodDict["检测运行时间"].append(preLastime)
-        maxNumLabels, preAllLabels = getMaxNumLabels(list(iprepd[preflaglabel])) # 得到当前预测时间内的预测值
+        maxNumLabels, preAllLabels = getMaxNumLabels(list(iprepd[testLabelName])) # 得到当前预测时间内的预测值
         timeperiodDict["检测标记"].append(maxNumLabels)
         timeperiodDict["检测所有标记"].append(",".join([str(i) for i in preAllLabels]))
 
@@ -1156,12 +1155,12 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         realcrossLabels = 0
         if iscross:
             assert len(tcrosspd) != 0
-            realcrossBeginTime = trealpd[TIME_COLUMN_NAME].iloc[0]
-            realcrossEndTime = trealpd[TIME_COLUMN_NAME].iloc[-1]
+            realcrossBeginTime = trealpd[timeLabelName].iloc[0]
+            realcrossEndTime = trealpd[timeLabelName].iloc[-1]
             crossTime = len(tcrosspd)
             realTimeLen = len(trealpd)
 
-            realcrossLabels, _ = getMaxNumLabels(list(trealpd[FAULT_FLAG]))
+            realcrossLabels, _ = getMaxNumLabels(list(trealpd[realFlagName]))
         timeperiodDict["实际开始时间"].append(realcrossBeginTime)
         timeperiodDict["实际结束时间"].append(realcrossEndTime)
         timeperiodDict["实际运行时间"].append(realTimeLen)
@@ -1288,13 +1287,13 @@ def outputRestult(rpath: str, spath: str):
         f.write("准确率: {}".format(acc))
     # ==========================================================================================================输出时间段
     filepath = os.path.join(rpath, "5. 不去除首尾-详细时间段信息.csv")
-    writefilepath = os.path.join(spath, "详细时间段信息.csv")
+    writefilepath = os.path.join(spath, "持续时间.csv")
     feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "检测运行时间","实际运行时间","重叠时间"]
     tpd = pd.read_csv(filepath)[feas]
     tpd.to_csv(writefilepath, index=False)
 
     # ==========================================================================================================输出每个点的结果情况
-    filepath = os.path.join(rpath, "预测结果.csv")
+    filepath = os.path.join(rpath, "统计数据.csv")
     writefilepath = os.path.join(spath, "时间点预测结果.csv")
     acfeas = ["time", "faultFlag", "preFlag", "概率"]
     prefeas =["time", "实际标记", "检测标记", "概率"]
