@@ -1285,17 +1285,19 @@ def outputRestult(rpath: str, spath: str):
         print("准确率: {}".format(lines))
         f.write("准确率: {}".format(acc))
     # ==========================================================================================================输出时间段
-    filepath = os.path.join(rpath, "不去除首尾-详细时间段信息.csv")
+    filepath = os.path.join(rpath, "5. 不去除首尾-详细时间段信息.csv")
     writefilepath = os.path.join(spath, "详细时间段信息.csv")
-    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "重叠时间"]
+    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "重叠持续时间"]
     tpd = pd.read_csv(filepath)[feas]
     tpd.to_csv(writefilepath, index=False)
 
     # ==========================================================================================================输出每个点的结果情况
     filepath = os.path.join(rpath, "预测结果.csv")
     writefilepath = os.path.join(spath, "时间点预测结果.csv")
-    feas = ["time", "实际标记", "检测标记", "概率"]
+    acfeas = ["time", "faultFlag", "preFlag", "概率"]
+    prefeas =["time", "实际标记", "检测标记", "概率"]
     tpd = pd.read_csv(filepath)[feas]
+    tpd.columns = prefeas
     tpd.to_csv(writefilepath, index=False)
 
 
