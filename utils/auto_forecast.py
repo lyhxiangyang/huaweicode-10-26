@@ -773,8 +773,6 @@ def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd
 
 
 
-    return removepd
-
 # 去除指定异常及其首尾数据
 def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
     dealflag = "faultFlag"
@@ -1288,7 +1286,7 @@ def outputRestult(rpath: str, spath: str):
     # ==========================================================================================================输出时间段
     filepath = os.path.join(rpath, "5. 不去除首尾-详细时间段信息.csv")
     writefilepath = os.path.join(spath, "详细时间段信息.csv")
-    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "检测运行时间","实际运行时间" "重叠时间"]
+    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "检测运行时间","实际运行时间","重叠时间"]
     tpd = pd.read_csv(filepath)[feas]
     tpd.to_csv(writefilepath, index=False)
 
