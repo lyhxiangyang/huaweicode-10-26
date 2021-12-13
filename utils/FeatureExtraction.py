@@ -4,7 +4,7 @@
 1. 将滑动窗口设置，然后提取最小值、最大值等数值
 """
 from numpy import nan
-from typing import Tuple, Union, List, Any
+from typing import Tuple, Union, List, Any, Dict
 
 import pandas as pd
 
@@ -516,7 +516,7 @@ def featureExtraction_excludeAccumulation(featurePD: pd.DataFrame, windowSize: i
 
 def featureExtractionUsingFeatures(df: pd.DataFrame, windowSize: int = 5, windowRealSize: int = 1, silidWindows: bool = True,
                       extraFeature=None) -> \
-        Union[dict[int, dict], Any]:
+        Union[Dict[int, Dict], Any]:
     if extraFeature is None:
         extraFeature = []
     lendf = len(df)

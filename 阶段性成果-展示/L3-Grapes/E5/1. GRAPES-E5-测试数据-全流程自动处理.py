@@ -233,6 +233,9 @@ if __name__ == "__main__":
     tpath = os.path.join(spath, "5. server和process合并")
     allserverpds, _ = mergeDataFrames(extraction_server_pds)
     allprocesspds, _ = mergeDataFrames(extraction_process_pds)
+
+    # 由于训练数据使用了51、52、53，所以在此去掉
+    # allserverpds =
     serverinformationDict = deal_serverpds_and_processpds(
         allserverpds=allserverpds,
         allprocesspds=allprocesspds,
