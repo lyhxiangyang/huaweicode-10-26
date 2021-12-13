@@ -1024,13 +1024,13 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     # ================================================================================================== 统计全文准确率
     # 将三种情况得到的准确率写入
     writeinfo = [
-        "不去除首尾准确率：{:.2%}\n".format(accuracy1),
-        "去除首尾准确率：{:.2%}\n".format(accuracy2),
-        "去除首尾_去除低强度：{:.2%}\n".format(accuracy3),
+        "不去除首尾准确率:{:.2%}\n".format(accuracy1),
+        "去除首尾准确率:{:.2%}\n".format(accuracy2),
+        "去除首尾_去除低强度:{:.2%}\n".format(accuracy3),
         "=================================去除正常情况统计准确率\n",
-        "不去除首尾准确率：{:.2%}\n".format(accuracy1_nonormal),
-        "去除首尾准确率：{:.2%}\n".format(accuracy2_nonormal),
-        "去除首尾_去除低强度：{:.2%}\n".format(accuracy3_nonormal),
+        "不去除首尾准确率:{:.2%}\n".format(accuracy1_nonormal),
+        "去除首尾准确率:{:.2%}\n".format(accuracy2_nonormal),
+        "去除首尾_去除低强度:{:.2%}\n".format(accuracy3_nonormal),
     ]
     with open(os.path.join(spath, "4. 准确率.txt"), "w", encoding="utf-8") as f:
         f.writelines(writeinfo)
@@ -1276,11 +1276,11 @@ def outputRestult(rpath: str, spath: str):
     if not os.path.exists(spath):
         os.makedirs(spath)
     # ==========================================================================================================输出准确率
-    filepath = os.path.join(rpath, "准确率.txt")
-    with open(filepath, "r") as f:
+    filepath = os.path.join(rpath, "4. 准确率.txt")
+    with open(filepath, "r", encoding="utf-8") as f:
         lines = f.readlines()
     writefilepath = os.path.join(spath, "准确率.txt")
-    with open(filepath, "w") as f:
+    with open(writefilepath, "w") as f:
         acc = lines[6].split(":")[1]
         print("准确率: {}".format(lines))
         f.write("准确率: {}".format(acc))
