@@ -9,7 +9,7 @@ from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_F
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult, removeAllHeadTail
+    predictAllAbnormal, analysePredictResult, removeAllHeadTail, remove_Abnormal_Head_Tail
 
 
 def getSelfMean(dfs: List[pd.DataFrame]) -> pd.Series:
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     allprocesspds, _ = mergeDataFrames(extraction_process_pds)
 
     # 由于训练数据使用了51、52、53，所以在此去掉
-    # allserverpds =
+    allserverpds = remove_Abnormal_Head_Tail(predictPd=allserverpds, abnormals={51,52,53}, windowsize=3)
     serverinformationDict = deal_serverpds_and_processpds(
         allserverpds=allserverpds,
         allprocesspds=allprocesspds,

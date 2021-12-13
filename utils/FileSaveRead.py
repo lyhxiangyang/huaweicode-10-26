@@ -14,7 +14,7 @@ excludecore: 要排除读取信息的核
 # 读取某个单独的错误码
 # readpath指的是 包含1.csv的目录
 def readCoresPD(readpath: str, excludecore=None, select_feature: List[str] = None) -> Union[
-    Tuple[None, bool], Tuple[dict[int, Any], bool]]:
+    Tuple[None, bool], Tuple[Dict[int, Any], bool]]:
     if excludecore is None:
         excludecore = []
     if not os.path.exists(readpath):
@@ -34,8 +34,7 @@ def readCoresPD(readpath: str, excludecore=None, select_feature: List[str] = Non
 
 # 将readpath路径下的所有错误码进行读取，排除excludeFaulty，readDir是每个错误码下的读取目录
 # 返回一个字典 faulty-core-DataFrame
-def readFaultyPD(readpath: str, readDir: str, excludeFaulty=None, select_feature=None) -> Union[
-    Tuple[None, bool], Tuple[defaultdict[Any, Dict], bool]]:
+def readFaultyPD(readpath: str, readDir: str, excludeFaulty=None, select_feature=None):
     if select_feature is None:
         select_feature = []
     if excludeFaulty is None:

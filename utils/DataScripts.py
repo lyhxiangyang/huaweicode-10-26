@@ -215,7 +215,7 @@ def SplitDFByCores(df: pd.DataFrame) -> List[Tuple[int, pd.DataFrame]]:
 
 
 def abstractFaultPDDict(df: pd.DataFrame, extraFeature: List[str] = []) -> \
-        Union[dict[int, dict], Any]:
+        Union[Dict[int, Dict], Any]:
     # 获得这个df中所有的错误码的类型
     if FAULT_FLAG not in df.columns.array:
         print("featureExtractionOriginalData 中没有错误标签")
