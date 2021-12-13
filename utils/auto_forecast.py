@@ -1152,16 +1152,19 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         realcrossBeginTime = str(-1)
         realcrossEndTime = str(-1)
         crossTime = 0
+        realTimeLen = 0
         realcrossLabels = 0
         if iscross:
             assert len(tcrosspd) != 0
             realcrossBeginTime = trealpd[TIME_COLUMN_NAME].iloc[0]
             realcrossEndTime = trealpd[TIME_COLUMN_NAME].iloc[-1]
             crossTime = len(tcrosspd)
+            realTimeLen = len(trealpd)
+
             realcrossLabels, _ = getMaxNumLabels(list(trealpd[FAULT_FLAG]))
         timeperiodDict["实际开始时间"].append(realcrossBeginTime)
         timeperiodDict["实际结束时间"].append(realcrossEndTime)
-        timeperiodDict["实际运行时间"].append(len(trealpd))
+        timeperiodDict["实际运行时间"].append(realTimeLen)
         timeperiodDict["重叠时间"].append(crossTime)
         timeperiodDict["实际标记"].append(realcrossLabels)
 
@@ -1280,7 +1283,7 @@ def outputRestult(rpath: str, spath: str):
         lines = f.readlines()
     writefilepath = os.path.join(spath, "准确率.txt")
     with open(writefilepath, "w") as f:
-        acc = lines[6].split(":")[1]
+        acc = lines[5].split(":")[1]
         print("准确率: {}".format(acc))
         f.write("准确率: {}".format(acc))
     # ==========================================================================================================输出时间段
