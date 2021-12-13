@@ -975,9 +975,9 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     accuracy2_nonormal = getAccuracy(list(tpd[FAULT_FLAG]), list(tpd[preflaglabel]), excludeflags=[0])
     # ===============================================================================统计时间段信息
     realperiodLen, preperiodLen, sameLen = getTimePeriodInfo(tpd)
-    writeinfo = ["实际时间段个数: {}\n".format(realperiodLen), "预测时间段个数：{}\n".format(preperiodLen), "预测准确时间段个数: {}\n". \
-        format(sameLen), "预测召回率: {:.2%}\n".format(sameLen / realperiodLen),
-                 "预测精确率: {:.2%}\n".format(sameLen / preperiodLen)]
+    writeinfo = ["实际时间段个数:{}\n".format(realperiodLen), "预测时间段个数:{}\n".format(preperiodLen), "预测准确时间段个数:{}\n". \
+        format(sameLen), "预测召回率:{:.2%}\n".format(sameLen / realperiodLen),
+                 "预测精确率:{:.2%}\n".format(sameLen / preperiodLen)]
     # ===============================================================================
     # 将信息进行保存
     tpd = pd.DataFrame(data=analyseDict).T
@@ -1040,6 +1040,10 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     # 进行保存
     timeperiodPd: pd.DataFrame
     timeperiodPd.to_csv(os.path.join(spath, "5. 不去除首尾-详细时间段信息.csv"))
+
+    # 演示效果
+    time7path = os.path.join(os.path.dirname(spath), "7.关键信息输出")
+    outputRestult(rpath=spath, spath=time7path)
 
 
 """
@@ -1115,8 +1119,6 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         nowtimeProbability = iprepd["概率"].mean()
         return nowtimeProbability
 
-
-
     # ====================================================================================================== 函数部分结束
     # =================================================================================================得到时间段的逻辑部分
     preflaglabel = "preFlag"
@@ -1159,10 +1161,10 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
             realcrossEndTime = trealpd[TIME_COLUMN_NAME].iloc[-1]
             crossTime = len(tcrosspd)
             realcrossLabels, _ = getMaxNumLabels(list(trealpd[FAULT_FLAG]))
-        timeperiodDict["重叠实际开始时间"].append(realcrossBeginTime)
-        timeperiodDict["重叠实际结束时间"].append(realcrossEndTime)
+        timeperiodDict["实际开始时间"].append(realcrossBeginTime)
+        timeperiodDict["实际结束时间"].append(realcrossEndTime)
         timeperiodDict["重叠持续时间"].append(crossTime)
-        timeperiodDict["实际标签"].append(realcrossLabels)
+        timeperiodDict["实际标记"].append(realcrossLabels)
 
     timeperiodDictPd = pd.DataFrame(data=timeperiodDict)
     return timeperiodDictPd
@@ -1269,10 +1271,32 @@ def getProbability(preFlags: List[int]) -> List[float]:
 
 
 
+# 这个函数主要针对演示使用
+def outputRestult(rpath: str, spath: str):
+    if not os.path.exists(spath):
+        os.makedirs(spath)
+    # ==========================================================================================================输出准确率
+    filepath = os.path.join(rpath, "准确率.txt")
+    with open(filepath, "r") as f:
+        lines = f.readlines()
+    writefilepath = os.path.join(spath, "准确率.txt")
+    with open(filepath, "w") as f:
+        acc = lines[6].split(":")[1]
+        print("准确率: {}".format(lines))
+        f.write("准确率: {}".format(acc))
+    # ==========================================================================================================输出时间段
+    filepath = os.path.join(rpath, "不去除首尾-详细时间段信息.csv")
+    writefilepath = os.path.join(spath, "详细时间段信息.csv")
+    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "重叠时间"]
+    tpd = pd.read_csv(filepath)[feas]
+    tpd.to_csv(writefilepath, index=False)
 
-
-
-
+    # ==========================================================================================================输出每个点的结果情况
+    filepath = os.path.join(rpath, "预测结果.csv")
+    writefilepath = os.path.join(spath, "时间点预测结果.csv")
+    feas = ["time", "实际标记", "检测标记", "概率"]
+    tpd = pd.read_csv(filepath)[feas]
+    tpd.to_csv(writefilepath, index=False)
 
 
 

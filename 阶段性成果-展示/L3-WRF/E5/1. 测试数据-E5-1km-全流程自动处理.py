@@ -9,7 +9,7 @@ from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_F
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult
+    predictAllAbnormal, analysePredictResult, outputRestult
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
@@ -225,3 +225,7 @@ if __name__ == "__main__":
         )
         # 对结果进行分析
         analysePredictResult(predictpd, tpath)
+
+
+
+
