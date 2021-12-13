@@ -1282,7 +1282,7 @@ def outputRestult(rpath: str, spath: str):
     writefilepath = os.path.join(spath, "准确率.txt")
     with open(writefilepath, "w") as f:
         acc = lines[6].split(":")[1]
-        print("准确率: {}".format(lines))
+        print("准确率: {}".format(acc))
         f.write("准确率: {}".format(acc))
     # ==========================================================================================================输出时间段
     filepath = os.path.join(rpath, "5. 不去除首尾-详细时间段信息.csv")
@@ -1296,7 +1296,7 @@ def outputRestult(rpath: str, spath: str):
     writefilepath = os.path.join(spath, "时间点预测结果.csv")
     acfeas = ["time", "faultFlag", "preFlag", "概率"]
     prefeas =["time", "实际标记", "检测标记", "概率"]
-    tpd = pd.read_csv(filepath)[feas]
+    tpd = pd.read_csv(filepath)[acfeas]
     tpd.columns = prefeas
     tpd.to_csv(writefilepath, index=False)
 
