@@ -1140,7 +1140,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
         preendtime = iprepd[TIME_COLUMN_NAME].iloc[-1] # 预测结束时间
         timeperiodDict["检测结束时间"].append(preendtime)
         preLastime = len(iprepd) # 预测持续时间
-        timeperiodDict["检测持续时间"].append(preLastime)
+        timeperiodDict["检测运行时间"].append(preLastime)
         maxNumLabels, preAllLabels = getMaxNumLabels(list(iprepd[preflaglabel])) # 得到当前预测时间内的预测值
         timeperiodDict["检测标记"].append(maxNumLabels)
         timeperiodDict["检测所有标记"].append(",".join([str(i) for i in preAllLabels]))
@@ -1163,7 +1163,8 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame) -> pd.DataFrame:
             realcrossLabels, _ = getMaxNumLabels(list(trealpd[FAULT_FLAG]))
         timeperiodDict["实际开始时间"].append(realcrossBeginTime)
         timeperiodDict["实际结束时间"].append(realcrossEndTime)
-        timeperiodDict["重叠持续时间"].append(crossTime)
+        timeperiodDict["实际运行时间"].append(len(trealpd))
+        timeperiodDict["重叠时间"].append(crossTime)
         timeperiodDict["实际标记"].append(realcrossLabels)
 
     timeperiodDictPd = pd.DataFrame(data=timeperiodDict)
@@ -1287,7 +1288,7 @@ def outputRestult(rpath: str, spath: str):
     # ==========================================================================================================输出时间段
     filepath = os.path.join(rpath, "5. 不去除首尾-详细时间段信息.csv")
     writefilepath = os.path.join(spath, "详细时间段信息.csv")
-    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "重叠持续时间"]
+    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "检测运行时间","实际运行时间" "重叠时间"]
     tpd = pd.read_csv(filepath)[feas]
     tpd.to_csv(writefilepath, index=False)
 
