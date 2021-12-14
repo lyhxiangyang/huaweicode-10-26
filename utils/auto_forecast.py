@@ -1293,8 +1293,8 @@ def outputRestult(rpath: str, spath: str):
     tpd.to_csv(writefilepath, index=False)
 
     # ==========================================================================================================输出每个点的结果情况
-    filepath = os.path.join(rpath, "统计数据.csv")
-    writefilepath = os.path.join(spath, "时间点预测结果.csv")
+    filepath = os.path.join(rpath, "预测结果.csv")
+    writefilepath = os.path.join(spath, "统计数据.csv")
     acfeas = ["time", "faultFlag", "preFlag", "概率"]
     prefeas =["time", "实际标记", "检测标记", "概率"]
     tpd = pd.read_csv(filepath)[acfeas]
