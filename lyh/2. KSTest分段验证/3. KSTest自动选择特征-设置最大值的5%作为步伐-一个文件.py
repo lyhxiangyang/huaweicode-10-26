@@ -49,8 +49,8 @@ def getServerDiffFeaturesFromOneData(abnormalserverPD: pd.DataFrame, abnormaltyp
     abnormalserverPD = removeAllHeadTail(abnormalserverPD, windowsize=3)
     abnormal_pdDict = dict(list(abnormalserverPD.groupby(FAULT_FLAG))) # 指定异常类型
     specialAbnormalPd  = abnormal_pdDict[abnormaltype] # 异常类型
-    normalserverPD = abnormal_pdDict[0]
-    # normalserverPD = getNormalPD(abnormalserverPD=abnormalserverPD, abnormaltype=abnormaltype)
+    # normalserverPD = abnormal_pdDict[0]
+    normalserverPD = getNormalPD(abnormalserverPD=abnormalserverPD, abnormaltype=abnormaltype)
     print("正常数据长度：{}".format(len(normalserverPD)))
     print("异常特征{} 长度：{}".format(abnormaltype, len(specialAbnormalPd)))
 
