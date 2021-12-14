@@ -2,10 +2,11 @@ import os
 import time
 from collections import defaultdict
 from typing import List, Union, Dict, Tuple, Any
+
 import pandas as pd
 
 from utils.DataFrameOperation import PushLabelToEnd, PushLabelToFirst, SortLabels, subtractLastLineFromDataFrame
-from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, TIME_INTERVAL, CPU_FEATURE, MODEL_TYPE
+from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE
 from utils.FeatureExtraction import featureExtractionUsingFeatures
 from utils.FileSaveRead import saveDFListToFiles, saveCoreDFToFiles, saveFaultyDict
 

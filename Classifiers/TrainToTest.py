@@ -2,6 +2,7 @@
 import os
 from typing import List
 
+import joblib
 import pandas as pd
 
 from Classifiers.ModelPred import select_and_pred
@@ -9,7 +10,6 @@ from Classifiers.ModelTrain import model_train, getTestRealLabels, getTestPreLab
 from utils.DataFrameOperation import PushLabelToFirst, PushLabelToEnd
 from utils.DefineData import MODEL_TYPE, FAULT_FLAG, TIME_COLUMN_NAME
 from utils.GetMetrics import get_metrics
-import joblib
 
 
 def TrainThree(trainedpd: pd.DataFrame, spath: str, modelpath: str = "Classifiers/saved_model/tmp",

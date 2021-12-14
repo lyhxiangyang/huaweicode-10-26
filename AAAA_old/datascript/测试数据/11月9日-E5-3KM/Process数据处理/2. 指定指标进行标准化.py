@@ -1,14 +1,11 @@
 # 需要标准化文件所在的路径
 import os.path
-from typing import List
 
 import pandas as pd
 
 # 需要标准化的错误码
-from utils.DataFrameOperation import SortLabels, PushLabelToFirst, PushLabelToEnd
 from utils.DataScripts import getDFmean, standard_file_time_coreDict, standard_file_time_core_faultyDict
-from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
-from utils.FileSaveRead import saveFaultyDict, readFilename_Time_Core_pdDict, readFilename_Time_Core_Faulty_pdDict, \
+from utils.FileSaveRead import readFilename_Time_Core_pdDict, readFilename_Time_Core_Faulty_pdDict, \
     saveFilename_Time_Core_pdDict, saveFilename_Time_Core_Faulty_pdDict
 
 standardized_normalflag = 0

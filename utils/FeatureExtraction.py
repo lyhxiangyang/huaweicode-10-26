@@ -3,10 +3,10 @@
 比如：
 1. 将滑动窗口设置，然后提取最小值、最大值等数值
 """
-from numpy import nan
 from typing import Tuple, Union, List, Any, Dict
 
 import pandas as pd
+from numpy import nan
 
 from utils.DataFrameOperation import SortLabels, PushLabelToFirst, PushLabelToEnd
 from utils.DefineData import *

@@ -11,9 +11,6 @@ from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
     predictAllAbnormal, analysePredictResult
 
-
-
-
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定

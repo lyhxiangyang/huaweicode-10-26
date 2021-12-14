@@ -1,19 +1,13 @@
 import os
-from typing import Set, Tuple
 
 import pandas as pd
 
 from Classifiers.TrainToTest import ModelTrainAndTest
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import getDFmean
-from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
+from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles
-from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
-    standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult, removeAllHeadTail, remove_Abnormal_Head_Tail
-
-
-
+from utils.auto_forecast import getfilespath, getfilepd, differenceServer, \
+    standardLists, changeTimeTo_pdlists, serverpdsList, removeAllHeadTail, remove_Abnormal_Head_Tail
 
 """
 将一个DataFrame里面的数值全部更改为对应的模数

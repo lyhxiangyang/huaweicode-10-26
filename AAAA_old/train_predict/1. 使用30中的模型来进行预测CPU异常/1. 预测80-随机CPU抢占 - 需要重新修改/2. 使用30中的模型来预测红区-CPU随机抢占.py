@@ -5,9 +5,9 @@ from typing import Dict, List
 import pandas as pd
 
 from Classifiers.ModelPred import select_and_pred
-from utils.DataScripts import TranslateTimeToInt, getTime_AbnormalCore, TranslateTimeToStr
+from utils.DataScripts import TranslateTimeToInt, TranslateTimeToStr
 from utils.DataScripts import TranslateTimeToInt as c, getTime_AbnormalCore
-from utils.DefineData import MODEL_TYPE, FAULT_FLAG, TIME_COLUMN_NAME
+from utils.DefineData import MODEL_TYPE, FAULT_FLAG
 from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_Core_pdDict
 
 """

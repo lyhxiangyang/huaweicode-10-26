@@ -1,9 +1,8 @@
 import os.path
 
-import matplotlib.pyplot as plt
-import sklearn
-from sklearn import tree
 import joblib
+import matplotlib.pyplot as plt
+from sklearn import tree
 
 from utils.DefineData import MODEL_TYPE
 

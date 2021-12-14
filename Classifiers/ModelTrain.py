@@ -1,12 +1,13 @@
+import os
 from typing import List
 
+import joblib
+from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn import metrics
-import joblib
+
 from utils.DefineData import *
-import os
 
 TestRealLabels: List
 TestPreLabels: List

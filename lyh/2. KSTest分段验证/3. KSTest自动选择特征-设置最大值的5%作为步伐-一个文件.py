@@ -1,12 +1,11 @@
 import os
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import standardPDfromOriginal1, removeTimeAndfaultFlagFromList
-from utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, CPU_FEATURE
+from utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 from utils.FeatureSelection import getPValueFromTwoDF, getFeatureNameByBenjamini_Yekutiel
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceServer, removeAllHeadTail, smooth_dfs

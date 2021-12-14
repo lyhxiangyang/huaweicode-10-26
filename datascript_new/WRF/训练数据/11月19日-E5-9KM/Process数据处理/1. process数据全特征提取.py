@@ -1,15 +1,11 @@
 import os
-from typing import Dict
-
-import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
 from utils.DataScripts import getDFmean, mergeTwoDF
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles, saveFaultyCoreDict, saveFaultyDict
-from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
-    standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult, removeAllHeadTail, allMistakesOnExtractingAllCore
+from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, standardLists, \
+    changeTimeTo_pdlists, processpdsList, allMistakesOnExtractingAllCore
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义

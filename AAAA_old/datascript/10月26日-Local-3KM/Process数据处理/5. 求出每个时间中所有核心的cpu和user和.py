@@ -4,7 +4,6 @@ from typing import List
 import pandas as pd
 
 from utils.DataFrameOperation import mergeDataFrames
-from utils.DataScripts import splitDataFrameByTime
 from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
 from utils.FileSaveRead import saveDFListToFiles
 

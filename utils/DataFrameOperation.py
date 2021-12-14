@@ -7,10 +7,11 @@
 
 
 """
-from collections import defaultdict
 from typing import List, Dict, Tuple, Union
-from utils.DefineData import *
+
 import pandas as pd
+
+from utils.DefineData import *
 
 """
 函数功能：合并多个DataFrame 返回值是一个合并之后的DataFrame 上下合并

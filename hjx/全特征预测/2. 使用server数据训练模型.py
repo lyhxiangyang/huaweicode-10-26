@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 
 from Classifiers.TrainToTest import ModelTrainAndTest
-from utils.DataFrameOperation import mergeDataFrames, sortByAbsValue
+from utils.DataFrameOperation import mergeDataFrames
 from utils.DefineData import FAULT_FLAG
 
 trainNormalDataPath = [
