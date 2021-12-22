@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"DATA\L2层数据\功率封顶\43"
+    predictdirpath = R"DATA\L2层数据\温度过高\Mem & Fan\43"
     predictserverfiles = getfilespath(os.path.join(predictdirpath, "server"))
     predictprocessfiles = getfilespath(os.path.join(predictdirpath, "process"))
     # 指定正常server和process文件路径
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     servermemory_modeltype = 0
     serverbandwidth_modeltype = 0
     # 将一些需要保存的临时信息进行保存路径
-    spath = "tmp/总过程分析/L2层分析-功率封顶"
+    spath = "tmp/总过程分析/L2层分析-温度过高MemFan"
     # 是否有存在faultFlag
     isExistFaultFlag = True
     # 核心数据 如果isManuallyspecifyCoreList==True那么就专门使用我手工指定的数据，如果==False，那么我使用的数据就是从process文件中推理出来的结果
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y-%m-%d %H:%M:%S'
-    process_time_format = '%Y-%m-%d %H:%M:%S'
+    process_time_format = '%Y/%m/%d %H:%M'
 
     # 预测是否使用阀值, True为使用阀值预测 必须指定thresholdValueDict， False代表使用模型进行预测, 必须设置好模型的路径
     isThreshold = True
