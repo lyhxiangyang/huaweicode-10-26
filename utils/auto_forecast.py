@@ -673,7 +673,7 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     # 某一时刻的cpu列表
     wrfnumList = serverinformationDict['abnormalcores']
     # 得到某一时刻下
-    predictDict["smiaxcputime"] = getSingleMaxCPUTime(serverinformationDict)
+    predictDict["smaxcputime"] = getSingleMaxCPUTime(serverinformationDict)
     predictDict["pgfree_mean"] = serverinformationDict["pgfree_mean"]
     predictDict["used_mean"] = serverinformationDict["used_mean"]
 
