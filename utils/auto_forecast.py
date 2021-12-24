@@ -1,6 +1,7 @@
 import itertools
 import json
 import os.path
+import re
 from collections import defaultdict
 from typing import List, Dict, Union, Any, Set, Tuple, Optional
 
@@ -58,6 +59,25 @@ def add_cpu_column(pds: List[pd.DataFrame]) -> List[pd.DataFrame]:
 
 
 """
+根据字符串得到时间串格式
+"""
+
+
+def getTimeFormat(onetime: str) -> str:
+    T = ["%Y", "%m", "%d", "%H", "%M", "%S"]
+    ilastpos = 0
+    timeformatstr = ""
+    for i, ipos in enumerate(re.finditer("\d+", onetime)):
+        bpos = ipos.start()
+        epos = ipos.end()
+        timeformatstr += onetime[ilastpos:bpos]
+        timeformatstr += T[i]
+        ilastpos = epos
+    return timeformatstr
+
+
+
+"""
 将时间都转化为标准格式
 处理完之后的格式为这种形式
 '%Y-%m-%d %H:%M:00'
@@ -66,6 +86,11 @@ def add_cpu_column(pds: List[pd.DataFrame]) -> List[pd.DataFrame]:
 
 # 将一个pd中的时间序列的秒变为0
 def changeTimeColumns(df: pd.DataFrame, timeformat: str = '%Y/%m/%d %H:%M') -> pd.DataFrame:
+    if len(df) == 0:
+        return df
+    stimestr = df[TIME_COLUMN_NAME][0]
+    # timeformat给出的选项仅仅供选择，下面进行自动生成格式选项
+    timeformat = getTimeFormat(stimestr)
     tpd = df.loc[:, [TIME_COLUMN_NAME]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat), axis=0)
     df.loc[:, TIME_COLUMN_NAME] = tpd.loc[:, TIME_COLUMN_NAME]
     return df
@@ -229,7 +254,7 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
                                thresholdValue: Dict = None, modelfilepath: str = None, modeltype=0) -> Union[
     tuple[int, None, None, None], tuple[Any, list, list, Optional[Any]]]:
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
-    predictflag_probability = None # 存储概率的列表
+    predictflag_probability = None  # 存储概率的列表
     if len(nowdf) == 0:
         return 0, None, None, None
 
@@ -244,7 +269,8 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
         predictflag = isCPUAbnormalsByThreshold(nowdf, thresholdValue)
     else:
         predictflag = select_and_pred(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-        predictflag_probabilityDict = select_and_pred_probability(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+        predictflag_probabilityDict = select_and_pred_probability(nowdf, MODEL_TYPE[modeltype],
+                                                                  saved_model_path=modelfilepath)
         if 10 in predictflag_probabilityDict.keys():
             predictflag_probability = predictflag_probabilityDict[10]
             predictflag_probability = dict(zip(cores_serialnumber, predictflag_probability))
@@ -302,16 +328,17 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     serverinformationDict = defaultdict(list)
     for stime in timecolumns:
         # 添加wrf的cpu时间
-        wrf_cpu_time, abnormalcores, abnormalcoremaxtime, predictflag_probability = getprocess_cputime_abcores(allprocesspds, stime,
-                                                                                      isThreshold=isThreshold,
-                                                                                      thresholdValue=thresholdValue,
-                                                                                      modelfilepath=modelfilepath,
-                                                                                      modeltype=modeltype)
+        wrf_cpu_time, abnormalcores, abnormalcoremaxtime, predictflag_probability = getprocess_cputime_abcores(
+            allprocesspds, stime,
+            isThreshold=isThreshold,
+            thresholdValue=thresholdValue,
+            modelfilepath=modelfilepath,
+            modeltype=modeltype)
         # 不管返回值如何都进行直接的添加
         serverinformationDict["wrf_cpu"].append(wrf_cpu_time)
         serverinformationDict["abnormalcores"].append(abnormalcores)
         serverinformationDict["coresmaxtime"].append(abnormalcoremaxtime)
-        serverinformationDict["coresallprobability"].append(predictflag_probability) # 所有核心上的概率
+        serverinformationDict["coresallprobability"].append(predictflag_probability)  # 所有核心上的概率
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
@@ -435,6 +462,8 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             exit(1)
         ilastlist = ilist
     return iscpu
+
+
 """
 serverinformationDict: 
 abnormalcores 是一个列表的列表，存储的是异常的核心数
@@ -442,16 +471,20 @@ coresnums 是指多少个核心出现了异常
 coresmaxtime: 是一个列表的列表， 存储的是每个异常核心的值
 coresallprobability: 是每个时刻中预测每个核为异常的概率, 是一个core-概率的字典结构
 """
+
+
 def getCPU_Abnormal_Probability(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     coresallprobabilityList = serverinformationDict["coresallprobability"]
-    abnormalcoresList = serverinformationDict["abnormalcores"] # 如果这里出现了None， 那么表明这个时刻不存在
+    abnormalcoresList = serverinformationDict["abnormalcores"]  # 如果这里出现了None， 那么表明这个时刻不存在
     assert len(abnormalcoresList) == len(coresallprobabilityList)
+
     # 根据核心获得核心的概率函数
-    def getProbability(abnormalcores: List[int], coresallprobability: Dict ) -> List:
+    def getProbability(abnormalcores: List[int], coresallprobability: Dict) -> List:
         resList = []
         for icore in abnormalcores:
             resList.append(coresallprobability[icore])
         return resList
+
     minprobabilityList = []
     for i in range(0, len(abnormalcoresList)):
         tprobabilityDict = coresallprobabilityList[i]
@@ -459,7 +492,7 @@ def getCPU_Abnormal_Probability(serverinformationDict: Dict, coresnumber: int = 
         if tabnormalcores is None:
             minprobabilityList.append(-1)
             continue
-        if len(tabnormalcores) == 0: # 正常情况
+        if len(tabnormalcores) == 0:  # 正常情况
             minprobabilityList.append(min(tprobabilityDict.values()))
             continue
         minp = min(getProbability(abnormalcores=tabnormalcores, coresallprobability=tprobabilityDict))
@@ -504,10 +537,12 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
         # 得到预测值
         prelistflag = select_and_pred(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
         # 得到预测的概率
-        prelistflag_probabilityDict = select_and_pred_probability(tpd, MODEL_TYPE[memory_leaks_modeltype], saved_model_path=Memory_leaks_modelpath)
+        prelistflag_probabilityDict = select_and_pred_probability(tpd, MODEL_TYPE[memory_leaks_modeltype],
+                                                                  saved_model_path=Memory_leaks_modelpath)
         if 60 in prelistflag_probabilityDict.keys():
             prelistflag_probability = prelistflag_probabilityDict[60]
     return prelistflag, prelistflag_probability
+
 
 """
 对内存带宽进行预测
@@ -549,7 +584,7 @@ def predict_memory_bandwidth(serverinformationDict: Dict, isThreshold: bool = Fa
                                       saved_model_path=Memory_bandwidth_modelpath)
         # 得到预测的概率
         prelistflag_probabilityDict = select_and_pred_probability(tpd, MODEL_TYPE[memory_bandwidth_modeltype],
-                                      saved_model_path=Memory_bandwidth_modelpath)
+                                                                  saved_model_path=Memory_bandwidth_modelpath)
         if 50 in prelistflag_probabilityDict.keys():
             prelistflag_probability = prelistflag_probabilityDict[50]
     prelistflag = [50 if i == 50 else 0 for i in prelistflag]
@@ -758,6 +793,7 @@ def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3, realFlagName
     removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
     return removepd
 
+
 # 去除进程数据中所有异常的首尾
 # 保证这个进程数据包含pid选项
 def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFrame:
@@ -769,8 +805,6 @@ def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd
         removepds.append(tpd)
     allpd, _ = mergeDataFrames(removepds)
     return allpd
-
-
 
 
 # 去除指定异常及其首尾数据
@@ -1050,7 +1084,8 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
 """
 
 
-def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "time", realFlagName: str="faultFlag", testFlagName:str="preFlag", probabilityName: str="概率") -> pd.DataFrame:
+def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "time", realFlagName: str = "faultFlag",
+                                 testFlagName: str = "preFlag", probabilityName: str = "概率") -> pd.DataFrame:
     # ========================================================================================================== 函数部分
     # 找到一个列表中连续不为0的数据的位置, 返回的是每段不为0的起始位置[4,9), 左闭右开
     def findAbnormalPos(flags: List[int]) -> List[Tuple[int, int]]:
@@ -1084,11 +1119,13 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "
         overlapTime = list(df1times & df2times)
         if len(overlapTime) == 0:
             return False, None
+
         # 获得时间
         def f1(x):
             if x in overlapTime:
                 return True
             return False
+
         return True, df1.loc[df1[timeLabelName].apply(f1)]
 
     # 判断一个DataFrame的时间是否与一个时间列表交叉，如果交叉返回交叉的True, DataFrame 否则 False，DataFrame
@@ -1106,13 +1143,15 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "
         prelabels = max(labels, key=labels.count)
         alllabeslList = sorted(list(set(labels)))
         return prelabels, alllabeslList
+
     """
     得到概率
     参数： iprepd-预测到的时间段  tcrosspd-交叉的时间段 trealpd-实际的时间段
     返回值 0: CPU概率   1: 内存泄露概率   2: 内存带宽异常
     
     """
-    def getProbability (iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
+
+    def getProbability(iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
         nowtimeProbability = iprepd[probabilityName].mean()
         return nowtimeProbability
 
@@ -1132,13 +1171,13 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "
     timeperiodDict = defaultdict(list)
     for iprepd in preTimePeriodAbnormalPds:
         assert len(iprepd) != 0
-        prebegintime = iprepd[timeLabelName].iloc[0] # 预测开始时间
+        prebegintime = iprepd[timeLabelName].iloc[0]  # 预测开始时间
         timeperiodDict["检测开始时间"].append(prebegintime)
-        preendtime = iprepd[timeLabelName].iloc[-1] # 预测结束时间
+        preendtime = iprepd[timeLabelName].iloc[-1]  # 预测结束时间
         timeperiodDict["检测结束时间"].append(preendtime)
-        preLastime = len(iprepd) # 预测持续时间
+        preLastime = len(iprepd)  # 预测持续时间
         timeperiodDict["检测运行时间"].append(preLastime)
-        maxNumLabels, preAllLabels = getMaxNumLabels(list(iprepd[testLabelName])) # 得到当前预测时间内的预测值
+        maxNumLabels, preAllLabels = getMaxNumLabels(list(iprepd[testLabelName]))  # 得到当前预测时间内的预测值
         timeperiodDict["检测标记"].append(maxNumLabels)
         timeperiodDict["检测所有标记"].append(",".join([str(i) for i in preAllLabels]))
 
@@ -1170,6 +1209,7 @@ def getDetailedInformationOnTime(predictpd: pd.DataFrame, timeLabelName: str = "
     timeperiodDictPd = pd.DataFrame(data=timeperiodDict)
     return timeperiodDictPd
 
+
 """
 对server数据列表中pgfree进行滑动窗口的处理
 会将传入参数的列表中dataframe本身数值进行修改
@@ -1182,6 +1222,8 @@ def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List
         if pgfree_name in ipd.columns.array:
             ipd[pgfree_name] = ipd[pgfree_name].rolling(window=smoothwinsize, min_periods=1, center=True).median()
     return serverpds
+
+
 # 将dataframe中指定指标进行平滑，默认是使用除了time和faultflag
 # 会将serverpds本身的值进行修改
 def smooth_dfs(serverpds: List[pd.DataFrame], smoothwinsize: int = 7, features: List[str] = None) -> List[pd.DataFrame]:
@@ -1191,8 +1233,6 @@ def smooth_dfs(serverpds: List[pd.DataFrame], smoothwinsize: int = 7, features: 
     removeTimeAndfaultFlagFromList(features, inplace=True)
     for ipd in serverpds:
         ipd[features] = ipd[features].rolling(window=smoothwinsize, min_periods=1, center=True).median()
-
-
 
 
 """
@@ -1223,12 +1263,14 @@ def allMistakesOnExtractingAllCore(processpd: pd.DataFrame, windowsize: int = 2)
         core_faultpdDict[icore] = faultPdDict
     return core_faultpdDict
 
+
 """
 根据预测标签值得到概率
 0-> 代表不同  1->代表相同
 """
-def getProbability(preFlags: List[int]) -> List[float]:
 
+
+def getProbability(preFlags: List[int]) -> List[float]:
     def getBeforeData(preFlags: List[int], ipos: int, judgelen: int) -> List[int]:
         res = []
         for bpos in range(ipos - judgelen, ipos, 1):
@@ -1240,36 +1282,38 @@ def getProbability(preFlags: List[int]) -> List[float]:
             else:
                 res.append(0)
         return res
+
     def getAfterData(preFlags: List[int], ipos: int, judgelen: int) -> List[int]:
         res = []
         for bpos in range(ipos + 1, ipos + judgelen + 1, 1):
             if bpos >= len(preFlags):
-                res.append(0) # 不同
+                res.append(0)  # 不同
                 continue
             if preFlags[ipos] == preFlags[bpos]:
                 res.append(1)
             else:
                 res.append(0)
         return res
+
     """
     传入是否重复
     """
+
     def getp(isSameFlags: List[int], probabilities: List[float]) -> float:
         assert len(isSameFlags) == len(probabilities)
-        return sum( isSameFlags[i] * probabilities[i] for i in range(0, len(isSameFlags)))
+        return sum(isSameFlags[i] * probabilities[i] for i in range(0, len(isSameFlags)))
 
     # 得到时间概率的逻辑部分
     probabilityList = []
     preprobability = [0.1, 0.2, 0.3, 0.4]
     reverseprobability = list(reversed(preprobability))  # 概率相反
-    judgeLen = len(preprobability) # 概率的长度
+    judgeLen = len(preprobability)  # 概率的长度
     for ipos, iflag in enumerate(preFlags):
         bD = getBeforeData(preFlags, ipos, judgeLen)
         aD = getAfterData(preFlags, ipos, judgeLen)
         nowprobability = 0.1 + 0.45 * (getp(bD, preprobability)) + 0.45 * (getp(aD, reverseprobability))
         probabilityList.append(nowprobability)
     return probabilityList
-
 
 
 # 这个函数主要针对演示使用
@@ -1288,7 +1332,7 @@ def outputRestult(rpath: str, spath: str):
     # ==========================================================================================================输出时间段
     filepath = os.path.join(rpath, "5. 不去除首尾-详细时间段信息.csv")
     writefilepath = os.path.join(spath, "持续时间.csv")
-    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "检测运行时间","实际运行时间","重叠时间"]
+    feas = ["检测开始时间", "实际开始时间", "检测结束时间", "实际结束时间", "检测标记", "实际标记", "概率", "检测运行时间", "实际运行时间", "重叠时间"]
     tpd = pd.read_csv(filepath)[feas]
     tpd.to_csv(writefilepath, index=False)
 
@@ -1296,28 +1340,7 @@ def outputRestult(rpath: str, spath: str):
     filepath = os.path.join(rpath, "预测结果.csv")
     writefilepath = os.path.join(spath, "统计数据.csv")
     acfeas = ["time", "faultFlag", "preFlag", "概率"]
-    prefeas =["time", "实际标记", "检测标记", "概率"]
+    prefeas = ["time", "实际标记", "检测标记", "概率"]
     tpd = pd.read_csv(filepath)[acfeas]
     tpd.columns = prefeas
     tpd.to_csv(writefilepath, index=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
