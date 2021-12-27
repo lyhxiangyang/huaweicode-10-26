@@ -347,14 +347,15 @@ if __name__ == "__main__":
         l2temperamentresult["preFlag"] = select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath)
 
         # ******* 对网络异常1进行预测
+        REPORT_TIME = "report_time"
         allnetworkpds, _ = mergeDataFrames(extraction_network_pds)
         l2networkresult1 = pd.DataFrame()
-        l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
+        l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
         l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
         l2networkresult1["preFlag"] = select_and_pred(allnetworkpds, MODEL_TYPE[network_model1type], saved_model_path=network_model1path)
         # ******* 对网络异常2进行预测
         l2networkresult2 = pd.DataFrame()
-        l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
+        l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
         l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
         l2networkresult2["preFlag"] = select_and_pred(allnetworkpds, MODEL_TYPE[network_model2type], saved_model_path=network_model2path)
 
