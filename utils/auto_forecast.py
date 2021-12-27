@@ -86,22 +86,22 @@ leastTime 精确到那个时间点， 如果精确到分钟，就将秒进行修
 
 
 # 将一个pd中的时间序列的秒变为0
-def changeTimeColumns(df: pd.DataFrame, leastTime: str = "%M") -> pd.DataFrame:
+def changeTimeColumns(df: pd.DataFrame, leastTime: str = "%M", timefeaturename: str=TIME_COLUMN_NAME) -> pd.DataFrame:
     if len(df) == 0:
         return df
-    stimestr = df[TIME_COLUMN_NAME][0]
+    stimestr = df[timefeaturename][0]
     # timeformat给出的选项仅仅供选择，下面进行自动生成格式选项
     timeformat = getTimeFormat(stimestr)
-    tpd = df.loc[:, [TIME_COLUMN_NAME]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat, leastTime=leastTime), axis=0)
-    df.loc[:, TIME_COLUMN_NAME] = tpd.loc[:, TIME_COLUMN_NAME]
+    tpd = df.loc[:, [timefeaturename]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat, leastTime=leastTime), axis=0)
+    df.loc[:, timefeaturename] = tpd.loc[:, timefeaturename]
     return df
 
 
 # 讲一个pd的列表全都改变 timeformat没有使用的作用
-def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M', leastTime: str="%M") -> List[pd.DataFrame]:
+def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M', leastTime: str="%M", timefeaturename: str=TIME_COLUMN_NAME) -> List[pd.DataFrame]:
     changed_pds = []
     for ipd in pds:
-        tpd = changeTimeColumns(ipd, leastTime=leastTime)
+        tpd = changeTimeColumns(ipd, leastTime=leastTime, timefeaturename=TIME_COLUMN_NAME)
         changed_pds.append(tpd)
     return changed_pds
 
