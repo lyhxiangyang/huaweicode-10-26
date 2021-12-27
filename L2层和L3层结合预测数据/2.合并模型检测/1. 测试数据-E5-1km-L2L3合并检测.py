@@ -251,9 +251,9 @@ if __name__ == "__main__":
     standard_server_pds = changeTimeTo_pdlists(standard_server_pds)
     standard_process_pds = changeTimeTo_pdlists(standard_process_pds)
     standard_l2_pds = changeTimeTo_pdlists(standard_l2_pds)
-    # standard_network_pds = changeTimeTo_pdlists(standard_network_pds)
+    standard_network_pds = changeTimeTo_pdlists(standard_network_pds, leastTime="%S")
     # ============================================================================================= 对process数据和server数据进行特征提取
-    print("对process数据进行特征处理".center(40, "*"))
+    print("对process数据进行特征处理".center(40, "*"))g
     tpath = os.path.join(spath, "3. process特征提取数据")
     # 将cpu特征添加到process_feature中
     extraction_process_pds = processpdsList(standard_process_pds, extractFeatures=process_feature,

@@ -81,26 +81,27 @@ def getTimeFormat(onetime: str) -> str:
 将时间都转化为标准格式
 处理完之后的格式为这种形式
 '%Y-%m-%d %H:%M:00'
+leastTime 精确到那个时间点， 如果精确到分钟，就将秒进行修改
 """
 
 
 # 将一个pd中的时间序列的秒变为0
-def changeTimeColumns(df: pd.DataFrame, timeformat: str = '%Y/%m/%d %H:%M') -> pd.DataFrame:
+def changeTimeColumns(df: pd.DataFrame, leastTime: str = "%M") -> pd.DataFrame:
     if len(df) == 0:
         return df
     stimestr = df[TIME_COLUMN_NAME][0]
     # timeformat给出的选项仅仅供选择，下面进行自动生成格式选项
     timeformat = getTimeFormat(stimestr)
-    tpd = df.loc[:, [TIME_COLUMN_NAME]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat), axis=0)
+    tpd = df.loc[:, [TIME_COLUMN_NAME]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat, leastTime=leastTime), axis=0)
     df.loc[:, TIME_COLUMN_NAME] = tpd.loc[:, TIME_COLUMN_NAME]
     return df
 
 
-# 讲一个pd的列表全都改变
-def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M') -> List[pd.DataFrame]:
+# 讲一个pd的列表全都改变 timeformat没有使用的作用
+def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M', leastTime: str="%M") -> List[pd.DataFrame]:
     changed_pds = []
     for ipd in pds:
-        tpd = changeTimeColumns(ipd, timeformat)
+        tpd = changeTimeColumns(ipd, leastTime=leastTime)
         changed_pds.append(tpd)
     return changed_pds
 

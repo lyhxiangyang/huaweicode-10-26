@@ -45,11 +45,23 @@ def TranslateTimeStrToStr(stime: str, timeformat: str = '%Y-%m-%d %H:%M:%S') -> 
 
 
 # 转变一个列表的字符串
-def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%M:%S') -> Union[str, list[str]]:
+def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%M:%S', leastTime: str = "%M") -> Union[str, list[str]]:
+    T = ["%Y", "%m", "%d", "%H", "%M", "%S"]
+    changetoformat = '%Y-%m-%d %H:%M:%S'
+    if leastTime == "%Y":
+        changetoformat = "%Y-00-00 00:00:00"
+    elif leastTime == "%m":
+        changetoformat = "%Y-%m-00 00:00:00"
+    elif leastTime == "%d":
+        changetoformat = "%Y-%m-%d 00:00:00"
+    elif leastTime == "%H":
+        changetoformat = "%Y-%m-%d %H:00:00"
+    elif leastTime == "%M":
+        changetoformat = "%Y-%m-%d %H:%M:00"
     reslist = []
     for itime in stime:
         ttime = time.strptime(itime, timeformat)
-        strtime = time.strftime('%Y-%m-%d %H:%M:00', ttime)
+        strtime = time.strftime(changetoformat, ttime)
         reslist.append(strtime)
     if len(reslist) == 1:
         return reslist[0]
