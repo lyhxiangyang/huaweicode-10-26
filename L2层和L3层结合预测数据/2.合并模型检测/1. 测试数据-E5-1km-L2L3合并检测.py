@@ -251,7 +251,7 @@ if __name__ == "__main__":
     standard_server_pds = changeTimeTo_pdlists(standard_server_pds)
     standard_process_pds = changeTimeTo_pdlists(standard_process_pds)
     standard_l2_pds = changeTimeTo_pdlists(standard_l2_pds)
-    standard_network_pds = changeTimeTo_pdlists(standard_network_pds, leastTime="%S")
+    standard_network_pds = changeTimeTo_pdlists(standard_network_pds, leastTime="%S", timefeaturename="report_time")
     # ============================================================================================= 对process数据和server数据进行特征提取
     print("对process数据进行特征处理".center(40, "*"))
     tpath = os.path.join(spath, "3. process特征提取数据")
