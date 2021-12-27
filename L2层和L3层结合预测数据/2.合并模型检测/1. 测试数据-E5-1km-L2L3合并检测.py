@@ -19,6 +19,7 @@ def getServer_Process_l2_NetworkList(
         process_feature,
         l2_feature,
         network_feature,
+        isExistFlag: bool = True,
 )-> tuple[list[Any], list[Any], list[Any], list[Any]]:
     serverfiles = getfilespath(os.path.join(dirpath, "server"))
     processfiles = getfilespath(os.path.join(dirpath, "process"))
@@ -29,6 +30,16 @@ def getServer_Process_l2_NetworkList(
     time_process_feature = process_feature.copy()
     time_l2_feature = l2_feature.copy()
     time_network_feature = network_feature.copy()
+
+    time_server_feature.extend([TIME_COLUMN_NAME])
+    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
+    time_l2_feature.extend([TIME_COLUMN_NAME])
+    time_network_feature.extend(["report_time"])
+    if isExistFlag:
+        time_server_feature.extend([FAULT_FLAG])
+        time_process_feature.extend([FAULT_FLAG])
+        time_l2_feature.extend([FAULT_FLAG])
+        time_network_feature.extend([FAULT_FLAG])
 
     processpds = []
     serverpds = []
