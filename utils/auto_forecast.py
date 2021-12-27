@@ -739,6 +739,8 @@ def getfilespath(filepath: str) -> List[str]:
 
 
 def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[str]) -> List[pd.DataFrame]:
+    if len(accumulateFeatures) == 0:
+        return processpds
     differencepds = []
     for iprocesspd in processpds:
         subtractpdLists = []
@@ -760,6 +762,8 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
 
 
 def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str]) -> List[pd.DataFrame]:
+    if len(accumulateFeatures) == 0:
+        return serverpds
     differencepds = []
     for iserverpd in serverpds:
         subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
