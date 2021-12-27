@@ -320,7 +320,10 @@ if __name__ == "__main__":
         resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
         L3restult = predictpd[resfeatures]
         # 先得到L2数据
+        tpath = os.path.join(spath, "7.L2中间数据")
+        allserverpds.to_csv(os.path.join(tpath, "allserverpd.csv"))
         alll2pds, _ = mergeDataFrames(extraction_l2_pds)
+        alll2pds.to_csv(os.path.join(tpath, "alll2pd.csv"))
         l2_serverpds = mergeinnerTwoDataFrame(lpd=alll2pds, rpd=allserverpds) # 根据时间得到l2的合并结果
         # ******* 对L2机器封顶进行预测
         l2machinepowerresult = pd.DataFrame()
