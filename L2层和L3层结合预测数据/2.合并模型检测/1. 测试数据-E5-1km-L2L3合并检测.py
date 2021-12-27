@@ -76,8 +76,11 @@ def makeL2networkresultMergedByMin(l2networkpd: pd.DataFrame) -> pd.DataFrame:
         maxlabel = max(x, key=x.count)
         return maxlabel
     delpd = l2networkpd.groupby(TIME_COLUMN_NAME, as_index=False).agg([getrightflag])
+    delpd:pd.DataFrame
+    # delpd.reset_index(inplace=True)
+    delpd.columns = [i[0] for i in delpd.columns]
+    delpd.reset_index(inplace=True)
     return delpd
-
 
 
 if __name__ == "__main__":
