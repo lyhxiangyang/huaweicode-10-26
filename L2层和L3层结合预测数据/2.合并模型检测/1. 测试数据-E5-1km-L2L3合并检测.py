@@ -6,7 +6,7 @@ import pandas as pd
 from Classifiers.ModelPred import select_and_pred
 from utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from utils.DataScripts import getDFmean
-from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
+from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG, MODEL_TYPE
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
@@ -331,32 +331,32 @@ if __name__ == "__main__":
         l2machinepowerresult = pd.DataFrame()
         l2machinepowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
         l2machinepowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
-        l2machinepowerresult["preFlag"] = select_and_pred(l2_serverpds, power_machine_modeltype, saved_model_path=power_machine_modelpath)
+        l2machinepowerresult["preFlag"] = select_and_pred(l2_serverpds, MODEL_TYPE[power_machine_modeltype], saved_model_path=power_machine_modelpath)
 
         # ******* 对L2机柜封顶进行预测
         # 先得到数据
         l2cabinetpowerresult = pd.DataFrame()
         l2cabinetpowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
         l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
-        l2cabinetpowerresult["preFlag"] = select_and_pred(l2_serverpds, power_cabinet_modeltype, saved_model_path=power_cabinet_modelpath)
+        l2cabinetpowerresult["preFlag"] = select_and_pred(l2_serverpds, MODEL_TYPE[power_cabinet_modeltype], saved_model_path=power_cabinet_modelpath)
 
         # ******* 对温度进行预测
         l2temperamentresult = pd.DataFrame()
         l2temperamentresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
         l2temperamentresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
-        l2temperamentresult["preFlag"] = select_and_pred(l2_serverpds, tempertature_modeltype, saved_model_path=temperature_modelpath)
+        l2temperamentresult["preFlag"] = select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath)
 
         # ******* 对网络异常1进行预测
         allnetworkpds, _ = mergeDataFrames(extraction_network_pds)
         l2networkresult1 = pd.DataFrame()
         l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
         l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
-        l2networkresult1["preFlag"] = select_and_pred(allnetworkpds, network_model1type, saved_model_path=network_model1path)
+        l2networkresult1["preFlag"] = select_and_pred(allnetworkpds, MODEL_TYPE[network_model1type], saved_model_path=network_model1path)
         # ******* 对网络异常2进行预测
         l2networkresult2 = pd.DataFrame()
         l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
         l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
-        l2networkresult2["preFlag"] = select_and_pred(allnetworkpds, network_model2type, saved_model_path=network_model2path)
+        l2networkresult2["preFlag"] = select_and_pred(allnetworkpds, MODEL_TYPE[network_model2type], saved_model_path=network_model2path)
 
         # ******* 所有结果分析
         allresults = mergeouterPredictResult([L3restult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
