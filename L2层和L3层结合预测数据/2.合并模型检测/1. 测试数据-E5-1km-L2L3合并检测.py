@@ -67,6 +67,16 @@ def getServer_Process_l2_NetworkList(
         networkpds.append(tpd)
     return serverpds, processpds, l2pds, networkpds
 
+"""
+time faultFlag preFlag
+"""
+def makeL2networkresultMergedByMin(l2networkpd: pd.DataFrame) -> pd.DataFrame:
+    def getrightflag(x):
+        x = list(x)
+        maxlabel = max(x, key=x.count)
+        return maxlabel
+    delpd = l2networkpd.groupby(TIME_COLUMN_NAME).agg([getrightflag])
+    return delpd
 
 
 
@@ -353,12 +363,13 @@ if __name__ == "__main__":
         l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
         l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
         l2networkresult1["preFlag"] = select_and_pred(allnetworkpds, MODEL_TYPE[network_model1type], saved_model_path=network_model1path)
+        l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
         # ******* 对网络异常2进行预测
         l2networkresult2 = pd.DataFrame()
         l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
         l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
         l2networkresult2["preFlag"] = select_and_pred(allnetworkpds, MODEL_TYPE[network_model2type], saved_model_path=network_model2path)
-
+        l2networkresult2 = makeL2networkresultMergedByMin(l2networkresult2)
         # ******* 所有结果分析
         allresults = mergeouterPredictResult([L3restult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
         allresults.to_csv(os.path.join(spath, "总体结果.csv"))

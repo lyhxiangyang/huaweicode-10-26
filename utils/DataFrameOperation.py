@@ -33,7 +33,7 @@ def mergeDataFrames(lpds: List[pd.DataFrame]) -> (pd.DataFrame, bool):
 使用第一个df的faultFlag，第二个dataframe中的faultFlag不使用
 """
 def mergeinnerTwoDataFrame(lpd: pd.DataFrame, rpd: pd.DataFrame, onfeaturename: str = TIME_COLUMN_NAME) -> pd.DataFrame:
-    rpdcolumns = list(lpd.columns.array)
+    rpdcolumns = list(rpd.columns.array)
     rpdcolumns.remove(FAULT_FLAG)
     mergedf = pd.merge(left=lpd, right=rpd[rpdcolumns], left_on=onfeaturename, right_on=onfeaturename)
     return mergedf

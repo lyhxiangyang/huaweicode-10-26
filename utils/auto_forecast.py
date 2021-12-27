@@ -101,7 +101,7 @@ def changeTimeColumns(df: pd.DataFrame, leastTime: str = "%M", timefeaturename: 
 def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M', leastTime: str="%M", timefeaturename: str=TIME_COLUMN_NAME) -> List[pd.DataFrame]:
     changed_pds = []
     for ipd in pds:
-        tpd = changeTimeColumns(ipd, leastTime=leastTime, timefeaturename=TIME_COLUMN_NAME)
+        tpd = changeTimeColumns(ipd, leastTime=leastTime, timefeaturename=timefeaturename)
         changed_pds.append(tpd)
     return changed_pds
 
