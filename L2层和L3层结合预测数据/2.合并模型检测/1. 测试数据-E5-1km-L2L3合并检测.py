@@ -321,6 +321,8 @@ if __name__ == "__main__":
         L3restult = predictpd[resfeatures]
         # 先得到L2数据
         tpath = os.path.join(spath, "7.L2中间数据")
+        if not os.path.exists(tpath):
+            os.makedirs(tpath)
         allserverpds.to_csv(os.path.join(tpath, "allserverpd.csv"))
         alll2pds, _ = mergeDataFrames(extraction_l2_pds)
         alll2pds.to_csv(os.path.join(tpath, "alll2pd.csv"))
