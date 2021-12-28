@@ -295,7 +295,7 @@ if __name__ == "__main__":
                                           windowsSize=3, spath=tpath)
     tpath = os.path.join(spath, "6. network特征提取")
     extraction_network_pds = serverpdsList(standard_network_pds, extractFeatures=network_feature,
-                                           windowsSize=3, spath=tpath)
+                                           windowsSize=30, spath=tpath)
     # ============================================================================================= 将process数据和server数据合在一起，按照server时间进行预测
     print("将提取之后的server数据和process数据进行合并".center(40, "*"))
     tpath = os.path.join(spath, "7. server和process合并")
@@ -373,7 +373,7 @@ if __name__ == "__main__":
         l2temperamentresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
         l2temperamentresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
         # l2temperamentresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath))
-        l2temperamentresult["preFlag"] = predictTemp(model_path=temperature_modelpath, model_type=MODEL_TYPE[tempertature_modeltype], data=l2_serverpds)
+        l2temperamentresult["preFlag"] = ThransferRightLabels(predictTemp(model_path=temperature_modelpath, model_type=MODEL_TYPE[tempertature_modeltype], data=l2_serverpds))
 
         # ******* 对网络异常1进行预测
         REPORT_TIME = "report_time"
