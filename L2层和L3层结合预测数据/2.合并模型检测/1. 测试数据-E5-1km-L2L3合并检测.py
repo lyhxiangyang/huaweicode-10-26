@@ -152,7 +152,7 @@ if __name__ == "__main__":
     l2_accumulate_feature = []
     # 需要对网络数据进行处理的指标
     network_feature = ["tx_packets_phy", "rx_packets_phy"]
-    network_accumulate_feature = []
+    network_accumulate_feature = ["tx_packets_phy", "rx_packets_phy"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     # 格式其实是没有用了，函数中已经能够自动分析文件的格式进行使用
@@ -219,14 +219,15 @@ if __name__ == "__main__":
         add_cpu_column(normalprocesspds)
         # 对正常server进程数据进行差分处理之后，得到一些指标
         normalserverpds = differenceServer(normalserverpds, server_accumulate_feature)
+        normalnetworkpds = differenceServer(normalnetworkpds, network_accumulate_feature)
 
-
+    # ==============异常值的处理
     # 对异常数据进行差分处理之后，得到cpu特征值
     predictprocesspds = differenceProcess(predictprocesspds, process_accumulate_feature)
     add_cpu_column(predictprocesspds)
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, server_accumulate_feature)
-    # ----
+    predictnetworkpds = differenceServer(predictnetworkpds, network_accumulate_feature)
     process_feature = ["cpu"]
 
     # ============================================================================================= 先对正常数据的各个指标求平均值
