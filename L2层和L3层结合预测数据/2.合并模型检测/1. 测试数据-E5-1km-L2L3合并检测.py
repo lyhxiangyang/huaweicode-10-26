@@ -3,7 +3,7 @@ from typing import Set, Tuple, List, Any
 
 import pandas as pd
 
-from Classifiers.ModelPred import select_and_pred
+from Classifiers.ModelPred import select_and_pred, predictTemp
 from utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from utils.DataScripts import getDFmean
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG, MODEL_TYPE
@@ -83,7 +83,7 @@ def makeL2networkresultMergedByMin(l2networkpd: pd.DataFrame) -> pd.DataFrame:
     return delpd
 
 def ThransferRightLabels(x: List[int]):
-    C=[0,111,121,133,134,141]
+    C=[0,111,121,131,132,141]
     y = [C[i] if 0<=i<=5 else i for i in x]
     return y
 
@@ -138,7 +138,17 @@ if __name__ == "__main__":
     process_feature = ["user", "system"]
     process_accumulate_feature = ["user", "system"]
     # 需要对l2数据进行处理的指标，
-    l2_feature = ["CPU_Powewr", "Power", "Cabinet_Power", "CPU1_Core_Rem", "FAN1_F_Speed"]
+    l2_feature = ["CPU_Powewr", "Power", "Cabinet_Power",
+                  'FAN1_F_Speed', "FAN1_R_Speed",
+                  'FAN2_F_Speed', "FAN2_R_Speed",
+                  'FAN3_F_Speed', "FAN3_R_Speed",
+                  'FAN4_F_Speed', "FAN4_R_Speed",
+                  'FAN5_F_Speed', "FAN5_R_Speed",
+                  'FAN6_F_Speed', "FAN6_R_Speed",
+                  'FAN7_F_Speed', "FAN7_R_Speed",
+                  'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
+                  'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
+                  ]
     l2_accumulate_feature = []
     # 需要对网络数据进行处理的指标
     network_feature = ["tx_packets_phy", "rx_packets_phy"]
@@ -362,7 +372,8 @@ if __name__ == "__main__":
         l2temperamentresult = pd.DataFrame()
         l2temperamentresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
         l2temperamentresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
-        l2temperamentresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath))
+        # l2temperamentresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath))
+        l2temperamentresult["preFlag"] = predictTemp(model_path=temperature_modelpath, model_type=MODEL_TYPE[tempertature_modeltype], data=l2_serverpds)
 
         # ******* 对网络异常1进行预测
         REPORT_TIME = "report_time"

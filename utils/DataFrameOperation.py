@@ -57,7 +57,6 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         xlist = sorted(list(xlist))
         # 如果有多个preFlag，那么就显示除了-1之外的所有preFlag
         if len(xlist) > 1:
-            print(xlist)
             if 0 in xlist:
                 xlist.remove(0)
             xlist = list(map(str, xlist))
