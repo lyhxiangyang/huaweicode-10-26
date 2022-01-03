@@ -89,8 +89,14 @@ def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
     if len(lpds) == 0 or len(lpds) == 1:
         return True
     for i in range(1, len(lcolumns)):
-        if lcolumns[i] != lcolumns[0]:
+        lleft = set(lcolumns[i])
+        lright = set(lcolumns[0])
+        if lleft != lright:
+            a = lleft & lright
+            b = lleft - a
+            c = lright - a
             return False
+
     return True
 
 
