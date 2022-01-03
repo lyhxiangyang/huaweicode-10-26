@@ -30,5 +30,5 @@ if __name__ == "__main__":
 
     # ========================================================= 进行读取
     jsonDict = covertCSVToJsonDict(predictdirpath, server_feature=server_feature, process_feature=process_feature, network_feature=network_feature, l2_feature=l2_feature)
-    saveDictToJson(jsonDict, spath=spath, filename="alljson.jsong")
+    saveDictToJson(jsonDict, spath=spath, filename="alljson.json")
 
