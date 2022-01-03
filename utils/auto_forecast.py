@@ -39,21 +39,28 @@ def getServer_Process_l2_NetworkList(
     processfiles = getfilespath(os.path.join(dirpath, "process"))
     l2files = getfilespath(os.path.join(dirpath, "l2"))
     networkfiles = getfilespath(os.path.join(dirpath, "network"))
+    if server_feature is not None:
+        time_server_feature = server_feature.copy()
+        time_server_feature.extend([TIME_COLUMN_NAME])
+    if process_feature is not None:
+        time_process_feature = process_feature.copy()
+        time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
+    if l2_feature is not None:
+        time_l2_feature = l2_feature.copy()
+        time_l2_feature.extend([TIME_COLUMN_NAME])
+    if network_feature is not None:
+        time_network_feature = network_feature.copy()
+        time_network_feature.extend(["report_time"])
 
-    time_server_feature = server_feature.copy()
-    time_process_feature = process_feature.copy()
-    time_l2_feature = l2_feature.copy()
-    time_network_feature = network_feature.copy()
-
-    time_server_feature.extend([TIME_COLUMN_NAME])
-    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
-    time_l2_feature.extend([TIME_COLUMN_NAME])
-    time_network_feature.extend(["report_time"])
     if isExistFlag:
-        time_server_feature.extend([FAULT_FLAG])
-        time_process_feature.extend([FAULT_FLAG])
-        time_l2_feature.extend([FAULT_FLAG])
-        time_network_feature.extend([FAULT_FLAG])
+        if server_feature is not None:
+            time_server_feature.extend([FAULT_FLAG])
+        if process_feature is not None:
+            time_process_feature.extend([FAULT_FLAG])
+        if l2_feature is not None:
+            time_l2_feature.extend([FAULT_FLAG])
+        if network_feature is not None:
+            time_network_feature.extend([FAULT_FLAG])
 
     processpds = []
     serverpds = []
