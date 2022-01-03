@@ -26,14 +26,15 @@ def getfilepd(ipath: str, features: List[str] = None) -> pd.DataFrame:
         return tpd[:, features]
     return tpd
 
+
 def getServer_Process_l2_NetworkList(
         dirpath: str,
-        server_feature,
-        process_feature,
-        l2_feature,
-        network_feature,
+        server_feature=None,
+        process_feature=None,
+        l2_feature=None,
+        network_feature=None,
         isExistFlag: bool = True,
-)-> tuple[list[Any], list[Any], list[Any], list[Any]]:
+) -> tuple[list[Any], list[Any], list[Any], list[Any]]:
     serverfiles = getfilespath(os.path.join(dirpath, "server"))
     processfiles = getfilespath(os.path.join(dirpath, "process"))
     l2files = getfilespath(os.path.join(dirpath, "l2"))
@@ -61,22 +62,26 @@ def getServer_Process_l2_NetworkList(
     # 预测进程数据
     for ifile in processfiles:
         tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_process_feature]
+        if process_feature is not None:
+            tpd = tpd.loc[:, time_process_feature]
         processpds.append(tpd)
     # 预测服务数据
     for ifile in serverfiles:
         tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_server_feature]
+        if server_feature is not None:
+            tpd = tpd.loc[:, time_server_feature]
         serverpds.append(tpd)
     # 预测l2数据
     for ifile in l2files:
         tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_l2_feature]
+        if l2_feature is not None:
+            tpd = tpd.loc[:, time_l2_feature]
         l2pds.append(tpd)
     # 预测网络数据
     for ifile in networkfiles:
         tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_network_feature]
+        if network_feature is not None:
+            tpd = tpd.loc[:, time_network_feature]
         networkpds.append(tpd)
     return serverpds, processpds, l2pds, networkpds
 
@@ -130,7 +135,6 @@ def getTimeFormat(onetime: str) -> str:
     return timeformatstr
 
 
-
 """
 将时间都转化为标准格式
 处理完之后的格式为这种形式
@@ -140,19 +144,21 @@ leastTime 精确到那个时间点， 如果精确到分钟，就将秒进行修
 
 
 # 将一个pd中的时间序列的秒变为0
-def changeTimeColumns(df: pd.DataFrame, leastTime: str = "%M", timefeaturename: str=TIME_COLUMN_NAME) -> pd.DataFrame:
+def changeTimeColumns(df: pd.DataFrame, leastTime: str = "%M", timefeaturename: str = TIME_COLUMN_NAME) -> pd.DataFrame:
     if len(df) == 0:
         return df
     stimestr = df[timefeaturename][0]
     # timeformat给出的选项仅仅供选择，下面进行自动生成格式选项
     timeformat = getTimeFormat(stimestr)
-    tpd = df.loc[:, [timefeaturename]].apply(lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat, leastTime=leastTime), axis=0)
+    tpd = df.loc[:, [timefeaturename]].apply(
+        lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat, leastTime=leastTime), axis=0)
     df.loc[:, timefeaturename] = tpd.loc[:, timefeaturename]
     return df
 
 
 # 讲一个pd的列表全都改变 timeformat没有使用的作用
-def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M', leastTime: str="%M", timefeaturename: str=TIME_COLUMN_NAME) -> List[pd.DataFrame]:
+def changeTimeTo_pdlists(pds: List[pd.DataFrame], timeformat: str = '%Y/%m/%d %H:%M', leastTime: str = "%M",
+                         timefeaturename: str = TIME_COLUMN_NAME) -> List[pd.DataFrame]:
     changed_pds = []
     for ipd in pds:
         tpd = changeTimeColumns(ipd, leastTime=leastTime, timefeaturename=timefeaturename)

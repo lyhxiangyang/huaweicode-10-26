@@ -29,6 +29,6 @@ if __name__ == "__main__":
     network_feature = ["tx_packets_phy", "rx_packets_phy"]
 
     # ========================================================= 进行读取
-    jsonDict = covertCSVToJsonDict(predictdirpath, server_feature=server_feature, process_feature=process_feature, network_feature=network_feature, l2_feature=l2_feature)
+    jsonDict = covertCSVToJsgonDict(predictdirpath)
     saveDictToJson(jsonDict, spath=spath, filename="alljson.json")
 

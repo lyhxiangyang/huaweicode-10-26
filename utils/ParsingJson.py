@@ -42,10 +42,10 @@ filepath是存储network、server等目录的目录
 """
 
 
-def covertCSVToJsonDict(dirpath: str, server_feature,
-                        process_feature,
-                        l2_feature,
-                        network_feature,
+def covertCSVToJsonDict(dirpath: str, server_feature=None,
+                        process_feature=None,
+                        l2_feature=None,
+                        network_feature=None,
                         isExistFlag: bool = True,
                         jobid: int = 16,
                         type: str = 'L3',
