@@ -10,62 +10,7 @@ from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_F
 from utils.FileSaveRead import saveDFListToFiles
 from utils.auto_forecast import getfilespath, getfilepd, differenceProcess, add_cpu_column, differenceServer, \
     standardLists, changeTimeTo_pdlists, processpdsList, serverpdsList, deal_serverpds_and_processpds, \
-    predictAllAbnormal, analysePredictResult
-
-# 得到四种列表
-def getServer_Process_l2_NetworkList(
-        dirpath: str,
-        server_feature,
-        process_feature,
-        l2_feature,
-        network_feature,
-        isExistFlag: bool = True,
-)-> tuple[list[Any], list[Any], list[Any], list[Any]]:
-    serverfiles = getfilespath(os.path.join(dirpath, "server"))
-    processfiles = getfilespath(os.path.join(dirpath, "process"))
-    l2files = getfilespath(os.path.join(dirpath, "l2"))
-    networkfiles = getfilespath(os.path.join(dirpath, "network"))
-
-    time_server_feature = server_feature.copy()
-    time_process_feature = process_feature.copy()
-    time_l2_feature = l2_feature.copy()
-    time_network_feature = network_feature.copy()
-
-    time_server_feature.extend([TIME_COLUMN_NAME])
-    time_process_feature.extend([TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE])
-    time_l2_feature.extend([TIME_COLUMN_NAME])
-    time_network_feature.extend(["report_time"])
-    if isExistFlag:
-        time_server_feature.extend([FAULT_FLAG])
-        time_process_feature.extend([FAULT_FLAG])
-        time_l2_feature.extend([FAULT_FLAG])
-        time_network_feature.extend([FAULT_FLAG])
-
-    processpds = []
-    serverpds = []
-    l2pds = []
-    networkpds = []
-    # 预测进程数据
-    for ifile in processfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_process_feature]
-        processpds.append(tpd)
-    # 预测服务数据
-    for ifile in serverfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_server_feature]
-        serverpds.append(tpd)
-    # 预测l2数据
-    for ifile in l2files:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_l2_feature]
-        l2pds.append(tpd)
-    # 预测网络数据
-    for ifile in networkfiles:
-        tpd = getfilepd(ifile)
-        tpd = tpd.loc[:, time_network_feature]
-        networkpds.append(tpd)
-    return serverpds, processpds, l2pds, networkpds
+    predictAllAbnormal, analysePredictResult, getServer_Process_l2_NetworkList
 
 """
 time faultFlag preFlag
