@@ -161,6 +161,7 @@ def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str)
 def getMeanFromDataFrom(detectionJson: Dict, classname: str, featuresnames: List[str], datanumber: int = 10):
     dataDict = detectionJson["RequestData"]["data"][classname]
     classdatanumber = min(datanumber, len(dataDict))
+    dataDict = dict(list(dataDict.items())[:classdatanumber])
     dataPd = pd.DataFrame(data=dataDict[:classdatanumber])
     return dataPd[featuresnames].mean()
 

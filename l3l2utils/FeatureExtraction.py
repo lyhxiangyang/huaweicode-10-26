@@ -72,7 +72,6 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
     对server数据列表中pgfree进行滑动窗口的处理
     会将传入参数的列表中dataframe本身数值进行修改
     """
-
     def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
         pgfree_name = "pgfree"
         for ipd in serverpds:

@@ -68,8 +68,8 @@ def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
     jsonDict["RequestData"]["data"] = {}
     jsonDict["RequestData"]["data"]["server"] = convertDataFrameToDict(serverallpd)
     jsonDict["RequestData"]["data"]["process"] = convertDataFrameToDict(processallpd)
-    jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(serverallpd)
-    jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(serverallpd)
+    jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(networkallpd)
+    jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(l2allpd)
     return jsonDict
 
 
