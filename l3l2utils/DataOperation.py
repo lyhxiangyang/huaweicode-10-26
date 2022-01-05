@@ -29,9 +29,9 @@ def getTimeFormat(onetime: str) -> str:
 """
 
 
-def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%M:%S', leastTime: str = "%M") -> Union[
+def TranslateTimeListStrToStr(stime: List[str], leastTime: str = "%M") -> Union[
     str, list[str]]:
-    T = ["%Y", "%m", "%d", "%H", "%M", "%S"]
+    # T = ["%Y", "%m", "%d", "%H", "%M", "%S"]
     changetoformat = '%Y-%m-%d %H:%M:%S'
     if leastTime == "%Y":
         changetoformat = "%Y-00-00 00:00:00"
@@ -45,6 +45,7 @@ def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%
         changetoformat = "%Y-%m-%d %H:%M:00"
     reslist = []
     for itime in stime:
+        timeformat = getTimeFormat(itime)
         ttime = time.strptime(itime, timeformat)
         strtime = time.strftime(changetoformat, ttime)
         reslist.append(strtime)
@@ -53,16 +54,14 @@ def TranslateTimeListStrToStr(stime: List[str], timeformat: str = '%Y-%m-%d %H:%
     return reslist
 
 
-# 将一个pd中的时间序列的秒变为0
+# 将一个pd中的时间序列的秒变为00
 def changeTimeFromOnepd(df: pd.DataFrame, leastTime: str = "%M",
                         timefeaturename: str = TIME_COLUMN_NAME) -> pd.DataFrame:
     if len(df) == 0:
         return df
-    stimestr = df[timefeaturename][0]
     # timeformat给出的选项仅仅供选择，下面进行自动生成格式选项
-    timeformat = getTimeFormat(stimestr)
     tpd = df.loc[:, [timefeaturename]].apply(
-        lambda x: TranslateTimeListStrToStr(x.to_list(), timeformat, leastTime=leastTime), axis=0)
+        lambda x: TranslateTimeListStrToStr(x.to_list(), leastTime=leastTime), axis=0)
     df.loc[:, timefeaturename] = tpd.loc[:, timefeaturename]
     return df
 
