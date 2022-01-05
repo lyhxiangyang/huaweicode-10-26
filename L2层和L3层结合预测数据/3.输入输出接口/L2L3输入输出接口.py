@@ -71,10 +71,10 @@ def FeatureextractionData(inputDict: Dict):
     inputDict["process_feature"] = ["cpu"]
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
-    normalserver_meanvalue = getNormalServerMean(detectionJson, inputDict["server_feature"])
-    normalprocess_meanvalue = getNormalProcessMean(detectionJson, inputDict["process_feature"])
-    normall2_meanvalue = getNormalL2Mean(detectionJson, inputDict["l2_feature"])
-    normalnetwork_meanvalue = getNormalNetworkMean(detectionJson, inputDict["network_feature"])
+    normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, inputDict["server_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    normalprocess_meanvalue = getNormalProcessMean(detectionJson, predictprocesspds, inputDict["process_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    normall2_meanvalue = getNormalL2Mean(detectionJson, predictl2pds, inputDict["l2_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    normalnetwork_meanvalue = getNormalNetworkMean(detectionJson, predictnetworkpds, inputDict["network_feature"], datanumber=inputDict["meanNormalDataNumber"])
     # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "1.正常数据的平均值")

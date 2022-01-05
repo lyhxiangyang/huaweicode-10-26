@@ -4,11 +4,10 @@
 import json
 import os.path
 from typing import Dict, List
-
 import pandas as pd
 
-from utils.DataFrameOperation import mergeDataFrames
-from utils.auto_forecast import getServer_Process_l2_NetworkList
+from l3l2utils.DataFrameOperation import mergeDataFrames
+from l3l2utils.DataFrameSaveRead import getServer_Process_l2_NetworkList
 
 """
 将dataFrame转化为
@@ -56,10 +55,10 @@ def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
                                                                                 l2_feature=l2_feature,
                                                                                 network_feature=network_feature,
                                                                                 isExistFlag=isExistFlag)
-    serverallpd, _ = mergeDataFrames(serverpds)
-    processallpd, _ = mergeDataFrames(processpds)
-    l2allpd, _ = mergeDataFrames(l2pds)
-    networkallpd, _ = mergeDataFrames(networkpds)
+    serverallpd = mergeDataFrames(serverpds)
+    processallpd = mergeDataFrames(processpds)
+    l2allpd = mergeDataFrames(l2pds)
+    networkallpd = mergeDataFrames(networkpds)
     jsonDict = {}
     jsonDict["JobID"] = jobid
     jsonDict["Type"] = type
@@ -161,16 +160,13 @@ def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str)
     return meanValue
 
 
-def getMeanFromDataFrom(detectionJson: Dict, classname: str, featuresnames: List[str], datanumber: int = 10):
-    dataDict = detectionJson["RequestData"]["data"][classname]
-    classdatanumber = min(datanumber, len(dataDict))
-    dataDict = dict(list(dataDict.items())[:classdatanumber])
-    dataPd = pd.DataFrame(data=dataDict).T
+def getMeanFromDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datanumber: int = 10):
+    datapd = mergeDataFrames(datapds).iloc[:datanumber]
     return dataPd[featuresnames].mean()
 
 
-def getNormalServerMean(detectionJson: Dict, features: List[str], datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(detectionJson, "server", features, datanumber)
+def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+    meanSeries = getMeanFromDataFrom(datapd, "server", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
         if featureVaule is not None:
@@ -178,8 +174,8 @@ def getNormalServerMean(detectionJson: Dict, features: List[str], datanumber: in
     return meanSeries
 
 
-def getNormalProcessMean(detectionJson: Dict, features: List[str], datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(detectionJson, "process", features, datanumber)
+def getNormalProcessMean(detectionJson: Dict,datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+    meanSeries = getMeanFromDataFrom(datapd, "process", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "process", ifeaturename)
         if featureVaule is not None:
@@ -187,8 +183,8 @@ def getNormalProcessMean(detectionJson: Dict, features: List[str], datanumber: i
     return meanSeries
 
 
-def getNormalL2Mean(detectionJson: Dict, features: List[str], datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(detectionJson, "l2", features, datanumber)
+def getNormalL2Mean(detectionJson: Dict,datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+    meanSeries = getMeanFromDataFrom(datapd, "l2", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "l2", ifeaturename)
         if featureVaule is not None:
@@ -196,8 +192,8 @@ def getNormalL2Mean(detectionJson: Dict, features: List[str], datanumber: int = 
     return meanSeries
 
 
-def getNormalNetworkMean(detectionJson: Dict, features: List[str], datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(detectionJson, "network", features, datanumber)
+def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+    meanSeries = getMeanFromDataFrom(datapd, "network", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "network", ifeaturename)
         if featureVaule is not None:
