@@ -287,7 +287,7 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
                                                  allnetworkpds)
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "5.L2L3总的预测结果")
-        l2l3predetectresultpd.to_csv(os.path.join(tpath, "总预测结果.csv"))
+        savefile(l2l3predetectresultpd, tpath, "总预测结果.csv")
 
 
 if __name__ == "__main__":
