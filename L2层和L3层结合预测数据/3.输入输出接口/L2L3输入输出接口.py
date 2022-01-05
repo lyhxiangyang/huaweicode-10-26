@@ -1,7 +1,7 @@
 import os
 from typing import Set, Tuple, List, Dict
 import pandas as pd
-from Classifiers.ModelPred import select_and_pred, predictTemp
+from Classifiers.ModelPred import select_and_pred
 from l3l2utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from l3l2utils.DataOperation import changeTimeToFromPdlists
 from l3l2utils.DefineData import TIME_COLUMN_NAME, CPU_FEATURE, FAULT_FLAG, MODEL_TYPE
@@ -291,6 +291,6 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
 
 
 if __name__ == "__main__":
-    configfilepath = "./config.json"
+    configfilepath = R"L2层和L3层结合预测数据/3.输入输出接口/config.json"
     configJsonDict = readJsonToDict(*(os.path.split(configfilepath)))
     outputDict = detectionFromInputDict(configJsonDict)

@@ -17,8 +17,7 @@
     "tempertature_modeltype":0,
     "network_model1type":0,
     "network_model2type":0,
-
-
+    "meanNormalDataNumber": 10,
     "spath": "tmp/总过程分析/L3l2数据集合输入输出",
     "resultsavepath": ".",
 

@@ -19,7 +19,8 @@
     "tempertature_modeltype":0,
     "network_model1type":0,
     "network_model2type":0,
-
+    // 如果没有指定正常数据，那么取前几条数据作为正常值
+    "meanNormalDataNumber": 10,
     // 指定中间的数据生成的路径  如果spath=null,则不生成中间文件
     "spath": "tmp/总过程分析/L3l2数据集合输入输出",
 
