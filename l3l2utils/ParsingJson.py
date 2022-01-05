@@ -151,8 +151,11 @@ classname: 别分代表l2 server process network
 
 
 def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str):
-    classFeatureMeanDict = detectionJson["RequestData"]["normalDataMean"][classname]
+    RequestDataDict = detectionJson["RequestData"]
     meanValue = None
+    if "normalDataMean" not in RequestDataDict:
+        return meanValue
+    classFeatureMeanDict = detectionJson["RequestData"]["normalDataMean"][classname]
     if featuresname in classFeatureMeanDict.keys():
         meanValue = Dict["RequestData"]["normalDataMean"][classname][featuresname]
     return meanValue
@@ -162,7 +165,7 @@ def getMeanFromDataFrom(detectionJson: Dict, classname: str, featuresnames: List
     dataDict = detectionJson["RequestData"]["data"][classname]
     classdatanumber = min(datanumber, len(dataDict))
     dataDict = dict(list(dataDict.items())[:classdatanumber])
-    dataPd = pd.DataFrame(data=dataDict[:classdatanumber])
+    dataPd = pd.DataFrame(data=dataDict).T
     return dataPd[featuresnames].mean()
 
 
