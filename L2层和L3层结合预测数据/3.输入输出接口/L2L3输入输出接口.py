@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Set, Tuple, List, Dict
 import pandas as pd
 from Classifiers.ModelPred import select_and_pred
@@ -291,6 +292,9 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
 
 
 if __name__ == "__main__":
+    startTime = time.clock()
     configfilepath = R"L2层和L3层结合预测数据/3.输入输出接口/config.json"
     configJsonDict = readJsonToDict(*(os.path.split(configfilepath)))
     outputDict = detectionFromInputDict(configJsonDict)
+    endTime = time.clock()
+    print('Running time: %s Seconds' % (endTime - startTime))
