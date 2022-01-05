@@ -48,7 +48,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     def fun_faultFlag(xlist: pd.Series):
         xlist = xlist.dropna()
         assert len(xlist) != -1
-        return str(int(xlist[0]))
+        return xlist[0]
     def fun_preFlag(xlist: pd.Series):
         xlist = xlist.dropna()
         assert len(xlist) != -1
@@ -59,10 +59,9 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         if len(xlist) > 1:
             if 0 in xlist:
                 xlist.remove(0)
-            xlist = list(map(str, xlist))
-            return ",".join(xlist)
+            return xlist
         else:
-            return str(int(xlist[-1]))
+            return xlist[-1]
     # 需要将每个dataframe的索引设置为time
     timeindexpds = [ipd.set_index(TIME_COLUMN_NAME) for ipd in pds]
     mergepds = pd.concat(timeindexpds, join="outer", axis=1) # 将会出现多个faultFlag和多个preFlag 将会按照time进行列的合并，会出现多行
@@ -84,7 +83,6 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
 
 def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
     lcolumns = [list(i.columns.array) for i in lpds]
-
     # 长度为0的时候可以返回True
     if len(lpds) == 0 or len(lpds) == 1:
         return True
@@ -96,7 +94,6 @@ def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
             b = lleft - a
             c = lright - a
             return False
-
     return True
 
 

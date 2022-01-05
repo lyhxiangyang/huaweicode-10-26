@@ -230,7 +230,7 @@ accumulateFeatures : 累计特征 都在extractFeatures
 """
 
 
-def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumulateFeatures: List[str],
+def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumulateFeatures=None,
                     windowsSize: int = 3, spath: str = None) -> pd.DataFrame:
     if spath is not None and not os.path.exists(spath):
         os.makedirs(spath)
@@ -257,10 +257,12 @@ def processpd_bypid(processpd: pd.DataFrame, extractFeatures: List[str], accumul
 
 """
 将所有的process数据进行特征提取
+accumulateFeatures 被抛弃
+
 """
 
 
-def processpdsList(processpds: List[pd.DataFrame], extractFeatures: List[str], accumulateFeatures: List[str],
+def processpdsList(processpds: List[pd.DataFrame], extractFeatures: List[str], accumulateFeatures: List[str] = None,
                    windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
     featureExtractiondfs = []
     for ipd in processpds:
@@ -427,7 +429,8 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
         [(key, serverinformationDict[key]) for key in serverinformationDict.keys() if key not in nosavefeatures])
     savedict["coresnums"] = coresnumslist
     tpd = pd.DataFrame(data=savedict)
-    tpd.to_csv(os.path.join(spath, "server_process有用指标.csv"))
+    if spath is not None:
+        tpd.to_csv(os.path.join(spath, "server_process有用指标.csv"))
     # 将时间和错误核心列表进行保存
     timelist = serverinformationDict[TIME_COLUMN_NAME]
     abcores = serverinformationDict["abnormalcores"]  # 是一个列表的集合
@@ -435,8 +438,9 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
 
     time_abcoresDict = dict(zip(timelist, abcores))
     time_abcoresJson = json.dumps(time_abcoresDict, indent=4, sort_keys=True)
-    with open(os.path.join(spath, "time_abnormalCores.json"), "w") as f:
-        f.write(str(time_abcoresJson))
+    if spath is not None:
+        with open(os.path.join(spath, "time_abnormalCores.json"), "w") as f:
+            f.write(str(time_abcoresJson))
     # ==============================================================================================================
     return serverinformationDict
 
@@ -459,33 +463,33 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     #  wrfnumList不为None
     wrfnumList = serverinformationDict['abnormalcores']
     assert len(serverinformationDict[TIME_COLUMN_NAME]) == len(wrfnumList)
-    iscpu = []  # 先添加一个数值，最后返回的时候要去掉
+    iscpulist = []  # 先添加一个数值，最后返回的时候要去掉
     ilastlist = None
     for i, ilist in enumerate(wrfnumList):
         # ===========================
         if ilist is None:
-            iscpu.append(-1)
+            iscpulist.append(-1)
             ilastlist = None
             continue
         # ========================
         if len(ilist) == 0:
-            iscpu.append(0)
+            iscpulist.append(0)
             ilastlist = []
             continue
         # ========================
         if len(ilist) == 1:
             if ilastlist is None:
-                iscpu.append(20)
+                iscpulist.append(20)
             elif len(ilastlist) == 0:
-                iscpu.append(20)
+                iscpulist.append(20)
             elif len(ilastlist) == 1 and set(ilastlist) == set(ilist):
-                iscpu.append(20)
+                iscpulist.append(20)
             elif len(ilastlist) == 1 and set(ilastlist) != set(ilist):
-                iscpu[-1] = 80
-                iscpu.append(80)
+                iscpulist[-1] = 80
+                iscpulist.append(80)
             elif len(ilastlist) > 1:
-                iscpu[-1] = 80
-                iscpu.append(80)
+                iscpulist[-1] = 80
+                iscpulist.append(80)
             else:
                 print("len(list) == 1: 预测cpu出现了不可预知的错误")
                 exit(1)
@@ -494,42 +498,42 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
         # =======================
         if len(ilist) == coresnumber:
             if ilastlist is None:
-                iscpu.append(10)
+                iscpulist.append(10)
             elif len(ilastlist) == 0:
-                iscpu.append(10)
+                iscpulist.append(10)
             elif len(ilastlist) == coresnumber:
-                iscpu.append(10)
+                iscpulist.append(10)
             else:
-                iscpu[-1] = 80
-                iscpu.append(80)
+                iscpulist[-1] = 80
+                iscpulist.append(80)
             ilastlist = ilist
             continue
         # =======================
         # 现在就是多核心cpu的数据
         if ilastlist is None:
-            iscpu.append(30)
+            iscpulist.append(30)
         elif len(ilastlist) == 0:
-            iscpu.append(30)
+            iscpulist.append(30)
         elif len(ilastlist) == 1:
-            iscpu[-1] = 80
-            iscpu.append(80)
+            iscpulist[-1] = 80
+            iscpulist.append(80)
         elif len(ilastlist) == coresnumber:
-            iscpu[-1] = 80
-            iscpu.append(80)
+            iscpulist[-1] = 80
+            iscpulist.append(80)
         elif len(ilastlist) != len(ilist):
-            iscpu[-1] = 80
-            iscpu.append(80)
+            iscpulist[-1] = 80
+            iscpulist.append(80)
         elif len(ilastlist) == len(ilist) and set(ilastlist) != set(ilist):
-            iscpu[-1] = 80
-            iscpu.append(80)
+            iscpulist[-1] = 80
+            iscpulist.append(80)
         elif len(ilastlist) == len(ilist) and set(ilastlist) == set(ilist):
-            iscpu[-1] = 30
-            iscpu.append(30)
+            iscpulist[-1] = 30
+            iscpulist.append(30)
         else:
             print("多核cpu 来到了不可能来到的位置")
             exit(1)
         ilastlist = ilist
-    return iscpu
+    return iscpulist
 
 
 """
@@ -732,11 +736,12 @@ memory_bandwidth_modeltype 0-决策树  1-随机森林  2-自适应增强
 """
 
 
-def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: bool = False,
+def predictAllAbnormal(serverinformationDict: Dict,
+                       coresnumber: int,
+                       spath: str = None, isThreshold: bool = False,
                        thresholdValue: Dict = None,
                        Memory_bandwidth_modelpath: str = None, Memory_leaks_modelpath: str = None,
                        memory_bandwidth_modeltype=0, memory_leaks_modeltype=0,
-                       coresnumber: int = 0,
                        mem_leak_features=None,
                        mem_bandwidth_features=None,
                        ) -> pd.DataFrame:
@@ -785,9 +790,10 @@ def predictAllAbnormal(serverinformationDict: Dict, spath: str, isThreshold: boo
     tpd = PushLabelToFirst(tpd, FAULT_FLAG)
     tpd = PushLabelToFirst(tpd, TIME_COLUMN_NAME)
     # ====================将结果进行保存
-    if not os.path.exists(spath):
-        os.makedirs(spath)
-    tpd.to_csv(os.path.join(spath, "预测结果.csv"))
+    if spath is not None:
+        if not os.path.exists(spath):
+            os.makedirs(spath)
+        tpd.to_csv(os.path.join(spath, "预测结果.csv"))
     return tpd
 
 

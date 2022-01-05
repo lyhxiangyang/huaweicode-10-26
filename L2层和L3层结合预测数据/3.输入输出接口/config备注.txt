@@ -1,0 +1,28 @@
+{
+    // 指定输入文件
+    "predictdirjsonpath": "tmp/jsonfile/alljson.json",
+
+    // 指定各个模型的路径
+    "processcpu_modelpath":"tmp/modelpath/singlefeature/process_cpu_model",
+    "servermemory_modelpath":"tmp/modelpath/singlefeature/memory_leak_model",
+    "serverbandwidth_modelpath":"tmp/modelpath/singlefeature/memory_bandwidth_model",
+    "power_machine_modelpath":"tmp/modelpath/l2/机器功率封顶",
+    "power_cabinet_modelpath":"tmp/modelpath/l2/机柜功率封顶",
+    "temperature_modelpath":"tmp/modelpath/l2/温度过高",
+    "network_model1path":"tmp/modelpath/l2/网络异常1",
+    "network_model2path":"tmp/modelpath/l2/网络异常2",
+    "processcpu_modeltype":0,
+    "servermemory_modeltype":0,
+    "serverbandwidth_modeltype":0,
+    "power_machine_modeltype":0,
+    "power_cabinet_modeltype":0,
+    "tempertature_modeltype":0,
+    "network_model1type":0,
+    "network_model2type":0,
+
+    // 指定中间的数据生成的路径  如果spath=null,则不生成中间文件
+    "spath": "tmp/总过程分析/L3l2数据集合输入输出",
+
+    // 指定生成json文件保存的路径
+    "resultsavepath": "."
+}

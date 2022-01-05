@@ -99,51 +99,6 @@ def predictFilename_Time_Core(ftcPD: Dict, modelpath: str):
                     tpd[itype + "_flag"] = prelist
 
 
-"""
-识别温度数据
-"""
-def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
-    FANS = [
-        'FAN1_F_Speed', "FAN1_R_Speed",
-        'FAN2_F_Speed', "FAN2_R_Speed",
-        'FAN3_F_Speed', "FAN3_R_Speed",
-        'FAN4_F_Speed', "FAN4_R_Speed",
-        'FAN5_F_Speed', "FAN5_R_Speed",
-        'FAN6_F_Speed', "FAN6_R_Speed",
-        'FAN7_F_Speed', "FAN7_R_Speed",
-    ]
-    TEMPERATURE = [
-        'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
-        'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
-    ]
-    def get_extended_features(prefix):
-        selected = []
-        for p in prefix:
-            selected.append(p)
-            selected.append(p + '_max')
-            selected.append(p + '_min')
-            selected.append(p + '_mean')
-            selected.append(p + '_percentage50')
-        return selected
-    result = []
-    for i, temp in enumerate(TEMPERATURE):
-        for j, fan in enumerate(FANS):
-            extended_features = get_extended_features(['freq', temp, fan])
-            select_data = data[extended_features]
-            model = joblib.load(os.path.join(model_path, model_type + '.pkl'))
-            y = model.predict(select_data)
-            if i == 0 and j == 0:
-                result = y
-            for k, v in enumerate(y):
-                if v == 3:
-                    if result[k] == 0:
-                        result[k] = 3
-                if v == 4:
-                    if result[k] == 0 or result[k] == 3:
-                        result[k] = 4
-    return result
-
-
 
 
 
