@@ -100,7 +100,7 @@ def readJsonToDict(spath: str, filename: str):
 
 def getServerPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     serverDict = sdict["RequestData"]["data"]["server"]
-    serpd = pd.DataFrame(data=serverDict)
+    serpd = pd.DataFrame(data=serverDict).T
     return [serpd]
 
 
@@ -111,7 +111,7 @@ def getServerPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     processDict = sdict["RequestData"]["data"]["process"]
-    processpd = pd.DataFrame(data=processDict)
+    processpd = pd.DataFrame(data=processDict).T
     return [processpd]
 
 
@@ -122,7 +122,7 @@ def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     networkDict = sdict["RequestData"]["data"]["network"]
-    networkpd = pd.DataFrame(data=networkDict)
+    networkpd = pd.DataFrame(data=networkDict).T
     return [networkpd]
 
 
@@ -133,7 +133,7 @@ def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getL2PdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     l2Dict = sdict["RequestData"]["data"]["l2"]
-    l2pd = pd.DataFrame(data=l2Dict)
+    l2pd = pd.DataFrame(data=l2Dict).T
     return [l2pd]
 
 
