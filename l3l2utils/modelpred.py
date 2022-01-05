@@ -8,7 +8,7 @@ import pandas as pd
 
 from Classifiers.ModelPred import select_and_pred
 from l3l2utils.DataOperation import pushLabelToFirst
-from l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE
+from l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
 
 """
 得到以prefixnames中元素为前缀的所有值
@@ -99,18 +99,18 @@ def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepat
         return 0, None, None
     cpuusefulFeatures = getTrainedFeatures(processpds.columns.tolist(), processFeatures)
     # 先得到总的CPUTIME的时间
-    cputime = nowdf[cpuusefulFeatures].sum()
+    cputime = nowdf[PROCESS_CPUNAME].sum()
     # 核的编号
     cores_serialnumber = list(nowdf.loc[:, CPU_FEATURE])
     # 核的cpu时间
-    cores_max_time = list(nowdf.loc[:, cpuusefulFeatures])
-    predictflag = select_and_pred(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+    cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME])
+    predictflag = select_and_pred(nowdf[cpuusefulFeatures], MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     predictflag = [True if i != 0 else False for i in predictflag]
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
     assert len(predictflag) == len(cores_serialnumber)
     abnormalcores = [cores_serialnumber[i] for i, flag in enumerate(predictflag) if flag]
-    abnormalcoremaxtime = [cores_max_time[i] for i, flag in enumerate(predictflag) if flag]
+    abnormalcoremaxtime = [cores_runtimeList[i] for i, flag in enumerate(predictflag) if flag]
     # 将所有的cputime和不正常的核心数据进行返回
     return cputime, abnormalcores, abnormalcoremaxtime
 

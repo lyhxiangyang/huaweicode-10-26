@@ -178,7 +178,6 @@ def extractionOneProcessPd(processpd: pd.DataFrame, extractFeatures: List[str],
     print(PID_FEATURE.center(40, "*"))
     for ipid, idf in processpd.groupby(PID_FEATURE):
         print("pid: {} ".format(ipid), end="")
-        idf: pd.DataFrame
         assert len(idf) > 6  # 对每一个进程开始的前两个点和后两个点都去掉
         idf = idf.iloc[3:-3]  # 删除数据了
         print("size: {}".format(len(idf)))
@@ -190,7 +189,7 @@ def extractionOneProcessPd(processpd: pd.DataFrame, extractFeatures: List[str],
                 os.makedirs(spath)
             featureExtractionDf.to_csv(os.path.join(spath, "{}.csv".format(ipid)))
         pidpds.append(featureExtractionDf)
-    allpidpds, _ = mergeDataFrames(pidpds)
+    allpidpds = mergeDataFrames(pidpds)
     return allpidpds
 
 

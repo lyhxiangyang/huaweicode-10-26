@@ -14,8 +14,7 @@ CPU_FEATURE = "cpu_affinity"
 PID_FEATURE = "pid"
 TIME_INTERVAL = 60
 
-DEBUG = False
-
+PROCESS_CPUNAME = "cpu"
 # 定义固定的文件名字
 FDR = 0.01
 
