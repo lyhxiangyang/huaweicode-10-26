@@ -162,7 +162,7 @@ def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str)
 
 def getMeanFromDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datanumber: int = 10):
     datapd = mergeDataFrames(datapds).iloc[:datanumber]
-    return dataPd[featuresnames].mean()
+    return datapd[featuresnames].mean()
 
 
 def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:

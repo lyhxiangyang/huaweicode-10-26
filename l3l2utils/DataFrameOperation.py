@@ -11,7 +11,7 @@ from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 """
 
 
-def mergeDataFrames(lpds: List[pd.DataFrame]) -> (pd.DataFrame, bool):
+def mergeDataFrames(lpds: List[pd.DataFrame]):
     """
     函数功能： 判断多个DataFrame是否含有相同的列表
     函数参数：预期是一个含有DataFrame的列表
