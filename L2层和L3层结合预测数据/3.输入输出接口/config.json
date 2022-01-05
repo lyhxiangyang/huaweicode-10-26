@@ -22,7 +22,7 @@
     "resultsavepath": ".",
 
     "isExistFaultFlag": true,
-    "server_feature": ["user", "pgfree", "freq"],
+    "server_feature": ["used", "pgfree", "freq"],
     "server_accumulate_feature": ["pgfree"],
     "process_feature":["user", "system"],
     "process_accumulate_feature":["user", "system"],
