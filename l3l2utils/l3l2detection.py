@@ -1,5 +1,7 @@
 import pandas as pd
 
+from l3l2utils.DataOperation import remove_Abnormal_Head_Tail
+
 """
 修改preFlag那些单独存在的点
 """
@@ -31,11 +33,16 @@ def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
 
 """
 对faultFlag进行修改
-主要是将133变成131  134变成1
+主要是将133变成131  134变成132
+99 状态代表着这段时间没有wrf运行，可以删除
+此外还要删除41-45  71-75  91-95
 """
 
 def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
-    pass
+    l2l3predetectresultpd = remove_Abnormal_Head_Tail(l2l3predetectresultpd, abnormals={41,42,43,44,45,71,72,73,74,75, 91, 92, 93, 94, 95,99}, windowsize=4)
+    l2l3predetectresultpd["preFlag"] = l2l3predetectresultpd["preFlag"].apply(lambda x: 131 if x == 133 else x)
+    l2l3predetectresultpd["preFlag"] = l2l3predetectresultpd["preFlag"].apply(lambda x: 132 if x == 134 else x)
+    return l2l3predetectresultpd
 
 
 

@@ -1,10 +1,11 @@
 import re
 import time
-from typing import List, Union
+from typing import List, Union, Set
 
 import pandas as pd
 
-from l3l2utils.DefineData import TIME_COLUMN_NAME
+from l3l2utils.DataFrameOperation import mergeDataFrames
+from l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE
 
 """
 根据字符串自动得到时间串格式
@@ -141,3 +142,52 @@ def sortLabels(dataFrame: pd.DataFrame, reverse=False) -> pd.DataFrame:
     return dataFrame
 
 
+# time  faultFlag  preFlag  mem_leak  mem_bandwidth
+# 去除指定异常的首尾, 只去除首尾部分
+def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
+    dealflag = FAULT_FLAG
+    def judge(x: pd.Series):
+        # abnormals中有一个
+        if len(abnormals & set(x)) != 0 and x.nunique() != 1:
+            return False  # 表示去除
+        else:
+            return True  # 表示保留
+
+    savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
+    return predictPd[savelines]
+
+# 去除每个异常的首尾
+def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3, realFlagName: str = FAULT_FLAG) -> pd.DataFrame:
+    allabnormals = set(predictPd[realFlagName])
+    if 0 in allabnormals:
+        allabnormals.remove(0)
+    removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
+    return removepd
+
+
+# 去除进程数据中所有异常的首尾
+# 保证这个进程数据包含pid选项
+def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFrame:
+    removepds = []
+    for ipid, ipd in processPd.groupby(PID_FEATURE):
+        if len(ipd) <= 6:
+            continue
+        tpd = removeAllHeadTail(ipd, windowsize=windowsize)
+        removepds.append(tpd)
+    allpd = mergeDataFrames(removepds)
+    return allpd
+
+
+# 去除指定异常及其首尾数据
+def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
+    dealflag = "faultFlag"
+
+    def judge(x: pd.Series):
+        # abnormals中有一个
+        if len(abnormals & set(x)) != 0:
+            return False  # 表示去除
+        else:
+            return True  # 表示保留
+
+    savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
+    return predictPd[savelines]

@@ -12,6 +12,7 @@ from l3l2utils.FeatureExtraction import differenceProcess, differenceServer, sta
 from l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
     getNormalNetworkMean
+from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint
 from l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, predictTemp
 
 """
@@ -205,6 +206,9 @@ def detectionL2L3Network(inputDict: Dict, allserverpds: pd.DataFrame, allprocess
 
     print("将L2 L3 Network数据合并分析")
     allresultspd = mergeouterPredictResult([l3cpuresult,l3memleakresult,l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
+    # 对结果进行一些优化
+    allresultspd = fixFaultFlag(allresultspd)
+    allresultspd = fixIsolatedPoint(allresultspd)
     return allresultspd
 
 

@@ -66,12 +66,14 @@ time faultFlag  preFlag
 def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     def fun_faultFlag(xlist: pd.Series):
         xlist = xlist.dropna()
+        # 去重
+        xlist = xlist[~xlist.duplicated()].reset_index(drop=True)
         assert len(xlist) != 0
-        return xlist
+        return list(xlist)
 
     def fun_preFlag(xlist: pd.Series):
         xlist = xlist.dropna()
-        assert len(xlist) != -1
+        assert len(xlist) != 0
         xlist = xlist[~xlist.duplicated()].reset_index(drop=True)  # 先去重
         xlist = list(map(int, xlist))
         xlist = sorted(list(xlist))
