@@ -88,7 +88,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     timeindexpds = [ipd.set_index(TIME_COLUMN_NAME) for ipd in pds]
     mergepds = pd.concat(timeindexpds, join="outer", axis=1)  # 将会出现多个faultFlag和多个preFlag 将会按照time进行列的合并，会出现多行
     respd = pd.DataFrame(index=mergepds.index)  # 设置时间
-    respd[FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
-    respd["preFlag"] = mergepds["preFlag"].apply(fun_preFlag, axis=1)
+    respd.loc[:, FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
+    respd.loc[:, "preFlag"] = mergepds["preFlag"].apply(fun_preFlag, axis=1)
     respd.sort_values(by="time", inplace=True)
     return respd

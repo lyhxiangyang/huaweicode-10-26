@@ -31,6 +31,7 @@ def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
         if 2<=i<=len(preflagList)-2 and isallEqual(preflagList[i-2:i+2], list(map(int, list("11011")))):
             preflagList[i] = sorted(list(set(preflagList[i - 1] + preflagList[i + 1])))
             continue
+    l2l3predetectresultpd.loc[:, "preFlag"] = preflagList
 
 """
 对faultFlag进行修改
@@ -41,12 +42,14 @@ def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
 
 def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = remove_Abnormal_Head_Tail(l2l3predetectresultpd, abnormals={41,42,43,44,45,71,72,73,74,75, 91, 92, 93, 94, 95,99}, windowsize=4)
-    l2l3predetectresultpd.loc[:FAULT_FLAG] = l2l3predetectresultpd[FAULT_FLAG].apply(lambda x: 131 if x == 133 else x)
-    l2l3predetectresultpd.loc[:FAULT_FLAG] = l2l3predetectresultpd[FAULT_FLAG].apply(lambda x: 132 if x == 134 else x)
+    l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd[FAULT_FLAG].apply(lambda x: 131 if x == 133 else x)
+    l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd[FAULT_FLAG].apply(lambda x: 132 if x == 134 else x)
     return l2l3predetectresultpd
 
 
-
+"""
+得到概率
+"""
 def getDetectionProbability(l2l3predetectresultpd: pd.DataFrame):
     pass
 
