@@ -144,7 +144,7 @@ def sortLabels(dataFrame: pd.DataFrame, reverse=False) -> pd.DataFrame:
 
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 # 去除指定异常的首尾, 只去除首尾部分
-def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
+def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[List], windowsize: int = 3) -> pd.DataFrame:
     dealflag = FAULT_FLAG
     def judge(x: pd.Series):
         # abnormals中有一个
@@ -159,8 +159,8 @@ def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[int
 # 去除每个异常的首尾
 def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3, realFlagName: str = FAULT_FLAG) -> pd.DataFrame:
     allabnormals = set(predictPd[realFlagName])
-    if 0 in allabnormals:
-        allabnormals.remove(0)
+    if [0] in allabnormals:
+        allabnormals.remove([0])
     removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
     return removepd
 

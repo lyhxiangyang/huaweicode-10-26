@@ -1,6 +1,7 @@
 import pandas as pd
 
 from l3l2utils.DataOperation import remove_Abnormal_Head_Tail
+from l3l2utils.DefineData import FAULT_FLAG
 
 """
 修改preFlag那些单独存在的点
@@ -40,9 +41,17 @@ def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
 
 def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = remove_Abnormal_Head_Tail(l2l3predetectresultpd, abnormals={41,42,43,44,45,71,72,73,74,75, 91, 92, 93, 94, 95,99}, windowsize=4)
-    l2l3predetectresultpd["preFlag"] = l2l3predetectresultpd["preFlag"].apply(lambda x: 131 if x == 133 else x)
-    l2l3predetectresultpd["preFlag"] = l2l3predetectresultpd["preFlag"].apply(lambda x: 132 if x == 134 else x)
+    l2l3predetectresultpd.loc[:FAULT_FLAG] = l2l3predetectresultpd[FAULT_FLAG].apply(lambda x: 131 if x == 133 else x)
+    l2l3predetectresultpd.loc[:FAULT_FLAG] = l2l3predetectresultpd[FAULT_FLAG].apply(lambda x: 132 if x == 134 else x)
     return l2l3predetectresultpd
+
+
+
+def getDetectionProbability(l2l3predetectresultpd: pd.DataFrame):
+    pass
+
+
+
 
 
 

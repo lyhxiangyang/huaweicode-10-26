@@ -69,7 +69,8 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         # 去重
         xlist = xlist[~xlist.duplicated()].reset_index(drop=True)
         assert len(xlist) != 0
-        return list(xlist)
+        # return list(xlist)
+        return int(xlist[0])
 
     def fun_preFlag(xlist: pd.Series):
         xlist = xlist.dropna()
