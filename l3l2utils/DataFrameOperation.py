@@ -66,7 +66,7 @@ time faultFlag  preFlag
 def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     def fun_faultFlag(xlist: pd.Series):
         xlist = xlist.dropna()
-        assert len(xlist) != -1
+        assert len(xlist) != 0
         return xlist
 
     def fun_preFlag(xlist: pd.Series):
@@ -79,9 +79,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         if len(xlist) > 1:
             if 0 in xlist:
                 xlist.remove(0)
-            return xlist
-        else:
-            return xlist[-1]
+        return xlist
 
     # 需要将每个dataframe的索引设置为time
     timeindexpds = [ipd.set_index(TIME_COLUMN_NAME) for ipd in pds]

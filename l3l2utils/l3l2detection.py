@@ -28,11 +28,10 @@ def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
         if 2<=i<=len(preflagList)-2 and isallEqual(preflagList[i-2:i+2], list(map(int, list("11011")))):
             preflagList[i] = sorted(list(set(preflagList[i - 1] + preflagList[i + 1])))
             continue
-        # 去除00011000这种异常
 
 """
 对faultFlag进行修改
-
+主要是将133变成131  134变成1
 """
 
 def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
