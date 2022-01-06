@@ -207,7 +207,7 @@ def detectionL2L3Network(inputDict: Dict, allserverpds: pd.DataFrame, allprocess
     allresultspd = mergeouterPredictResult([l3cpuresult,l3memleakresult,l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
     # 对结果进行一些优化
     allresultspd = fixFaultFlag(allresultspd)
-    fixIsolatedPoint(allresultspd)
+    allresultspd = fixIsolatedPoint(allresultspd)
     return allresultspd
 
 

@@ -181,13 +181,11 @@ def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd
 # 去除指定异常及其首尾数据
 def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
     dealflag = "faultFlag"
-
     def judge(x: pd.Series):
         # abnormals中有一个
         if len(abnormals & set(x)) != 0:
             return False  # 表示去除
         else:
             return True  # 表示保留
-
     savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]
