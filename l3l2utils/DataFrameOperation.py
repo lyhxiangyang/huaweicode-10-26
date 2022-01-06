@@ -54,21 +54,25 @@ def mergeinnerTwoDataFrame(lpd: pd.DataFrame, rpd: pd.DataFrame, onfeaturename: 
     mergedf = pd.merge(left=lpd, right=rpd[rpdcolumns], left_on=onfeaturename, right_on=onfeaturename)
     return mergedf
 
+
 """
 将多个预测结果合并起来
 如果时间相同，那么就将结果合并起来
 1. 保证索引不是time
 time faultFlag  preFlag
 """
+
+
 def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     def fun_faultFlag(xlist: pd.Series):
         xlist = xlist.dropna()
         assert len(xlist) != -1
-        return xlist[0]
+        return xlist
+
     def fun_preFlag(xlist: pd.Series):
         xlist = xlist.dropna()
         assert len(xlist) != -1
-        xlist = xlist[~xlist.duplicated()].reset_index(drop=True) # 先去重
+        xlist = xlist[~xlist.duplicated()].reset_index(drop=True)  # 先去重
         xlist = list(map(int, xlist))
         xlist = sorted(list(xlist))
         # 如果有多个preFlag，那么就显示除了-1之外的所有preFlag
@@ -78,11 +82,12 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
             return xlist
         else:
             return xlist[-1]
+
     # 需要将每个dataframe的索引设置为time
     timeindexpds = [ipd.set_index(TIME_COLUMN_NAME) for ipd in pds]
-    mergepds = pd.concat(timeindexpds, join="outer", axis=1) # 将会出现多个faultFlag和多个preFlag 将会按照time进行列的合并，会出现多行
-    respd = pd.DataFrame(index=mergepds.index) # 设置时间
-    respd[FAULT_FLAG] =  mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
+    mergepds = pd.concat(timeindexpds, join="outer", axis=1)  # 将会出现多个faultFlag和多个preFlag 将会按照time进行列的合并，会出现多行
+    respd = pd.DataFrame(index=mergepds.index)  # 设置时间
+    respd[FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
     respd["preFlag"] = mergepds["preFlag"].apply(fun_preFlag, axis=1)
     respd.sort_values(by="time", inplace=True)
     return respd

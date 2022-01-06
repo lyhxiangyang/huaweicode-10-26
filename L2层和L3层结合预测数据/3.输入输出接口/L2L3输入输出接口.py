@@ -282,19 +282,18 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
     alll2pds = mergeDataFrames(extraction_l2_pds)
     allnetworkpds = mergeDataFrames(extraction_network_pds)
 
-
     print("对L3 L2层的数据进行预测".center(40, "*"))
-    l2l3predetectresultpd = detectionL2L3Network(inputDict, allserverpds, allprocesspds, alll2pds,
-                                                 allnetworkpds)
+    l2l3predetectresultpd = detectionL2L3Network(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds)
+    # =============================将信息保存到磁盘
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "5.L2L3总的预测结果")
         savefile(l2l3predetectresultpd, tpath, "总预测结果.csv")
 
 
 if __name__ == "__main__":
-    startTime = time.clock()
+    startTime = time.perf_counter()
     configfilepath = R"L2层和L3层结合预测数据/3.输入输出接口/config.json"
     configJsonDict = readJsonToDict(*(os.path.split(configfilepath)))
     outputDict = detectionFromInputDict(configJsonDict)
-    endTime = time.clock()
+    endTime = time.perf_counter()
     print('Running time: %s Seconds' % (endTime - startTime))
