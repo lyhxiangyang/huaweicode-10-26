@@ -212,11 +212,6 @@ def detectionL2L3Network(inputDict: Dict, allserverpds: pd.DataFrame, allprocess
 
 
 """
-去除单个或者两个异常点
-"""
-
-
-"""
 通过preFlag得到概率，其中preFlag每个元素是list
 """
 

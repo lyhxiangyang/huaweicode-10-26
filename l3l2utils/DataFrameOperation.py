@@ -78,7 +78,10 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         xlist = xlist[~xlist.duplicated()].reset_index(drop=True)  # 先去重
         xlist = list(map(int, xlist))
         xlist = sorted(list(xlist))
-        # 如果有多个preFlag，那么就显示除了-1之外的所有preFlag
+        # 如果有-1那么就代表process没有那一部分，
+        if -1 in xlist:
+            return [-1]
+        # 如果有多个preFlag，那么就显示除了之外的所有preFlag
         if len(xlist) > 1:
             if 0 in xlist:
                 xlist.remove(0)
