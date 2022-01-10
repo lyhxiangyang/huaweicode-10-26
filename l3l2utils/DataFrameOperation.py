@@ -80,7 +80,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         xlist = sorted(list(xlist))
         # 如果有-1那么就代表process没有那一部分，
         if -1 in xlist:
-            return [-1]
+            return [0]
         # 如果有多个preFlag，那么就显示除了之外的所有preFlag
         if len(xlist) > 1:
             if 0 in xlist:

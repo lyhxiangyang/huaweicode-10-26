@@ -11,8 +11,8 @@ from l3l2utils.FeatureExtraction import differenceProcess, differenceServer, sta
     extractionServerPdLists
 from l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
-    getNormalNetworkMean
-from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint, getDetectionProbability
+    getNormalNetworkMean, saveDictToJson
+from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint, getDetectionProbability, getTimePeriodInfo
 from l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, predictTemp
 
 """
@@ -227,6 +227,8 @@ def detectionL2L3Network(inputDict: Dict, allserverpds: pd.DataFrame, allprocess
 
 def outputJsonFromDetection(l2l3predetectresultpd: pd.DataFrame) -> Dict:
     l2l3predetectresultpd = l2l3predetectresultpd.copy()
+    outputDict = {"error": getTimePeriodInfo(l2l3predetectresultpd, "preFlag", "probability")}
+    return outputDict
 
 
 """
@@ -246,10 +248,13 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
 
     print("对L3 L2层的数据进行预测".center(40, "*"))
     l2l3predetectresultpd = detectionL2L3Network(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds)
+    outputDict = outputJsonFromDetection(l2l3predetectresultpd)
     # =============================将信息保存到磁盘
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "5.L2L3总的预测结果")
         savefile(l2l3predetectresultpd, tpath, "总预测结果.csv")
+        saveDictToJson(outputDict, tpath, "output.json")
+    return outputDict
 
 
 if __name__ == "__main__":

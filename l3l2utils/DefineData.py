@@ -31,3 +31,12 @@ MODEL_TYPE = ['decision_tree', 'random_forest', 'adaptive_boosting']
 # 属于CPU和MEMORY异常类型的种类
 CPU_ABNORMAL_TYPE = [10, 20, 30, 80]
 MEMORY_ABNORMAL_TYPE = [50, 60]
+
+errorFeatureDict = {
+    10: ["process_cpu"],
+    20: ["process_cpu"],
+    30: ["process_cpu"],
+    80: ["process_cpu"],
+    50: ["server_pgfree"],
+    60: ["server_used"],
+}

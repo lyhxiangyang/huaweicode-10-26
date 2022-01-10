@@ -1,9 +1,10 @@
-from typing import List, Tuple
+from itertools import chain
+from typing import List, Tuple, Dict
 
 import pandas as pd
 
 from l3l2utils.DataOperation import remove_Abnormal_Head_Tail
-from l3l2utils.DefineData import FAULT_FLAG
+from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, errorFeatureDict
 
 """
 修改preFlag那些单独存在的点
@@ -52,6 +53,7 @@ def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = remove_Abnormal_Head_Tail(l2l3predetectresultpd,
                                                       abnormals={41, 42, 43, 44, 45, 71, 72, 73, 74, 75, 91, 92, 93, 94,
                                                                  95, 99}, windowsize=4)
+    # 修改标签
     l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
         lambda x: 131 if x == 133 else x)
     l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
@@ -115,19 +117,20 @@ def getDetectionProbability(preFlagsList: List[List[int]]):
 """
 
 
-def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagname: str = "preFlag",
+def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagName: str = "preFlag",
                       probabilityName: str = "probability") -> pd.DataFrame:
     # ========================================================================================================== 函数部分
     # 找到一个列表中连续不为0的数据的位置, 返回的是每段不为0的起始位置[4,9), 左闭右开
     def findAbnormalPos(flags: List[int]) -> List[Tuple[int, int]]:
         beginpos_endpos_List = []
         i = 0
-        while i < len(flags):
-            if flags[i] == 0:
+        flagslen = len(flags)
+        while i < flagslen:
+            if flags[i] == [0]:
                 i += 1
                 continue
             beginpos = i
-            while i < len(flags) and flags[i] != 0:
+            while i < flagslen and flags[i] != [0]:
                 i += 1
             endpos = i
             beginpos_endpos_List.append((beginpos, endpos))
@@ -142,100 +145,82 @@ def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagname: str = "p
             respdList.append(pd[i[0]:i[1]])
         return respdList
 
-    # 判断两个DataFrame是否交叉，如果交叉返回True，DataFrame  否则 False，DataFrame
-    def determineTwoDataframeOverlap(df1: pd.DataFrame, df2: pd.DataFrame) -> Union[
-        tuple[bool, None], tuple[bool, Any]]:
-        df1times = set(df1[timeLabelName])
-        df2times = set(df2[timeLabelName])
-        overlapTime = list(df1times & df2times)
-        if len(overlapTime) == 0:
-            return False, None
-
-        # 获得时间
-        def f1(x):
-            if x in overlapTime:
-                return True
-            return False
-
-        return True, df1.loc[df1[timeLabelName].apply(f1)]
-
-    # 判断一个DataFrame的时间是否与一个时间列表交叉，如果交叉返回交叉的True, DataFrame 否则 False，DataFrame
-    # 返回是否交叉  返回交叉的部分  返回匹配到交叉的部分
-    def determineDataframeListOverlap(df: pd.DataFrame, dflist: List[pd.DataFrame]) -> Union[
-        tuple[bool, Any, Any], tuple[bool, None, None]]:
-        for idf in dflist:
-            iscross, crossdf = determineTwoDataframeOverlap(df, idf)
-            if iscross:
-                return True, crossdf, idf
-        return False, None, None
-
-    # 得到列表中出现的最大频率的数值，以及去重之后的列表
-    def getMaxNumLabels(labels: List):
-        prelabels = max(labels, key=labels.count)
-        alllabeslList = sorted(list(set(labels)))
-        return prelabels, alllabeslList
+    # 计算一段时间的概率 ifault的概率
+    def getProbability(prepd: pd.DataFrame, ifault: int, probabilityName: str = "probability") -> float:
+        faultprob = 0
+        prelen = len(prepd)
+        probabilityLists = prepd[probabilityName]
+        for iprobability in probabilityLists:
+            iprobability: Dict
+            if ifault in iprobability:
+                faultprob += iprobability[ifault] / prelen
+        return faultprob
 
     """
-    得到概率
-    参数： iprepd-预测到的时间段  tcrosspd-交叉的时间段 trealpd-实际的时间段
-    返回值 0: CPU概率   1: 内存泄露概率   2: 内存带宽异常
-
+    得到预测值的错误类型 返回List， 概率从大到小排序
+    返回一个List
     """
 
-    def getProbability(iprepd: pd.DataFrame, tcrosspd: pd.DataFrame, trealpd: pd.DataFrame) -> List:
-        nowtimeProbability = iprepd[probabilityName].mean()
-        return nowtimeProbability
+    def getErrorInfo(prepd: pd.DataFrame, preflagName: str = "preFlag", probabilityName: str = "probability") -> List:
+        errorList = []
+        preFlags = prepd[preflagName]
+        allPreFlags = sorted(list(set(chain.from_iterable(preFlags))))
+        for ifault in allPreFlags:
+            errorDict = {}
+            errorDict["type"] = ifault
+            # 计算概率
+            errorDict["probability"] = getProbability(prepd, ifault, probabilityName)
+            errorList.append(errorDict)
+        # 需要对errorList按照概率从大到小进行排序
+        errorList = sorted(errorList, key=lambda x: x["probability"], reverse=True)
+        return errorList
 
-    # ====================================================================================================== 函数部分结束
-    # =================================================================================================得到时间段的逻辑部分
-    testLabelName = testFlagName
-    reallabels = list(predictpd[realFlagName])
-    prelabels = list(predictpd[testLabelName])
-    # =================================================================================================得到真实标签的分类
-    beginpos_endpos_list = findAbnormalPos(reallabels)
-    realTimePeriodAbnormalPds = getDataFramesFromPos(predictpd, beginpos_endpos_list)
-    # =================================================================================================得到预测标签的分类
+    """
+    得到预测值所依赖的特征值及其重要程度
+    将预测的这段时间内每个错误对应的特征值使用的特征百分比作为参考依据
+    返回一个Dict
+    """
+    def getKPIInfo(prepd: pd.DataFrame,  preflagName: str = "preFlag"):
+        preFlags = prepd[preflagName]
+        repeatPreFlags = list(chain.from_iterable(preFlags))
+        alluserfeatureList = []
+        for ifault in repeatPreFlags:
+            if ifault not in errorFeatureDict:
+                print("{} 的特征值没有存储".format(ifault))
+                continue
+            usedfeatures = errorFeatureDict[ifault]
+            alluserfeatureList.extend(usedfeatures)
+
+        # 得到所有错误使用的featurename，然后判断其占比进行输出
+        alluserfeatureSeries = pd.Series(data=alluserfeatureList)
+        proportionDict = dict(alluserfeatureSeries.value_counts(normalize=True, ascending=False))
+        return proportionDict
+    """
+    返回影响程序的总体指标
+    返回值float
+    """
+    def getperformance_var(prepd: pd.DataFrame, preflagName: str = "preFlag", probabilityName: str = "probability")->float:
+        prepdlen = len(prepd)
+        return -(1 - prepdlen / 10)
+
+    if FAULT_FLAG in l2l3predetectresultpd.columns:
+        reallabels = list(l2l3predetectresultpd[FAULT_FLAG])
+        beginpos_endpos_list = findAbnormalPos(reallabels)
+        realTimePeriodAbnormalPds = getDataFramesFromPos(l2l3predetectresultpd, beginpos_endpos_list)
+
+    # 预测标签列表值
+    prelabels = list(l2l3predetectresultpd[preflagName])
     beginpos_endpos_list = findAbnormalPos(prelabels)
-    preTimePeriodAbnormalPds = getDataFramesFromPos(predictpd, beginpos_endpos_list)
-    # =================================================================================================时间段的逻辑
-
-    timeperiodDict = defaultdict(list)
+    preTimePeriodAbnormalPds = getDataFramesFromPos(l2l3predetectresultpd, beginpos_endpos_list)
+    # 用于json格式输出的Dict，包含时间段格式
+    outputTimePeriodList = []
     for iprepd in preTimePeriodAbnormalPds:
-        assert len(iprepd) != 0
-        prebegintime = iprepd[timeLabelName].iloc[0]  # 预测开始时间
-        timeperiodDict["检测开始时间"].append(prebegintime)
-        preendtime = iprepd[timeLabelName].iloc[-1]  # 预测结束时间
-        timeperiodDict["检测结束时间"].append(preendtime)
-        preLastime = len(iprepd)  # 预测持续时间
-        timeperiodDict["检测运行时间"].append(preLastime)
-        maxNumLabels, preAllLabels = getMaxNumLabels(list(iprepd[testLabelName]))  # 得到当前预测时间内的预测值
-        timeperiodDict["检测标记"].append(maxNumLabels)
-        timeperiodDict["检测所有标记"].append(",".join([str(i) for i in preAllLabels]))
-
-        # 判断是否有真实标签值与其重叠
-        iscross, tcrosspd, trealpd = determineDataframeListOverlap(iprepd, realTimePeriodAbnormalPds)
-        # 得到概率
-        nowtimeProbability = getProbability(iprepd=iprepd, tcrosspd=tcrosspd, trealpd=trealpd)
-        timeperiodDict["概率"].append(nowtimeProbability)
-
-        realcrossBeginTime = str(-1)
-        realcrossEndTime = str(-1)
-        crossTime = 0
-        realTimeLen = 0
-        realcrossLabels = 0
-        if iscross:
-            assert len(tcrosspd) != 0
-            realcrossBeginTime = trealpd[timeLabelName].iloc[0]
-            realcrossEndTime = trealpd[timeLabelName].iloc[-1]
-            crossTime = len(tcrosspd)
-            realTimeLen = len(trealpd)
-
-            realcrossLabels, _ = getMaxNumLabels(list(trealpd[realFlagName]))
-        timeperiodDict["实际开始时间"].append(realcrossBeginTime)
-        timeperiodDict["实际结束时间"].append(realcrossEndTime)
-        timeperiodDict["实际运行时间"].append(realTimeLen)
-        timeperiodDict["重叠时间"].append(crossTime)
-        timeperiodDict["实际标记"].append(realcrossLabels)
-
-    timeperiodDictPd = pd.DataFrame(data=timeperiodDict)
-    return timeperiodDictPd
+        oneTimePeriodDict = {}
+        oneTimePeriodDict["begin_time"] = iprepd[TIME_COLUMN_NAME].iloc[0]  # 预测开始时间
+        oneTimePeriodDict["end_time"] = iprepd[TIME_COLUMN_NAME].iloc[-1]  # 预测结束时间
+        oneTimePeriodDict["error_info"] = getErrorInfo(iprepd, preflagName, probabilityName)
+        oneTimePeriodDict["kpi"] = getKPIInfo(iprepd, preflagName)
+        oneTimePeriodDict["performance_var"] = getperformance_var(iprepd, preflagName, probabilityName)
+        # 将这个时间段中的数据添加
+        outputTimePeriodList.append(oneTimePeriodDict)
+    return outputTimePeriodList

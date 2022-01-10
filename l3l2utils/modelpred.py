@@ -277,3 +277,122 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
     return bandwidthPreFlagList
 
 
+
+def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool = True):
+    threshold_avg_lat = 100
+    data = allnetworkpds.groupby(TIME_COLUMN_NAME, as_index=False).agg([max])
+    prenet = []
+    for i in data['avg_lat'].tolist():
+        if i > threshold_avg_lat:
+            prenet.append(151)
+        else:
+            prenet.append(0)
+    result = data[TIME_COLUMN_NAME].to_frame()
+    if isExistFlag:
+        result[FAULT_FLAG] = data[FAULT_FLAG]
+    result['preFLag'] = prenet
+    # result.set_index(TIME_COLUMN_NAME, inplace=True)
+    return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
