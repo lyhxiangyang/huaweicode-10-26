@@ -12,7 +12,7 @@ from l3l2utils.FeatureExtraction import differenceProcess, differenceServer, sta
 from l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
     getNormalNetworkMean
-from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint
+from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint, getDetectionProbability
 from l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, predictTemp
 
 """
@@ -205,55 +205,19 @@ def detectionL2L3Network(inputDict: Dict, allserverpds: pd.DataFrame, allprocess
     l2networkresult2 = makeL2networkresultMergedByMin(l2networkresult2)
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult([l3cpuresult,l3memleakresult,l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
-    # 对结果进行一些优化
+
+    print("对结果进行优化".center(40, "*"))
     allresultspd = fixFaultFlag(allresultspd)
     allresultspd = fixIsolatedPoint(allresultspd)
+
+    print("增加概率".center(40, "*"))
+    allresultspd["probability"] = getDetectionProbability(allresultspd["preFlag"].tolist())
     return allresultspd
 
 
 """
 通过preFlag得到概率，其中preFlag每个元素是list
 """
-
-
-def getProbabilityFromPreFlag(preFlags: List[List[int]]) -> List[Dict]:
-    def getBeforeData(preFlags: List[int], ipos: int, judgelen: int) -> List[int]:
-        res = []
-        for bpos in range(ipos - judgelen, ipos, 1):
-            if bpos < 0:
-                res.append(0)
-                continue
-            if preFlags[ipos] == preFlags[bpos]:
-                res.append(1)
-            else:
-                res.append(0)
-        return res
-    def getAfterData(preFlags: List[int], ipos: int, judgelen: int) -> List[int]:
-        res = []
-        for bpos in range(ipos + 1, ipos + judgelen + 1, 1):
-            if bpos >= len(preFlags):
-                res.append(0)  # 不同
-                continue
-            if preFlags[ipos] == preFlags[bpos]:
-                res.append(1)
-            else:
-                res.append(0)
-        return res
-    def getp(isSameFlags: List[int], probabilities: List[float]) -> float:
-        assert len(isSameFlags) == len(probabilities)
-        return sum(isSameFlags[i] * probabilities[i] for i in range(0, len(isSameFlags)))
-
-    # 得到时间概率的逻辑部分
-    probabilityList = []
-    preprobability = [0.1, 0.2, 0.3, 0.4]
-    reverseprobability = list(reversed(preprobability))  # 概率相反
-    judgeLen = len(preprobability)  # 概率的长度
-    for ipos, iflag in enumerate(preFlags):
-        bD = getBeforeData(preFlags, ipos, judgeLen)
-        aD = getAfterData(preFlags, ipos, judgeLen)
-        nowprobability = 0.1 + 0.45 * (getp(bD, preprobability)) + 0.45 * (getp(aD, reverseprobability))
-        probabilityList.append(nowprobability)
-    return probabilityList
 
 
 """

@@ -66,8 +66,8 @@ def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
 """
 
 
-def getDetectionProbability(l2l3predetectresultpd: pd.DataFrame):
-    def getBeforData(preFlags: List[List[int]], ipos: int, ifault: int, judgelen: int)->List[int]:
+def getDetectionProbability(preFlagsList: List[List[int]]):
+    def getBeforDataWeight(preFlags: List[List[int]], ipos: int, ifault: int, judgelen: int)->List[float]:
         res = []
         for bpos in (ipos - judgelen, ipos, 1):
             if bpos < 0:
@@ -75,14 +75,41 @@ def getDetectionProbability(l2l3predetectresultpd: pd.DataFrame):
                 continue
             if ifault in preFlags[ipos]:
                 res.append(1)
-            else:
-                res.append(0)
+                continue
+            res.append(0)
         return res
-    def getAfterData(preFlags: List[List], ipos: int, ifault: int, judgelen: int) -> List[int]:
-        pass
-    def getp(isSameFlags: List[int], probabilities: List[float]) -> float:
-        assert len(isSameFlags) == len(probabilities)
-        return sum(isSameFlags[i] * probabilities[i] for i in range(0, len(isSameFlags)))
+    def getAfterDataWeight(preFlags: List[List], ipos: int, ifault: int, judgelen: int) -> List[float]:
+        res = []
+        for bpos in range(ipos + 1, ipos + judgelen + 1, 1):
+            if bpos >= len(preFlags):
+                res.append(0)
+                continue
+            if ifault in preFlags[bpos]:
+                res.append(1)
+                continue
+            res.append(0)
+        return res
+
+    def getp(weights: List[float], probabilities: List[float]) -> float:
+        assert len(weights) == len(probabilities)
+        return sum(weights[i] * probabilities[i] for i in range(0, len(weights)))
+
+    # 得到时间概率的逻辑部分
+    probabilityList = []
+    preprobability = [0.1, 0.2, 0.3, 0.4]
+    reverseprobability = list(reversed(preprobability))  # 概率相反
+    judgeLen = len(preprobability)
+    for ipos, onepreflag in enumerate(preFlagsList):
+        oneprobabilityDict = {}
+        for iflag in onepreflag:
+            beforeWeight = getBeforDataWeight(preFlagsList, ipos, iflag, judgeLen)
+            afterWeight = getAfterDataWeight(preFlagsList, ipos, iflag, judgeLen)
+            nowprobability = 0.1 + 0.45 * (getp(beforeWeight, preprobability)) + 0.45 * (getp(afterWeight, reverseprobability))
+            oneprobabilityDict[iflag] = nowprobability
+        probabilityList.append(oneprobabilityDict)
+    return probabilityList
+
+
 
 
 

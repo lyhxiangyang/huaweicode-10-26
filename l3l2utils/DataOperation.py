@@ -31,7 +31,7 @@ def getTimeFormat(onetime: str) -> str:
 
 
 def TranslateTimeListStrToStr(stime: List[str], leastTime: str = "%M") -> Union[
-    str, list[str]]:
+    str, List[str]]:
     # T = ["%Y", "%m", "%d", "%H", "%M", "%S"]
     changetoformat = '%Y-%m-%d %H:%M:%S'
     if leastTime == "%Y":
