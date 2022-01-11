@@ -286,7 +286,8 @@ def getDetectionRecallPrecision(realflags: List[int], preflags: List[List[int]],
     for i in range(len(realflags)):
         if realflags[i] in abnormalsSet:
             real_abnormalnums += 1  # 表示异常的真实数量+1
-        if preflags[i] in rightflagSet:
+        # 如果这个时间点预测的异常和我们需要的异常
+        if len(set(preflags[i]) & rightflagSet) != 0:
             pre_allabnormalnums += 1  # 被预测为异常的真实数量+1
 
         if realflags[i] in abnormalsSet:
