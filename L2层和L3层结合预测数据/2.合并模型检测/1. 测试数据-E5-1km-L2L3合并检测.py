@@ -3,7 +3,8 @@ from typing import Set, Tuple, List, Any
 
 import pandas as pd
 
-from Classifiers.ModelPred import select_and_pred, predictTemp
+from Classifiers.ModelPred import select_and_pred
+from l3l2utils.modelpred import predictTemp
 from utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from utils.DataScripts import getDFmean
 from utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG, MODEL_TYPE

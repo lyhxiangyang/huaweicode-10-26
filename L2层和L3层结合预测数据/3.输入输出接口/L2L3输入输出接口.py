@@ -129,8 +129,8 @@ def FeatureextractionData(inputDict: Dict):
 """
 
 
-def detectionL2L3Network(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
-                         alll2pds: pd.DataFrame, allnetworkpds) -> pd.DataFrame:
+def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
+                      alll2pds: pd.DataFrame, allnetworkpds) -> pd.DataFrame:
     # 需要用到的特征值
     resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
 
@@ -244,7 +244,7 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
     allnetworkpds = mergeDataFrames(extraction_network_pds)
 
     print("对L3 L2层的数据进行预测".center(40, "*"))
-    l2l3predetectresultpd = detectionL2L3Network(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds)
+    l2l3predetectresultpd = detectionL2L3Data(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds)
     # 对预测结果进行分析
     print("对预测结果进行准确率及其他分析".center(40, "*"))
     analysePredictResult(l2l3predetectresultpd,spath=os.path.join(inputDict["spath"], "5.准确率结果分析"), windowsize=3)

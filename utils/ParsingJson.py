@@ -49,7 +49,8 @@ def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
                         isExistFlag: bool = True,
                         jobid: int = 16,
                         type: str = 'L3',
-                        requestdataType: str = 'wrf'):
+                        requestdataType: str = 'wrf',
+                        normalMeanDict: Dict = None):
     serverpds, processpds, l2pds, networkpds = getServer_Process_l2_NetworkList(predictdir,
                                                                                 server_feature=server_feature,
                                                                                 process_feature=process_feature,
@@ -70,6 +71,8 @@ def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
     jsonDict["RequestData"]["data"]["process"] = convertDataFrameToDict(processallpd)
     jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(networkallpd)
     jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(l2allpd)
+    if normalMeanDict is not None:
+        jsonDict["RequestData"]["normalDataMean"] = normalMeanDict
     return jsonDict
 
 
