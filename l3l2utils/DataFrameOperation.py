@@ -72,6 +72,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         # return list(xlist)
         return int(xlist[0])
 
+    # -1 代表着正常
     def fun_preFlag(xlist: pd.Series):
         xlist = xlist.dropna()
         assert len(xlist) != 0
@@ -79,12 +80,16 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
         xlist = list(map(int, xlist))
         xlist = sorted(list(xlist))
         # 如果有-1那么就代表process没有那一部分，
-        if -1 in xlist:
-            return [0]
+
+        # if -1 in xlist:
+        #     # 如果-1在这里，说明这个时间点process中没有wrf运行，那么我们去除
+        #     return [0]
         # 如果有多个preFlag，那么就显示除了之外的所有preFlag
         if len(xlist) > 1:
             if 0 in xlist:
                 xlist.remove(0)
+            if -1 in xlist:
+                xlist.remove(-1)
         return xlist
 
     # 需要将每个dataframe的索引设置为time
