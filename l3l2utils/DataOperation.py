@@ -82,8 +82,6 @@ def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
     return changed_pds
 
 
-
-
 '''
 # - 功能介绍
 # 将dataFrame中的一个名字为lable的列名字移动到最前面
@@ -144,8 +142,10 @@ def sortLabels(dataFrame: pd.DataFrame, reverse=False) -> pd.DataFrame:
 
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 # 去除指定异常的首尾, 只去除首尾部分
-def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[List], windowsize: int = 3) -> pd.DataFrame:
+def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[List],
+                                     windowsize: int = 3) -> pd.DataFrame:
     dealflag = FAULT_FLAG
+
     def judge(x: pd.Series):
         # abnormals中有一个
         if len(abnormals & set(x)) != 0 and x.nunique() != 1:
@@ -155,6 +155,7 @@ def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[Lis
 
     savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]
+
 
 # 去除每个异常的首尾
 def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3, realFlagName: str = FAULT_FLAG) -> pd.DataFrame:
@@ -181,11 +182,13 @@ def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd
 # 去除指定异常及其首尾数据
 def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
     dealflag = "faultFlag"
+
     def judge(x: pd.Series):
         # abnormals中有一个
         if len(abnormals & set(x)) != 0:
             return False  # 表示去除
         else:
             return True  # 表示保留
+
     savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]

@@ -29,8 +29,8 @@ EXCLUDE_FEATURE_NAME = ["time", FAULT_FLAG]
 MODEL_TYPE = ['decision_tree', 'random_forest', 'adaptive_boosting']
 
 # 属于CPU和MEMORY异常类型的种类
-CPU_ABNORMAL_TYPE = [10, 20, 30, 80]
-MEMORY_ABNORMAL_TYPE = [50, 60]
+CPU_ABNORMAL_TYPE = {10, 20, 30, 80}
+MEMORY_ABNORMAL_TYPE = {50, 60}
 
 errorFeatureDict = {
     10: ["process_cpu"],

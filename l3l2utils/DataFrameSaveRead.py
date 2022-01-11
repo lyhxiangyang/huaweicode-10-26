@@ -92,3 +92,12 @@ def getfilepd(ipath: str, features: List[str] = None) -> pd.DataFrame:
     if features is not None:
         return tpd[:, features]
     return tpd
+
+"""
+保存一个文件
+"""
+def savepdfile(ds, spath, filename):
+    if not os.path.exists(spath):
+        os.makedirs(spath)
+    pathfilename = os.path.join(spath, filename)
+    ds.to_csv(pathfilename)

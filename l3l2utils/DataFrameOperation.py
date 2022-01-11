@@ -94,4 +94,5 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     respd.loc[:, FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
     respd.loc[:, "preFlag"] = mergepds["preFlag"].apply(fun_preFlag, axis=1)
     respd.sort_values(by="time", inplace=True)
+    respd.reset_index(drop=False, inplace=True)
     return respd

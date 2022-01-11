@@ -1,10 +1,12 @@
+import os.path
 from itertools import chain
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set
 
 import pandas as pd
 
-from l3l2utils.DataOperation import remove_Abnormal_Head_Tail
-from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, errorFeatureDict
+from l3l2utils.DataFrameSaveRead import savepdfile
+from l3l2utils.DataOperation import remove_Abnormal_Head_Tail, removeAllHeadTail
+from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, errorFeatureDict, CPU_ABNORMAL_TYPE, MEMORY_ABNORMAL_TYPE
 
 """
 修改preFlag那些单独存在的点
@@ -118,7 +120,7 @@ def getDetectionProbability(preFlagsList: List[List[int]]):
 
 
 def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagName: str = "preFlag",
-                      probabilityName: str = "probability") -> pd.DataFrame:
+                      probabilityName: str = "probability") -> List:
     # ========================================================================================================== 函数部分
     # 找到一个列表中连续不为0的数据的位置, 返回的是每段不为0的起始位置[4,9), 左闭右开
     def findAbnormalPos(flags: List[int]) -> List[Tuple[int, int]]:
@@ -180,7 +182,8 @@ def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagName: str = "p
     将预测的这段时间内每个错误对应的特征值使用的特征百分比作为参考依据
     返回一个Dict
     """
-    def getKPIInfo(prepd: pd.DataFrame,  preflagName: str = "preFlag"):
+
+    def getKPIInfo(prepd: pd.DataFrame, preflagName: str = "preFlag"):
         preFlags = prepd[preflagName]
         repeatPreFlags = list(chain.from_iterable(preFlags))
         alluserfeatureList = []
@@ -195,11 +198,14 @@ def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagName: str = "p
         alluserfeatureSeries = pd.Series(data=alluserfeatureList)
         proportionDict = dict(alluserfeatureSeries.value_counts(normalize=True, ascending=False))
         return proportionDict
+
     """
     返回影响程序的总体指标
     返回值float
     """
-    def getperformance_var(prepd: pd.DataFrame, preflagName: str = "preFlag", probabilityName: str = "probability")->float:
+
+    def getperformance_var(prepd: pd.DataFrame, preflagName: str = "preFlag",
+                           probabilityName: str = "probability") -> float:
         prepdlen = len(prepd)
         return -(1 - prepdlen / 10)
 
@@ -224,3 +230,134 @@ def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagName: str = "p
         # 将这个时间段中的数据添加
         outputTimePeriodList.append(oneTimePeriodDict)
     return outputTimePeriodList
+
+
+# ============================================================================== 对准确率进行统计
+
+"""
+函数功能：得到这个一个预测数据的准确率
+
+所有的预测中，我只要预测到就算准确。
+"""
+
+
+def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], excludeflags=None) -> float:
+    if excludeflags is None:
+        excludeflags = []
+    assert len(realflags) == len(preflags)
+    # 得到预测对的数量 # 数值相等或者数值的百分比
+    allnumber = 0
+    rightnumber = 0
+    for i in range(0, len(realflags)):
+        if realflags[i] in excludeflags:
+            continue
+        allnumber += 1
+        if (realflags[i] // 10) * 10 in preflags[i] or realflags[i] in preflags[i]:
+            rightnumber += 1
+    return rightnumber / allnumber
+
+
+"""
+得到每个异常的召回率、精确率等
+"""
+
+
+def getDetectionRecallPrecision(realflags: List[int], preflags: List[List[int]], abnormalsSet: Set, spath=None) -> Dict:
+    # 计算调和平均数
+    def harmonic_mean(data):  # 计算调和平均数
+        total = 0
+        for i in data:
+            if i == 0:  # 处理包含0的情况
+                return 0
+            total += 1 / i
+        return len(data) / total
+
+    assert len(realflags) == len(preflags)
+    rightflagSet = set([(i // 10) * 10 for i in abnormalsSet]) | abnormalsSet
+
+    real_abnormalnums = 0  # 异常的总数量
+    pre_allabnormalnums = 0  # 所有预测数据中，被预测为异常的数量
+    abnormal_rightabnormal_nums = 0  # 异常被预测为正确的个数
+    abnormal_abnormal_nums = 0  # 异常被预测为!=0的数量
+    abnormal_normal_nums = 0  # 异常被预测为正常的数量
+    abnormal_memory_nums = 0  # 异常被预测为内存异常的数量
+    abnormal_cpu_nums = 0  # 异常被预测为cpu异常的数
+
+    for i in range(len(realflags)):
+        if realflags[i] in abnormalsSet:
+            real_abnormalnums += 1  # 表示异常的真实数量+1
+        if preflags[i] in rightflagSet:
+            pre_allabnormalnums += 1  # 被预测为异常的真实数量+1
+
+        if realflags[i] in abnormalsSet:
+            #  现在实际预测值是异常
+            if preflags[i] == [0]:
+                abnormal_normal_nums += 1
+            if preflags[i] != [0]:
+                abnormal_abnormal_nums += 1
+            # 判断预测的点是否包含了异常
+            if len(set(preflags[i]) & rightflagSet) != 0:
+                abnormal_rightabnormal_nums += 1  # 异常预测正确
+            if len(set(preflags[i]) & CPU_ABNORMAL_TYPE) != 0:
+                abnormal_cpu_nums += 1
+            if len(set(preflags[i]) & MEMORY_ABNORMAL_TYPE) != 0:
+                abnormal_memory_nums += 1
+    infoDict = {"num": real_abnormalnums,
+                "recall": -1 if real_abnormalnums == 0 else abnormal_rightabnormal_nums / real_abnormalnums,
+                "precison": -1 if pre_allabnormalnums == 0 else abnormal_rightabnormal_nums / pre_allabnormalnums,
+                "per_abnormal": -1 if real_abnormalnums == 0 else abnormal_abnormal_nums / real_abnormalnums,
+                "per_normal": -1 if real_abnormalnums == 0 else abnormal_normal_nums / real_abnormalnums,
+                "cpu_abnormal": -1 if real_abnormalnums == 0 else abnormal_cpu_nums / real_abnormalnums,
+                "memory_abnormal": -1 if real_abnormalnums == 0 else abnormal_memory_nums / real_abnormalnums}
+    infoDict["f-score"] = harmonic_mean([infoDict["recall"], infoDict["precison"]])
+    return infoDict
+
+
+"""
+    对预测结果进行分析得到准确率之类的信息
+"""
+
+
+def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 3):
+    predictpd = predictpd.copy()
+    # 首先去除某些不需要的
+    # predictpd = remove_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
+    #     41, 42, 43, 44, 45,
+    #     71, 72, 73, 74, 75,
+    #     91, 92, 93, 94, 95, 99,
+    # }
+    # 去除每个异常的首尾
+    predictpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
+    analyseDict = {}
+    analyseDict[0] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {0})
+    analyseDict[10] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {11, 12, 13, 14, 15})
+    analyseDict[20] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {21, 22, 23, 24, 25})
+    analyseDict[30] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {31, 32, 33, 34, 35})
+    analyseDict[50] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {51, 52, 53, 54, 55})
+    analyseDict[60] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {61, 62, 63, 64, 65})
+    analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {
+        11, 12, 13, 14, 15,
+        21, 22, 23, 24, 25,
+        31, 32, 33, 34, 35,
+        81, 82, 83, 84, 85,
+    })
+    analyseDict["memory"] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {
+        51, 52, 53, 54, 55,
+        61, 62, 63, 64, 65,
+    })
+    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"], preflags=predictpd["preFlag"],
+                                             excludeflags={0})
+    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"], preflags=predictpd["preFlag"])
+
+    # ===================================== 将信息进行保存
+    if spath is not None:
+        tpd = pd.DataFrame(data=analyseDict).T
+        savepdfile(tpd, spath, "统计数据.csv")
+        # 写入准确率信息
+        wrfteinfo = [
+            "包含正常准确率: {:.2%}\n".format(accuracy_normal),
+            "去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
+        ]
+        with open(os.path.join(spath, "4.准确率.txt"), "w", encoding="utf-8") as f:
+            f.writelines(wrfteinfo)

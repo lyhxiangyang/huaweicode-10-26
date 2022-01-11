@@ -4,7 +4,7 @@ from typing import Set, Tuple, List, Dict
 import pandas as pd
 from Classifiers.ModelPred import select_and_pred
 from l3l2utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
-from l3l2utils.DataFrameSaveRead import saveDFListToFiles
+from l3l2utils.DataFrameSaveRead import saveDFListToFiles, savepdfile
 from l3l2utils.DataOperation import changeTimeToFromPdlists
 from l3l2utils.DefineData import TIME_COLUMN_NAME, CPU_FEATURE, FAULT_FLAG, MODEL_TYPE
 from l3l2utils.FeatureExtraction import differenceProcess, differenceServer, standardLists, extractionProcessPdLists, \
@@ -12,7 +12,8 @@ from l3l2utils.FeatureExtraction import differenceProcess, differenceServer, sta
 from l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
     getNormalNetworkMean, saveDictToJson
-from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint, getDetectionProbability, getTimePeriodInfo
+from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint, getDetectionProbability, getTimePeriodInfo, \
+    analysePredictResult
 from l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, predictTemp
 
 """
@@ -40,11 +41,7 @@ def ThransferRightLabels(x: List[int]):
     return y
 
 
-def savefile(ds, spath, filename):
-    if not os.path.exists(spath):
-        os.makedirs(spath)
-    pathfilename = os.path.join(spath, filename)
-    ds.to_csv(pathfilename)
+
 
 def add_cpu_column(pds: List[pd.DataFrame]):
     for ipd in pds:
@@ -80,10 +77,10 @@ def FeatureextractionData(inputDict: Dict):
     # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "1.正常数据的平均值")
-        savefile(normalserver_meanvalue, tpath, "meanvalue_server.csv")
-        savefile(normalprocess_meanvalue, tpath, "meanvalue_process.csv")
-        savefile(normall2_meanvalue, tpath, "meanvalue_l2.csv")
-        savefile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv")
+        savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv")
+        savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv")
+        savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv")
+        savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv")
     # ========================================
 
     print("标准化要预测的process和server数据".center(40, "*"))
@@ -248,11 +245,16 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
 
     print("对L3 L2层的数据进行预测".center(40, "*"))
     l2l3predetectresultpd = detectionL2L3Network(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds)
+    # 对预测结果进行分析
+    print("对预测结果进行准确率及其他分析".center(40, "*"))
+    analysePredictResult(l2l3predetectresultpd,spath=os.path.join(inputDict["spath"], "5.准确率结果分析"), windowsize=3)
+    print("对预测结果进行时间段分析，输出时间文件".center(40, "*"))
     outputDict = outputJsonFromDetection(l2l3predetectresultpd)
+
     # =============================将信息保存到磁盘
     if inputDict["spath"] is not None:
-        tpath = os.path.join(inputDict["spath"], "5.L2L3总的预测结果")
-        savefile(l2l3predetectresultpd, tpath, "总预测结果.csv")
+        tpath = os.path.join(inputDict["spath"], "6.L2L3总的预测结果")
+        savepdfile(l2l3predetectresultpd, tpath, "总预测结果.csv")
         saveDictToJson(outputDict, tpath, "output.json")
     return outputDict
 
