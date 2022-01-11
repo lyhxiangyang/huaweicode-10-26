@@ -156,7 +156,7 @@ def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str)
         return meanValue
     classFeatureMeanDict = detectionJson["RequestData"]["normalDataMean"][classname]
     if featuresname in classFeatureMeanDict.keys():
-        meanValue = Dict["RequestData"]["normalDataMean"][classname][featuresname]
+        meanValue = detectionJson["RequestData"]["normalDataMean"][classname][featuresname]
     return meanValue
 
 
