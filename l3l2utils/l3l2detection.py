@@ -330,26 +330,26 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     # 去除每个异常的首尾
     predictpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
     analyseDict = {}
-    analyseDict[0] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {0})
-    analyseDict[10] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {11, 12, 13, 14, 15})
-    analyseDict[20] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {21, 22, 23, 24, 25})
-    analyseDict[30] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {31, 32, 33, 34, 35})
-    analyseDict[50] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {51, 52, 53, 54, 55})
-    analyseDict[60] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {61, 62, 63, 64, 65})
-    analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {81, 82, 83, 84, 85})
-    analyseDict["cpu"] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {
+    analyseDict[0] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {0})
+    analyseDict[10] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {11, 12, 13, 14, 15})
+    analyseDict[20] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {21, 22, 23, 24, 25})
+    analyseDict[30] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {31, 32, 33, 34, 35})
+    analyseDict[50] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {51, 52, 53, 54, 55})
+    analyseDict[60] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {61, 62, 63, 64, 65})
+    analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {81, 82, 83, 84, 85})
+    analyseDict["cpu"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {
         11, 12, 13, 14, 15,
         21, 22, 23, 24, 25,
         31, 32, 33, 34, 35,
         81, 82, 83, 84, 85,
     })
-    analyseDict["memory"] = getDetectionRecallPrecision(predictpd["faultFlag"], predictpd["preFlag"], {
+    analyseDict["memory"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65,
     })
-    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"], preflags=predictpd["preFlag"],
+    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(),
                                              excludeflags={0})
-    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"], preflags=predictpd["preFlag"])
+    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist())
 
     # ===================================== 将信息进行保存
     if spath is not None:
