@@ -347,6 +347,12 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
         51, 52, 53, 54, 55,
         61, 62, 63, 64, 65,
     })
+    analyseDict[111] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {111})
+    analyseDict[121] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {121})
+    analyseDict[131] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {131})
+    analyseDict[133] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {133})
+    analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {141})
+
     accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(),
                                              excludeflags={0})
     accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist())
