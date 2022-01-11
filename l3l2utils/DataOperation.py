@@ -142,26 +142,25 @@ def sortLabels(dataFrame: pd.DataFrame, reverse=False) -> pd.DataFrame:
 
 # time  faultFlag  preFlag  mem_leak  mem_bandwidth
 # 去除指定异常的首尾, 只去除首尾部分
+# faultFlag 针对[0,11,12] 这种  每个时间点的错误只能是一个
 def removeHeadTail_specifiedAbnormal(predictPd: pd.DataFrame, abnormals: Set[List],
                                      windowsize: int = 3) -> pd.DataFrame:
-    dealflag = FAULT_FLAG
-
     def judge(x: pd.Series):
-        # abnormals中有一个
+        # x里面的种类有多种， 且和错误有交集
         if len(abnormals & set(x)) != 0 and x.nunique() != 1:
             return False  # 表示去除
         else:
             return True  # 表示保留
 
-    savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
+    savelines = predictPd[FAULT_FLAG].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]
 
 
 # 去除每个异常的首尾
-def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3, realFlagName: str = FAULT_FLAG) -> pd.DataFrame:
-    allabnormals = set(predictPd[realFlagName])
-    if [0] in allabnormals:
-        allabnormals.remove([0])
+def removeAllHeadTail(predictPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFrame:
+    allabnormals = set(predictPd[FAULT_FLAG])
+    if 0 in allabnormals:
+        allabnormals.remove(0)
     removepd = removeHeadTail_specifiedAbnormal(predictPd, windowsize=windowsize, abnormals=allabnormals)
     return removepd
 
@@ -181,8 +180,6 @@ def removeProcessAllHeadTail(processPd: pd.DataFrame, windowsize: int = 3) -> pd
 
 # 去除指定异常及其首尾数据
 def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], windowsize: int = 3) -> pd.DataFrame:
-    dealflag = "faultFlag"
-
     def judge(x: pd.Series):
         # abnormals中有一个
         if len(abnormals & set(x)) != 0:
@@ -190,5 +187,5 @@ def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], wind
         else:
             return True  # 表示保留
 
-    savelines = predictPd[dealflag].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
+    savelines = predictPd[FAULT_FLAG].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]
