@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # dirs = getDirs(R"C:\Users\lWX1084330\Desktop\json输入输出格式\test_all\test")
     dirs = addFlagDir
     for idir in dirs:
-        PD = getOneDirPd(dirpath=idir)g
+        PD = getOneDirPd(dirpath=idir)
         savePD = {}
         savePD["server"] = PD["server"]
         savePD["process"] = changeDataFrame(PD["server"], PD["process"])

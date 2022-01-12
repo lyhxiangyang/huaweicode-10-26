@@ -116,4 +116,4 @@ def savepdfile(ds, spath, filename):
     if not os.path.exists(spath):
         os.makedirs(spath)
     pathfilename = os.path.join(spath, filename)
-    ds.to_csv(pathfilename)
+    ds.to_csv(pathfilename, index=False)
