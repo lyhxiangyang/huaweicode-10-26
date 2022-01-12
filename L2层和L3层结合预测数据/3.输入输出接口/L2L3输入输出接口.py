@@ -210,7 +210,10 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     allresultspd = fixIsolatedPoint(allresultspd)
 
     print("增加此时间点是否预测正确".center(40, "*"))
-    isrightLists = [1 if allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] else 0 for i in range(0, len(allresultspd))]
+    isrightLists = [1 if
+                    allresultspd[FAULT_FLAG][i] != 0 and
+                    (allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or
+                    allresultspd[FAULT_FLAG][i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in range(0, len(allresultspd))]
     allresultspd["isright"] = isrightLists
 
     print("增加概率".center(40, "*"))
