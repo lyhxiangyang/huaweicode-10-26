@@ -7,7 +7,7 @@ from typing import Dict, List
 import pandas as pd
 
 from l3l2utils.DataFrameOperation import mergeDataFrames
-from l3l2utils.DataFrameSaveRead import getServer_Process_l2_NetworkList
+from l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_PingList
 
 """
 将dataFrame转化为
@@ -41,24 +41,26 @@ filepath是存储network、server等目录的目录
 """
 
 
-def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
+def covertCSVToJsonDict(predictdir: str, server_feature=None,
                         process_feature=None,
                         l2_feature=None,
                         network_feature=None,
                         isExistFlag: bool = True,
                         jobid: int = 16,
                         type: str = 'L3',
-                        requestdataType: str = 'wrf'):
-    serverpds, processpds, l2pds, networkpds = getServer_Process_l2_NetworkList(predictdir,
-                                                                                server_feature=server_feature,
-                                                                                process_feature=process_feature,
-                                                                                l2_feature=l2_feature,
-                                                                                network_feature=network_feature,
-                                                                                isExistFlag=isExistFlag)
+                        requestdataType: str = 'wrf',
+                        normalMeanDict: Dict = None):
+    serverpds, processpds, l2pds, networkpds, pingpds = getServer_Process_l2_Network_PingList(predictdir,
+                                                                                              server_feature=server_feature,
+                                                                                              process_feature=process_feature,
+                                                                                              l2_feature=l2_feature,
+                                                                                              network_feature=network_feature,
+                                                                                              isExistFlag=isExistFlag)
     serverallpd = mergeDataFrames(serverpds)
     processallpd = mergeDataFrames(processpds)
     l2allpd = mergeDataFrames(l2pds)
     networkallpd = mergeDataFrames(networkpds)
+    pingpd = mergeDataFrames(pingpds)
     jsonDict = {}
     jsonDict["JobID"] = jobid
     jsonDict["Type"] = type
@@ -67,8 +69,11 @@ def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
     jsonDict["RequestData"]["data"] = {}
     jsonDict["RequestData"]["data"]["server"] = convertDataFrameToDict(serverallpd)
     jsonDict["RequestData"]["data"]["process"] = convertDataFrameToDict(processallpd)
-    jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(serverallpd)
-    jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(serverallpd)
+    jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(networkallpd)
+    jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(l2allpd)
+    jsonDict["RequestData"]["data"]["ping"] = convertDataFrameToDict(pingpd)
+    if normalMeanDict is not None:
+        jsonDict["RequestData"]["normalDataMean"] = normalMeanDict
     return jsonDict
 
 
@@ -165,7 +170,8 @@ def getMeanFromDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnam
     return datapd[featuresnames].mean()
 
 
-def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
+                        datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromDataFrom(datapd, "server", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
@@ -174,7 +180,8 @@ def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], feature
     return meanSeries
 
 
-def getNormalProcessMean(detectionJson: Dict,datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+def getNormalProcessMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
+                         datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromDataFrom(datapd, "process", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "process", ifeaturename)
@@ -183,7 +190,8 @@ def getNormalProcessMean(detectionJson: Dict,datapd: List[pd.DataFrame], feature
     return meanSeries
 
 
-def getNormalL2Mean(detectionJson: Dict,datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+def getNormalL2Mean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
+                    datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromDataFrom(datapd, "l2", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "l2", ifeaturename)
@@ -192,7 +200,8 @@ def getNormalL2Mean(detectionJson: Dict,datapd: List[pd.DataFrame], features: Li
     return meanSeries
 
 
-def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
+                         datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromDataFrom(datapd, "network", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "network", ifeaturename)
