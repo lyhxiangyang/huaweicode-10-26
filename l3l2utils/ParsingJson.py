@@ -3,11 +3,12 @@
 """
 import json
 import os.path
-from typing import Dict, List
+from typing import Dict, List, Set
 import pandas as pd
 
 from l3l2utils.DataFrameOperation import mergeDataFrames
 from l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_PingList
+from l3l2utils.DefineData import TIME_COLUMN_NAME
 
 """
 将dataFrame转化为
@@ -131,6 +132,17 @@ def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 
 """
+从读取到的json文件中得到ping数据
+"""
+
+
+def getPingPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
+    pingDict = sdict["RequestData"]["data"]["ping"]
+    pingpd = pd.DataFrame(data=pingDict).T
+    return [pingpd]
+
+
+"""
 从读取到的json文件中得到l2数据
 """
 
@@ -164,15 +176,33 @@ def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str)
         meanValue = detectionJson["RequestData"]["normalDataMean"][classname][featuresname]
     return meanValue
 
-
-def getMeanFromDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datanumber: int = 10):
+# 根据时间点来获得
+def getMeanFromTimeDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datatime: List[str]):
+    datapd = mergeDataFrames(datapds)
+    chooseindex = datapd[TIME_COLUMN_NAME].apply(lambda x: x in datatime)
+    return datapd[chooseindex][featuresnames].mean()
+# 直接根据数量来获得时间
+def getMeanFromNumberDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datanumber: int = 10):
     datapd = mergeDataFrames(datapds).iloc[:datanumber]
     return datapd[featuresnames].mean()
 
 
-def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
+"""
+获得server数据的平均值，需要将process数据传入进来，根据process中出现的时间来获得server中运行wrf的时间点
+"""
+
+
+def getNormalServerMean(detectionJson: Dict, serverdatapd: List[pd.DataFrame], processdatapd: List[pd.DataFrame],
+                        features: List[str],
                         datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(datapd, "server", features, datanumber)
+    def getServerProcesTimeIntersection(servertimes: Set, processtimes: Set, datanumber: int = 10):
+        intersectionSet = servertimes & processtimes
+        timelists = sorted(list(intersectionSet))
+        return timelists[:datanumber]
+    allserverpd = mergeDataFrames(serverdatapd)
+    allprocesspd = mergeDataFrames(processdatapd)
+    intersectionTimes = getServerProcesTimeIntersection(set(allserverpd[TIME_COLUMN_NAME].tolist()), set(allprocesspd[TIME_COLUMN_NAME].tolist()), datanumber)
+    meanSeries = getMeanFromTimeDataFrom(serverdatapd, "server", features, intersectionTimes)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
         if featureVaule is not None:
@@ -182,7 +212,7 @@ def getNormalServerMean(detectionJson: Dict, datapd: List[pd.DataFrame], feature
 
 def getNormalProcessMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(datapd, "process", features, datanumber)
+    meanSeries = getMeanFromNumberDataFrom(datapd, "process", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "process", ifeaturename)
         if featureVaule is not None:
@@ -192,7 +222,7 @@ def getNormalProcessMean(detectionJson: Dict, datapd: List[pd.DataFrame], featur
 
 def getNormalL2Mean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                     datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(datapd, "l2", features, datanumber)
+    meanSeries = getMeanFromNumberDataFrom(datapd, "l2", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "l2", ifeaturename)
         if featureVaule is not None:
@@ -202,7 +232,7 @@ def getNormalL2Mean(detectionJson: Dict, datapd: List[pd.DataFrame], features: L
 
 def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromDataFrom(datapd, "network", features, datanumber)
+    meanSeries = getMeanFromNumberDataFrom(datapd, "network", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "network", ifeaturename)
         if featureVaule is not None:

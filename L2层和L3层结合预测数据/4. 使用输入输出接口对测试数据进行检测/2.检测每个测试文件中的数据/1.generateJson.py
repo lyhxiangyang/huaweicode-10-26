@@ -1,6 +1,5 @@
 from typing import Dict
 
-from l3l2utils.DataFrameSaveRead import getServer_Process_l2_NetworkList
 from l3l2utils.ParsingJson import covertCSVToJsonDict, saveDictToJson
 
 if __name__ == "__main__":
