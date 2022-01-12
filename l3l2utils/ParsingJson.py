@@ -8,6 +8,7 @@ import pandas as pd
 
 from l3l2utils.DataFrameOperation import mergeDataFrames
 from l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_PingList
+from l3l2utils.DataOperation import renamePds
 from l3l2utils.DefineData import TIME_COLUMN_NAME
 
 """
@@ -57,11 +58,64 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
                                                                                               l2_feature=l2_feature,
                                                                                               network_feature=network_feature,
                                                                                               isExistFlag=isExistFlag)
+
+    print("将数据关键名字进行改名操作".center(40, "*"))
+    servernameDict = {
+        "used": "mem_used",
+        "freq": "freq",
+        "pgfree": "pgfree",
+    }
+    processnameDict = {
+        "usr_cpu": "usr",
+        "kernel_cpu": "system",
+        "pid": "pid",
+    }
+    l2nameDict = {
+        "": "CPU_Powewr",
+        "": "Power",
+        "": "Cabinet_Power",
+        "": "FAN1_F_Speed",
+        "": "FAN1_R_Speed",
+        "": "FAN2_F_Speed",
+        "": "FAN2_R_Speed",
+        "": "FAN3_F_Speed",
+        "": "FAN3_R_Speed",
+        "": "FAN4_F_Speed",
+        "": "FAN4_R_Speed",
+        "": "FAN5_F_Speed",
+        "": "FAN5_R_Speed",
+        "": "FAN6_F_Speed",
+        "": "FAN6_R_Speed",
+        "": "FAN7_F_Speed",
+        "": "FAN7_R_Speed",
+        "cpu1_core_rem": "CPU1_Core_Rem",
+        "cpu2_core_rem": "CPU2_Core_Rem",
+        "cpu3_core_rem": "CPU3_Core_Rem",
+        "cpu4_core_rem": "CPU4_Core_Rem",
+        "cpu1_mem_temp": "CPU1_MEM_Temp",
+        "cpu2_mem_temp": "CPU2_MEM_Temp",
+        "cpu3_mem_temp": "CPU3_MEM_Temp",
+        "cpu4_mem_temp": "CPU4_MEM_Temp"
+    }
+    networknameDict = {
+        "tx_packets_phy": "tx_packets_phy",
+        "rx_packets_phy": "rx_packets_phy",
+    }
+    pingnameDict = {
+        "avg_lat": "avg_lat",
+    }
+    serverpds = renamePds(serverpds, servernameDict)
+    processpds = renamePds(serverpds, processnameDict)
+    l2pds = renamePds(l2pds, l2nameDict)
+    networkpds = renamePds(networkpds, networknameDict)
+    pingpds = renamePds(pingpds, pingnameDict)
+
     serverallpd = mergeDataFrames(serverpds)
     processallpd = mergeDataFrames(processpds)
     l2allpd = mergeDataFrames(l2pds)
     networkallpd = mergeDataFrames(networkpds)
     pingpd = mergeDataFrames(pingpds)
+
     jsonDict = {}
     jsonDict["JobID"] = jobid
     jsonDict["Type"] = type
@@ -176,13 +230,17 @@ def getMeanFromExistMean(detectionJson: Dict, classname: str, featuresname: str)
         meanValue = detectionJson["RequestData"]["normalDataMean"][classname][featuresname]
     return meanValue
 
+
 # 根据时间点来获得
 def getMeanFromTimeDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datatime: List[str]):
     datapd = mergeDataFrames(datapds)
     chooseindex = datapd[TIME_COLUMN_NAME].apply(lambda x: x in datatime)
     return datapd[chooseindex][featuresnames].mean()
+
+
 # 直接根据数量来获得时间
-def getMeanFromNumberDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str], datanumber: int = 10):
+def getMeanFromNumberDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str],
+                              datanumber: int = 10):
     datapd = mergeDataFrames(datapds).iloc[:datanumber]
     return datapd[featuresnames].mean()
 
@@ -199,9 +257,11 @@ def getNormalServerMean(detectionJson: Dict, serverdatapd: List[pd.DataFrame], p
         intersectionSet = servertimes & processtimes
         timelists = sorted(list(intersectionSet))
         return timelists[:datanumber]
+
     allserverpd = mergeDataFrames(serverdatapd)
     allprocesspd = mergeDataFrames(processdatapd)
-    intersectionTimes = getServerProcesTimeIntersection(set(allserverpd[TIME_COLUMN_NAME].tolist()), set(allprocesspd[TIME_COLUMN_NAME].tolist()), datanumber)
+    intersectionTimes = getServerProcesTimeIntersection(set(allserverpd[TIME_COLUMN_NAME].tolist()),
+                                                        set(allprocesspd[TIME_COLUMN_NAME].tolist()), datanumber)
     meanSeries = getMeanFromTimeDataFrom(serverdatapd, "server", features, intersectionTimes)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
