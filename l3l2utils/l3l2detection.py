@@ -39,6 +39,7 @@ def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
             preflagList[i] = sorted(list(set(preflagList[i - 1] + preflagList[i + 1])))
             continue
     l2l3predetectresultpd["preFlag"] = preflagList
+    l2l3predetectresultpd.reset_index(drop=True, inplace=True)
     return l2l3predetectresultpd
 
 
@@ -60,6 +61,7 @@ def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
         lambda x: 131 if x == 133 else x)
     l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
         lambda x: 132 if x == 134 else x)
+    l2l3predetectresultpd.reset_index(drop=True, inplace=True)
     return l2l3predetectresultpd
 
 

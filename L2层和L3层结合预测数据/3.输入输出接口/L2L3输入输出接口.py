@@ -124,6 +124,8 @@ def FeatureextractionData(inputDict: Dict):
     return extraction_server_pds, extraction_process_pds, extraction_l2_pds, extraction_network_pds
 
 
+
+
 """
 返回一个L2L3层合并之后的数据
 """
@@ -206,6 +208,10 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对结果进行优化".center(40, "*"))
     allresultspd = fixFaultFlag(allresultspd)
     allresultspd = fixIsolatedPoint(allresultspd)
+
+    print("增加此时间点是否预测正确".center(40, "*"))
+    isrightLists = [allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] for i in range(0, len(allresultspd))]
+    allresultspd["isright"] = isrightLists
 
     print("增加概率".center(40, "*"))
     allresultspd["probability"] = getDetectionProbability(allresultspd["preFlag"].tolist())
