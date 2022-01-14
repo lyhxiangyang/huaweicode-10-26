@@ -199,16 +199,16 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
                                                                       data=l2_serverpds))
 
     print("对网络异常1进行预测 TX_Hang".center(40, "#"))
-    REPORT_TIME = "time"
-    l2networkresult1 = pd.DataFrame()
-    l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
-    l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
-    l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
-    l2networkresult1["preFlag"] = detectNetwork_TXHangAbnormal(allpingpds)
+    # REPORT_TIME = "time"
+    # l2networkresult1 = pd.DataFrame()
+    # l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
+    # l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
+    # l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
+    l2networkresult1 = detectNetwork_TXHangAbnormal(allpingpds)
 
     print("对网络异常2进行预测".center(40, "#"))
     l2networkresult2 = pd.DataFrame()
-    l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
+    l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
     l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     l2networkresult2["preFlag"] = ThransferRightLabels(
         select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_model2type"]],

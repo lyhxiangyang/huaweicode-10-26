@@ -222,13 +222,13 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 
 def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
-    FANSFeatures1 = [
+    FANSFeatures = [
         'FAN1_F_Speed',
         'FAN2_F_Speed',
         'FAN3_F_Speed',
         'FAN4_F_Speed',
     ]
-    TEMPERATUREFeatures1 = [
+    TEMPERATUREFeatures = [
         'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
         'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
     ]
@@ -291,12 +291,13 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
 
 """
 检测网络异常情况 TXHang
+传入时间按照s进行传入，这个s会经过时间处理，也就是，会进行按照时间的分钟的分组合并，最后返回
 """
 
 
 def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool = True):
     threshold_avg_lat = 100
-    data = allnetworkpds.groupby(TIME_COLUMN_NAME, as_index=False).agg([max])
+    data = allnetworkpds.groupby(TIME_COLUMN_NAME, as_index=False).agg("max")
     prenet = []
     for i in data['avg_lat'].tolist():
         if i > threshold_avg_lat:
@@ -306,6 +307,6 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
     result = data[TIME_COLUMN_NAME].to_frame()
     if isExistFlag:
         result[FAULT_FLAG] = data[FAULT_FLAG]
-    result['preFLag'] = prenet
+    result['preFlag'] = prenet
     # result.set_index(TIME_COLUMN_NAME, inplace=True)
     return result
