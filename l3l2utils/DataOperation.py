@@ -70,12 +70,12 @@ def changeTimeFromOnepd(df: pd.DataFrame, leastTime: str = "%M",
 """
 将一个列表中的DataFrame的时间进行改变 变成%Y-%m-%d %H:%M:%S这种格式的
 leastTime表示要精确到的位数，如%M  则代表这  %M以下的数据%S就是00 
-isDuplicate true表示去除重复， false 表示不去除重复
+isremoveDuplicate true表示去除重复， false 表示不去除重复
 """
 
 
 def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
-                            timefeaturename: str = TIME_COLUMN_NAME, isDuplicate: bool = False) -> List[pd.DataFrame]:
+                            timefeaturename: str = TIME_COLUMN_NAME, isremoveDuplicate: bool = False) -> List[pd.DataFrame]:
     changed_pds = []
     for ipd in pds:
         tpd = changeTimeFromOnepd(ipd, leastTime=leastTime, timefeaturename=timefeaturename)
