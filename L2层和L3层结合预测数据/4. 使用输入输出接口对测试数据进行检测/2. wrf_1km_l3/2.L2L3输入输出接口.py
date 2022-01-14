@@ -112,11 +112,11 @@ def FeatureextractionData(inputDict: Dict):
 
 
     print("将数据的时间进行统一化处理".center(40, "*"))
-    standard_server_pds = changeTimeToFromPdlists(standard_server_pds)
+    standard_server_pds = changeTimeToFromPdlists(standard_server_pds, isDuplicate=True)
     standard_process_pds = changeTimeToFromPdlists(standard_process_pds)
-    standard_l2_pds = changeTimeToFromPdlists(standard_l2_pds)
-    standard_network_pds = changeTimeToFromPdlists(standard_network_pds)
-    standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds)
+    standard_l2_pds = changeTimeToFromPdlists(standard_l2_pds, isDuplicate=True)
+    standard_network_pds = changeTimeToFromPdlists(standard_network_pds, isDuplicate=True)
+    standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds, isDuplicate=True)
 
     print("process、server、l2、network特征处理".center(40, "*"))
     extraction_process_pds = extractionProcessPdLists(standard_process_pds, extractFeatures=inputDict["process_feature"],
