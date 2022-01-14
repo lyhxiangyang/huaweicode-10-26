@@ -18,7 +18,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
     # 判断这个错误是否符合equalFlag
     # 如果exultFlags是奇数如11011那么ipos指向的是0中间位置，如果exultFlags是偶数，如11100111那么ipos指向的是第一个0位置
-    def isallEqual(preFlagsList, equalFlags, ipos, ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
+    def isallEqual(preFlagsList, equalFlags, ipos,
+                   ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
         if len(equalFlags) % 2 == 1:
             beginpos = ipos - len(equalFlags) // 2
             endpos = ipos + len(equalFlags) // 2 + 1
@@ -41,27 +42,27 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
         return compareFlags.count(True) == len(compareFlags)
 
     preflagList = list(l2l3predetectresultpd["preFlag"])
-    allPreFlags = sorted(list(set(chain.from_iterable(preflagList)))) # 得到所有的错误
+    allPreFlags = sorted(list(set(chain.from_iterable(preflagList))))  # 得到所有的错误
     if 0 in allPreFlags:
         allPreFlags.remove(0)
     for i in range(0, len(preflagList)):
         # 对每个异常进行判断
-        for ifault in allPreFlags: # 对所有出现过的错误进行预判
+        for ifault in allPreFlags:  # 对所有出现过的错误进行预判
             # 0 代表不是这个错误， 1代表是这个错误
             if isallEqual(preflagList, list(map(int, list("00100"))), i, ifault):
                 preflagList[i].remove(ifault)
-                continue # 不需要这个异常
+                continue  # 不需要这个异常
             if isallEqual(preflagList, list(map(int, list("11011"))), i, ifault):
                 preflagList[i].append(ifault)
                 continue
             if isallEqual(preflagList, list(map(int, list("11100111"))), i, ifault):
-                preflagList[i].append(ifault) # 先不管i+1是怎么回事
+                preflagList[i].append(ifault)  # 先不管i+1是怎么回事
                 continue
             if isallEqual(preflagList, list(map(int, list("00011000"))), i, ifault):
                 preflagList[i].remove(ifault)
                 continue
 
-        if len(preflagList[i]) == 0: # 全部删除干净了，那就等于0
+        if len(preflagList[i]) == 0:  # 全部删除干净了，那就等于0
             preflagList[i] = [0]
         if len(preflagList[i]) >= 2 and 0 in preflagList[i]:
             preflagList[i].remove(0)
@@ -69,8 +70,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd["preFlag"] = preflagList
     l2l3predetectresultpd.reset_index(drop=True, inplace=True)
     return l2l3predetectresultpd
-12345678
-23456789
+
+
 """
 对faultFlag进行修改
 主要是将133变成131  134变成132
@@ -268,10 +269,25 @@ def getTimePeriodInfo(l2l3predetectresultpd: pd.DataFrame, preflagName: str = "p
 函数功能：得到这个一个预测数据的准确率
 
 所有的预测中，我只要预测到就算准确。
+isFuzzy=True会将 cpu预测为cpu的内存的预测为内存的都算正确
 """
 
 
-def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], excludeflags=None) -> float:
+def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], excludeflags=None, isFuzzy: bool=False) -> float:
+    # 判断预判和实际是否相同
+    FuzzyFlagDict = {
+        "cpu": {10,11,12,13,14,15,20,21,22,23,24,25,30,31,32,33,34,35,80,81,82,83,84,85},
+        "memory": {50,51,52,53,54,55,60,61,62,63,64,65},
+    }
+    def isright(realflag, preflagList):
+        if isFuzzy:
+            # cpu异常被预测为cpu异常
+            if realflag in FuzzyFlagDict["cpu"] and len(set(preflags) & FuzzyFlagDict["cpu"]) != 0:
+                return True
+            if realflag in FuzzyFlagDict["memory"] and len(set(preflags) & FuzzyFlagDict["memory"]) != 0:
+                return True
+        return (realflag // 10) * 10 in preflagList or realflag in preflagList
+
     if excludeflags is None:
         excludeflags = []
     assert len(realflags) == len(preflags)
@@ -282,7 +298,7 @@ def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], exclud
         if realflags[i] in excludeflags:
             continue
         allnumber += 1
-        if (realflags[i] // 10) * 10 in preflags[i] or realflags[i] in preflags[i]:
+        if isright(realflags[i], preflags[i]):
             rightnumber += 1
     return rightnumber / allnumber
 
@@ -395,11 +411,9 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
                                                    {141})
 
-    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
-                                             preflags=predictpd["preFlag"].tolist(),
-                                             excludeflags={0})
-    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
-                                           preflags=predictpd["preFlag"].tolist())
+    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist())
+    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(), excludeflags={0})
+    accuracy_nonormal_fuzzy = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(), excludeflags={0}, isFuzzy=True)
 
     # ===================================== 将信息进行保存
     if spath is not None:
@@ -407,8 +421,10 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
         savepdfile(tpd, spath, "统计数据.csv", index=True)
         # 写入准确率信息
         wrfteinfo = [
-            "包含正常准确率: {:.2%}\n".format(accuracy_normal),
-            "去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
+            "1. 包含正常准确率: {:.2%}\n".format(accuracy_normal),
+            "2.去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
+            "2.去除正常模糊准确率: {:.2%}\n".format(accuracy_nonormal_fuzzy),
+
         ]
         with open(os.path.join(spath, "4.准确率.txt"), "w", encoding="utf-8") as f:
             f.writelines(wrfteinfo)
