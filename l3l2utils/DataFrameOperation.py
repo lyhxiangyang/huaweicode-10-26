@@ -5,6 +5,25 @@ import pandas as pd
 from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 
 """
+True 表示所有的列名是相同的
+False 表示列名不相同
+"""
+def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
+    lcolumns = [list(i.columns.array) for i in lpds]
+    # 长度为0的时候可以返回True
+    if len(lpds) == 0 or len(lpds) == 1:
+        return True
+    for i in range(1, len(lcolumns)):
+        lleft = set(lcolumns[i])
+        lright = set(lcolumns[0])
+        if lleft != lright:
+            a = lleft & lright
+            b = lleft - a
+            c = lright - a
+            return False
+    return True
+
+"""
 函数功能：合并多个DataFrame 返回值是一个合并之后的DataFrame 上下合并
 函数参数：预期是一个含有DataFrame的列表
 返回值： 包含各个DataFrame的一个大的DataFrame , 第二个参数表示是否运行出错 True 代表出错  False代表没错
@@ -21,21 +40,6 @@ def mergeDataFrames(lpds: List[pd.DataFrame]):
         return pd.DataFrame()
     if len(lpds) == 1:
         return lpds[0]
-
-    def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
-        lcolumns = [list(i.columns.array) for i in lpds]
-        # 长度为0的时候可以返回True
-        if len(lpds) == 0 or len(lpds) == 1:
-            return True
-        for i in range(1, len(lcolumns)):
-            lleft = set(lcolumns[i])
-            lright = set(lcolumns[0])
-            if lleft != lright:
-                a = lleft & lright
-                b = lleft - a
-                c = lright - a
-                return False
-        return True
 
     # 如果说传进来的DataFrame头部不一样 就报错
     if not judgeSameFrames(lpds):
@@ -96,6 +100,9 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
             if -1 in xlist:
                 xlist.remove(-1)
         return xlist
+    if not judgeSameFrames(pds):
+        print("mergeouterPredictResult 列名不相同")
+        exit(1)
 
     # 需要将每个dataframe的索引设置为time
     timeindexpds = [ipd.set_index(TIME_COLUMN_NAME) for ipd in pds]

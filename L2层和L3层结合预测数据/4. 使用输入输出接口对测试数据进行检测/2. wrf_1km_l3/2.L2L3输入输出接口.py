@@ -214,6 +214,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
         select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_model2type"]],
                         saved_model_path=inputDict["network_model2path"]))
     l2networkresult2 = makeL2networkresultMergedByMin(l2networkresult2)
+
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult([l3cpuresult,l3memleakresult,l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
 
