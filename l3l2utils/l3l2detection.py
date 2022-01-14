@@ -17,12 +17,17 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = l2l3predetectresultpd.copy()
 
     # 判断这个错误是否符合equalFlag
-    def isallEqual(abnormals, equalFlags, ipos, ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
+    def isallEqual(preFlagsList, equalFlags, ipos, ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
         beginpos = ipos - len(equalFlags) // 2
         endpos = ipos + len(equalFlags) // 2 + 1
-        beginpos = 0 if beginpos < 0 else beginpos
-        endpos = len(abnormals) - 1 if endpos > len(abnormals) else endpos
-        abnormals = abnormals[beginpos:endpos]
+        abnormals = []
+        for i in range(beginpos, endpos):
+            if i < 0:
+                abnormals.append([0])
+            elif i > len(preFlagsList):
+                abnormals.append([0])
+            else:
+                abnormals.append(preFlagsList[i])
 
         if len(abnormals) != len(equalFlags):
             return False

@@ -119,7 +119,7 @@ def FeatureextractionData(inputDict: Dict):
     standard_process_pds = changeTimeToFromPdlists(standard_process_pds)
     standard_l2_pds = changeTimeToFromPdlists(standard_l2_pds, isremoveDuplicate=True)
     standard_network_pds = changeTimeToFromPdlists(standard_network_pds, isremoveDuplicate=True)
-    standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds, isremoveDuplicate=True)
+    standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds, isremoveDuplicate=False)
 
     print("process、server、l2、network特征处理".center(40, "*"))
     extraction_process_pds = extractionProcessPdLists(standard_process_pds,
