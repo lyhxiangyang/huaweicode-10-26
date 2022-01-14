@@ -1,3 +1,4 @@
+import os.path
 from typing import Dict
 
 from l3l2utils.ParsingJson import covertCSVToJsonDict, saveDictToJson
@@ -6,8 +7,9 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"C:\Users\lWX1084330\Desktop\json输入输出格式\test_all\test\wrf_1km_multi_l3\centos11"
-    spath = "tmp/jsonfile/wrf_1km_l3"
+    predictdirpath = R"DATA/2020-01-14新的测试数据/wrf_1km_multi_l3/centos11"
+    spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
+    jsonfilename = "alljson.json"
     normalMeanDict = {
         "server": {
             # "used": 48935662250,
@@ -57,5 +59,5 @@ if __name__ == "__main__":
 
     # ========================================================= 进行读取
     jsonDict = covertCSVToJsonDict(predictdir=predictdirpath, normalMeanDict=normalMeanDict)
-    saveDictToJson(jsonDict, spath=spath, filename="alljson.json")
+    saveDictToJson(jsonDict, spath=spath, filename=jsonfilename)
 

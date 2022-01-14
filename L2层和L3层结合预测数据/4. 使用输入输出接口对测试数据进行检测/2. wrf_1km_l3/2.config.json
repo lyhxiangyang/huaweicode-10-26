@@ -1,6 +1,6 @@
 {
-    "predictdirjsonpath": "tmp/jsonfile/wrf_1km_l3/alljson.json",
-
+    "predictdirjsonpath": "DATA/2020-01-14新的测试数据/wrf_1km_multi_l3/centos11/jsonfile/alljson.json",
+    "spath": "DATA/2020-01-14新的测试数据/wrf_1km_multi_l3/centos11/jsonfile/中间结果文件生成",
     "processcpu_modelpath":"tmp/modelpath/singlefeature/process_cpu_model",
     "servermemory_modelpath":"tmp/modelpath/singlefeature/memory_leak_model",
     "serverbandwidth_modelpath":"tmp/modelpath/singlefeature/memory_bandwidth_model",
@@ -18,9 +18,7 @@
     "network_model1type":0,
     "network_model2type":0,
     "meanNormalDataNumber": 10,
-    "spath": "tmp/总过程分析/最新测试集合/wrf_1km_l3",
     "resultsavepath": ".",
-
     "isExistFaultFlag": true,
     "server_feature": ["used", "pgfree", "freq"],
     "server_accumulate_feature": ["pgfree"],
