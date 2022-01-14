@@ -17,14 +17,19 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = l2l3predetectresultpd.copy()
 
     # 判断这个错误是否符合equalFlag
+    # 如果exultFlags是奇数如11011那么ipos指向的是0中间位置，如果exultFlags是偶数，如11100111那么ipos指向的是第一个0位置
     def isallEqual(preFlagsList, equalFlags, ipos, ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
-        beginpos = ipos - len(equalFlags) // 2
-        endpos = ipos + len(equalFlags) // 2 + 1
+        if len(equalFlags) % 2 == 1:
+            beginpos = ipos - len(equalFlags) // 2
+            endpos = ipos + len(equalFlags) // 2 + 1
+        else:
+            beginpos = ipos - len(equalFlags) // 2 + 1
+            endpos = ipos + len(equalFlags) // 2 + 1
         abnormals = []
         for i in range(beginpos, endpos):
             if i < 0:
                 abnormals.append([0])
-            elif i > len(preFlagsList):
+            elif i >= len(preFlagsList):
                 abnormals.append([0])
             else:
                 abnormals.append(preFlagsList[i])
@@ -37,6 +42,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
     preflagList = list(l2l3predetectresultpd["preFlag"])
     allPreFlags = sorted(list(set(chain.from_iterable(preflagList)))) # 得到所有的错误
+    if 0 in allPreFlags:
+        allPreFlags.remove(0)
     for i in range(0, len(preflagList)):
         # 对每个异常进行判断
         for ifault in allPreFlags: # 对所有出现过的错误进行预判
@@ -46,7 +53,14 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 continue # 不需要这个异常
             if isallEqual(preflagList, list(map(int, list("11011"))), i, ifault):
                 preflagList[i].append(ifault)
-                pass
+                continue
+            if isallEqual(preflagList, list(map(int, list("11100111"))), i, ifault):
+                preflagList[i].append(ifault) # 先不管i+1是怎么回事
+                continue
+            if isallEqual(preflagList, list(map(int, list("00011000"))), i, ifault):
+                preflagList[i].remove(ifault)
+                continue
+
         if len(preflagList[i]) == 0: # 全部删除干净了，那就等于0
             preflagList[i] = [0]
         if len(preflagList[i]) >= 2 and 0 in preflagList[i]:
@@ -55,8 +69,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd["preFlag"] = preflagList
     l2l3predetectresultpd.reset_index(drop=True, inplace=True)
     return l2l3predetectresultpd
-
-
+12345678
+23456789
 """
 对faultFlag进行修改
 主要是将133变成131  134变成132
