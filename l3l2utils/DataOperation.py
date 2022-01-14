@@ -78,6 +78,8 @@ def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
     changed_pds = []
     for ipd in pds:
         tpd = changeTimeFromOnepd(ipd, leastTime=leastTime, timefeaturename=timefeaturename)
+        # 将时间进行去重
+        tpd = tpd[~tpd[timefeaturename].duplicated()]
         changed_pds.append(tpd)
     return changed_pds
 
