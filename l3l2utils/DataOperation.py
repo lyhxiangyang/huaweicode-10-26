@@ -77,10 +77,14 @@ isremoveDuplicate true表示去除重复， false 表示不去除重复
 def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
                             timefeaturename: str = TIME_COLUMN_NAME, isremoveDuplicate: bool = False) -> List[pd.DataFrame]:
     changed_pds = []
-    for ipd in pds:
+    print("一个pdlist改变时间".center(20, "*"))
+    for i, ipd in enumerate(pds):
         tpd = changeTimeFromOnepd(ipd, leastTime=leastTime, timefeaturename=timefeaturename)
-        if isDuplicate: #将时间进行去重
+        if isremoveDuplicate: #将时间进行去重
+            beforelen = len(tpd)
             tpd = tpd[~tpd[timefeaturename].duplicated()]
+            afterlen = len(tpd)
+            print("第{}个pd减少了{}行".format(i, beforelen - afterlen))
         changed_pds.append(tpd)
     return changed_pds
 

@@ -12,7 +12,7 @@ from l3l2utils.FeatureExtraction import differenceProcess, differenceServer, sta
 from l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
     getNormalNetworkMean, saveDictToJson
-from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPoint, getDetectionProbability, getTimePeriodInfo, \
+from l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, getTimePeriodInfo, \
     analysePredictResult
 from l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, predictTemp
 
@@ -207,7 +207,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
 
     print("对结果进行优化".center(40, "*"))
     allresultspd = fixFaultFlag(allresultspd)
-    allresultspd = fixIsolatedPoint(allresultspd)
+    allresultspd = fixIsolatedPointPreFlag(allresultspd)
 
     print("增加此时间点是否预测正确".center(40, "*"))
     isrightLists = [1 if

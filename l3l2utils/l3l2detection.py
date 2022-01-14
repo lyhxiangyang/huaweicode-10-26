@@ -13,31 +13,40 @@ from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, errorFeatureDict,
 """
 
 
-def fixIsolatedPoint(l2l3predetectresultpd: pd.DataFrame):
+def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = l2l3predetectresultpd.copy()
 
-    def isAbnormal(x) -> bool:  # 判断是否是
-        if x == [0]:
-            return False
-        return True
+    # 判断这个错误是否符合equalFlag
+    def isallEqual(abnormals, equalFlags, ipos, ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
+        beginpos = ipos - len(equalFlags) // 2
+        endpos = ipos + len(equalFlags) // 2 + 1
+        beginpos = 0 if beginpos < 0 else beginpos
+        endpos = len(abnormals) - 1 if endpos > len(abnormals) else endpos
+        abnormals = abnormals[beginpos:endpos]
 
-    def isallEqual(abnormals, equalFlags):  # 比较两个列表是否相等  abnormals是preFlag的截取， equalFlags 是
         if len(abnormals) != len(equalFlags):
             return False
-        abnormals = [1 if isAbnormal(i) else 0 for i in abnormals]  # 1代表异常 0 代表正常
+        abnormals = [1 if ifault in ifautltlists else 0 for ifautltlists in abnormals]
         compareFlags = [abnormals[i] == equalFlags[i] for i in range(0, len(abnormals))]  # True代表相同 False代表不同
         return compareFlags.count(True) == len(compareFlags)
 
     preflagList = list(l2l3predetectresultpd["preFlag"])
+    allPreFlags = sorted(list(set(chain.from_iterable(preflagList)))) # 得到所有的错误
     for i in range(0, len(preflagList)):
-        # 去除00100中的异常
-        if 2 <= i <= len(preflagList) - 2 and isallEqual(preflagList[i - 2:i + 2], list(map(int, list("00100")))):
+        # 对每个异常进行判断
+        for ifault in allPreFlags: # 对所有出现过的错误进行预判
+            # 0 代表不是这个错误， 1代表是这个错误
+            if isallEqual(preflagList, list(map(int, list("00100"))), i, ifault):
+                preflagList[i].remove(ifault)
+                continue # 不需要这个异常
+            if isallEqual(preflagList, list(map(int, list("11011"))), i, ifault):
+                preflagList[i].append(ifault)
+                pass
+        if len(preflagList[i]) == 0: # 全部删除干净了，那就等于0
             preflagList[i] = [0]
-            continue
-        # 去除11011这种异常
-        if 2 <= i <= len(preflagList) - 2 and isallEqual(preflagList[i - 2:i + 2], list(map(int, list("11011")))):
-            preflagList[i] = sorted(list(set(preflagList[i - 1] + preflagList[i + 1])))
-            continue
+        if len(preflagList[i]) >= 2 and 0 in preflagList[i]:
+            preflagList[i].remove(0)
+
     l2l3predetectresultpd["preFlag"] = preflagList
     l2l3predetectresultpd.reset_index(drop=True, inplace=True)
     return l2l3predetectresultpd
