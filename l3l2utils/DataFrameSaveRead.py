@@ -1,5 +1,5 @@
 import os
-from typing import List, Any
+from typing import List
 
 import pandas as pd
 
@@ -18,8 +18,9 @@ def saveDFListToFiles(spath: str, pds: List[pd.DataFrame]):
         pds[i].to_csv(savefilepath, index=False)
 
 
-def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, process_feature=None, l2_feature=None, ping_feature=None,
-                                     network_feature=None, isExistFlag: bool = True):
+def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, process_feature=None, l2_feature=None,
+                                          ping_feature=None,
+                                          network_feature=None, isExistFlag: bool = True):
     def getfilespath(filepath: str) -> List[str]:
         if not os.path.exists(filepath):
             print("{}路径不存在".format(filepath))
@@ -123,8 +124,8 @@ def getfilepd(ipath: str, ifile: str = None, features: List[str] = None) -> pd.D
 """
 
 
-def savepdfile(ds, spath, filename):
+def savepdfile(ds, spath, filename, index: bool = False):
     if not os.path.exists(spath):
         os.makedirs(spath)
     pathfilename = os.path.join(spath, filename)
-    ds.to_csv(pathfilename, index=False)
+    ds.to_csv(pathfilename, index=index)

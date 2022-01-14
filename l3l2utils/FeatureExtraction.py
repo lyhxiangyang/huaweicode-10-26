@@ -72,6 +72,7 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
     对server数据列表中pgfree进行滑动窗口的处理
     会将传入参数的列表中dataframe本身数值进行修改
     """
+
     def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
         pgfree_name = "pgfree"
         for ipd in serverpds:
@@ -136,8 +137,10 @@ def featureExtractionPd(df: pd.DataFrame, extraFeature: List[str], windowSize: i
     def quantile(n):
         def quantile_(x):
             return np.quantile(x, q=n)
+
         quantile_.__name__ = 'percentage%d' % (n * 100)
         return quantile_
+
     # 得到的这个DataFrame是一个二级列名类似下面这种
     #	    system	                            ｜                      user
     #  sum	mean	amax	amin	quantile50  ｜ sum	mean	amax	amin	quantile50
@@ -206,12 +209,14 @@ def extractionProcessPdLists(processpds: List[pd.DataFrame], extractFeatures: Li
         featureExtractiondfs.append(tpd)
     return featureExtractiondfs
 
+
 """
 函数功能：将包含多个server dataframe进行特征提取
 """
 
+
 def extractionServerPdLists(serverpds: List[pd.DataFrame], extractFeatures: List[str],
-                  windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
+                            windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
     extraction_dfs = []
     for i, iserverpd in enumerate(serverpds):
         # 对累计的特征值进行数据的处理, 默认一个server数据里面都是连续的, 就算不连续，也只会影响几个点

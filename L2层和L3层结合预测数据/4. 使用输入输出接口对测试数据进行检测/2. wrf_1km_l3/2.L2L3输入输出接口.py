@@ -265,7 +265,7 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
     allpingpds = mergeDataFrames(extraction_ping_pds)
 
     print("对L3 L2层的数据进行预测".center(40, "*"))
-    l2l3predetectresultpd = detectionL2L3Data(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds)
+    l2l3predetectresultpd = detectionL2L3Data(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds, allpingpds)
     # 对预测结果进行分析
     print("对预测结果进行准确率及其他分析".center(40, "*"))
     analysePredictResult(l2l3predetectresultpd,spath=os.path.join(inputDict["spath"], "5.准确率结果分析"), windowsize=3)

@@ -1,4 +1,3 @@
-import json
 import os
 from collections import defaultdict
 from typing import List, Dict, Tuple, Set
@@ -135,17 +134,17 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     ilastlist = None
     for i, ilist in enumerate(wrfnumList):
         # ===========================
-        if ilist is None:
+        if ilist is None: # 表明这个时间没有wrf进程在运行
             iscpulist.append(-1)
             ilastlist = None
             continue
         # ========================
-        if len(ilist) == 0:
+        if len(ilist) == 0: # 表明这个时间没有核心被抢占
             iscpulist.append(0)
             ilastlist = []
             continue
         # ========================
-        if len(ilist) == 1:
+        if len(ilist) == 1: # 只有一个核心被抢占
             if ilastlist is None:
                 iscpulist.append(20)
             elif len(ilastlist) == 0:
@@ -164,14 +163,26 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             ilastlist = ilist
             continue
         # =======================
-        if len(ilist) == coresnumber:
+        # if len(ilist) == coresnumber: # 现在就是全核心抢占了
+        #     if ilastlist is None:
+        #         iscpulist.append(10)
+        #     elif len(ilastlist) == 0:
+        #         iscpulist.append(10)
+        #     elif len(ilastlist) == coresnumber:
+        #         iscpulist.append(10)
+        #     else:
+        #         iscpulist[-1] = 80
+        #         iscpulist.append(80)
+        #     ilastlist = ilist
+        #     continue
+        if len(ilist) >= coresnumber // 2: # 现在就是全核心抢占了
             if ilastlist is None:
                 iscpulist.append(10)
             elif len(ilastlist) == 0:
                 iscpulist.append(10)
-            elif len(ilastlist) == coresnumber:
+            elif len(ilastlist) >= coresnumber // 2:
                 iscpulist.append(10)
-            else:
+            else: # 介于1-一半之间
                 iscpulist[-1] = 80
                 iscpulist.append(80)
             ilastlist = ilist
@@ -206,11 +217,12 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 """
 识别温度数据
+
 """
 
 
 def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
-    FANS = [
+    FANSFeatures1 = [
         'FAN1_F_Speed', "FAN1_R_Speed",
         'FAN2_F_Speed', "FAN2_R_Speed",
         'FAN3_F_Speed', "FAN3_R_Speed",
@@ -219,10 +231,13 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
         'FAN6_F_Speed', "FAN6_R_Speed",
         'FAN7_F_Speed', "FAN7_R_Speed",
     ]
-    TEMPERATURE = [
+    TEMPERATUREFeatures1 = [
         'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
         'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
     ]
+    FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
+    TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])
+
 
     def get_extended_features(prefix):
         selected = []
@@ -235,8 +250,8 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
         return selected
 
     result = []
-    for i, temp in enumerate(TEMPERATURE):
-        for j, fan in enumerate(FANS):
+    for i, temp in enumerate(TEMPERATUREFeatures):
+        for j, fan in enumerate(FANSFeatures):
             extended_features = get_extended_features(['freq', temp, fan])
             select_data = data[extended_features]
             model = joblib.load(os.path.join(model_path, model_type + '.pkl'))
@@ -276,9 +291,12 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     return bandwidthPreFlagList
 
+
 """
 检测网络异常情况 TXHang
 """
+
+
 def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool = True):
     threshold_avg_lat = 100
     data = allnetworkpds.groupby(TIME_COLUMN_NAME, as_index=False).agg([max])

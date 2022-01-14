@@ -190,10 +190,13 @@ def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], wind
     savelines = predictPd[FAULT_FLAG].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]
 
+
 """
 对server数据列表进行改名字
 返回一个新的列表
 """
+
+
 def renamePds(datapds: List[pd.DataFrame], namedict: Dict):
     if len(namedict) == 0:
         return datapds
@@ -202,8 +205,3 @@ def renamePds(datapds: List[pd.DataFrame], namedict: Dict):
         tpd = ipd.rename(columns=namedict, inplace=False)
         renamepds.append(tpd)
     return renamepds
-
-
-
-
-

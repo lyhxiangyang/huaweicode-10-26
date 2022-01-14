@@ -4,6 +4,7 @@
 import json
 import os.path
 from typing import Dict, List, Set
+
 import pandas as pd
 
 from l3l2utils.DataFrameOperation import mergeDataFrames
@@ -61,33 +62,23 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
 
     print("将数据关键名字进行改名操作".center(40, "*"))
     servernameDict = {
-        "used": "mem_used",
+        "mem_used": "used",
         "freq": "freq",
         "pgfree": "pgfree",
     }
     processnameDict = {
-        "usr_cpu": "usr",
+        "usr_cpu": "user",
         "kernel_cpu": "system",
         "pid": "pid",
     }
     l2nameDict = {
-        "": "CPU_Powewr",
-        "": "Power",
-        "": "Cabinet_Power",
-        "": "FAN1_F_Speed",
-        "": "FAN1_R_Speed",
-        "": "FAN2_F_Speed",
-        "": "FAN2_R_Speed",
-        "": "FAN3_F_Speed",
-        "": "FAN3_R_Speed",
-        "": "FAN4_F_Speed",
-        "": "FAN4_R_Speed",
-        "": "FAN5_F_Speed",
-        "": "FAN5_R_Speed",
-        "": "FAN6_F_Speed",
-        "": "FAN6_R_Speed",
-        "": "FAN7_F_Speed",
-        "": "FAN7_R_Speed",
+        "cpu_power": "CPU_Powewr",
+        "power": "Power",
+        "cabinet_power": "Cabinet_Power",
+        "fan1_speed": "FAN1_F_Speed",
+        "fan2_speed": "FAN2_F_Speed",
+        "fan3_speed": "FAN3_F_Speed",
+        "fan4_speed": "FAN4_F_Speed",
         "cpu1_core_rem": "CPU1_Core_Rem",
         "cpu2_core_rem": "CPU2_Core_Rem",
         "cpu3_core_rem": "CPU3_Core_Rem",
@@ -105,7 +96,7 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
         "avg_lat": "avg_lat",
     }
     serverpds = renamePds(serverpds, servernameDict)
-    processpds = renamePds(serverpds, processnameDict)
+    processpds = renamePds(processpds, processnameDict)
     l2pds = renamePds(l2pds, l2nameDict)
     networkpds = renamePds(networkpds, networknameDict)
     pingpds = renamePds(pingpds, pingnameDict)

@@ -333,36 +333,50 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     predictpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
     analyseDict = {}
     analyseDict[0] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {0})
-    analyseDict[10] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {11, 12, 13, 14, 15})
-    analyseDict[20] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {21, 22, 23, 24, 25})
-    analyseDict[30] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {31, 32, 33, 34, 35})
-    analyseDict[50] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {51, 52, 53, 54, 55})
-    analyseDict[60] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {61, 62, 63, 64, 65})
-    analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {81, 82, 83, 84, 85})
+    analyseDict[10] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {11, 12, 13, 14, 15})
+    analyseDict[20] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {21, 22, 23, 24, 25})
+    analyseDict[30] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {31, 32, 33, 34, 35})
+    analyseDict[50] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {51, 52, 53, 54, 55})
+    analyseDict[60] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {61, 62, 63, 64, 65})
+    analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {81, 82, 83, 84, 85})
     analyseDict["cpu"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {
         11, 12, 13, 14, 15,
         21, 22, 23, 24, 25,
         31, 32, 33, 34, 35,
         81, 82, 83, 84, 85,
     })
-    analyseDict["memory"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {
-        51, 52, 53, 54, 55,
-        61, 62, 63, 64, 65,
-    })
-    analyseDict[111] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {111})
-    analyseDict[121] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {121})
-    analyseDict[131] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {131})
-    analyseDict[132] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {132})
-    analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {141})
+    analyseDict["memory"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                        {
+                                                            51, 52, 53, 54, 55,
+                                                            61, 62, 63, 64, 65,
+                                                        })
+    analyseDict[111] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {111})
+    analyseDict[121] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {121})
+    analyseDict[131] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {131})
+    analyseDict[132] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {132})
+    analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {141})
 
-    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(),
+    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                             preflags=predictpd["preFlag"].tolist(),
                                              excludeflags={0})
-    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist())
+    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                           preflags=predictpd["preFlag"].tolist())
 
     # ===================================== 将信息进行保存
     if spath is not None:
         tpd = pd.DataFrame(data=analyseDict).T
-        savepdfile(tpd, spath, "统计数据.csv")
+        savepdfile(tpd, spath, "统计数据.csv", index=True)
         # 写入准确率信息
         wrfteinfo = [
             "包含正常准确率: {:.2%}\n".format(accuracy_normal),
