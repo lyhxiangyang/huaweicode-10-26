@@ -302,6 +302,8 @@ def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], exclud
         allnumber += 1
         if isright(realflags[i], preflags[i]):
             rightnumber += 1
+    if allnumber == 0:
+        return -1
     return rightnumber / allnumber
 
 
