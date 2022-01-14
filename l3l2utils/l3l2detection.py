@@ -273,20 +273,22 @@ isFuzzy=True会将 cpu预测为cpu的内存的预测为内存的都算正确
 """
 
 
-def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], excludeflags=None, isFuzzy: bool=False) -> float:
+def getDetectionAccuract(realflags: List[int], preflags: List[List[int]], excludeflags=None,
+                         isFuzzy: bool = False) -> float:
     # 判断预判和实际是否相同
     FuzzyFlagDict = {
-        "cpu": {10,11,12,13,14,15,20,21,22,23,24,25,30,31,32,33,34,35,80,81,82,83,84,85},
-        "memory": {50,51,52,53,54,55,60,61,62,63,64,65},
+        "cpu": {10, 11, 12, 13, 14, 15, 20, 21, 22, 23, 24, 25, 30, 31, 32, 33, 34, 35, 80, 81, 82, 83, 84, 85},
+        "memory": {50, 51, 52, 53, 54, 55, 60, 61, 62, 63, 64, 65},
     }
-    def isright(realflag, preflagList):
+
+    def isright(onerealflag, onepreflagList):
         if isFuzzy:
             # cpu异常被预测为cpu异常
-            if realflag in FuzzyFlagDict["cpu"] and len(set(preflags) & FuzzyFlagDict["cpu"]) != 0:
+            if onerealflag in FuzzyFlagDict["cpu"] and len(set(onepreflagList) & FuzzyFlagDict["cpu"]) != 0:
                 return True
-            if realflag in FuzzyFlagDict["memory"] and len(set(preflags) & FuzzyFlagDict["memory"]) != 0:
+            if onerealflag in FuzzyFlagDict["memory"] and len(set(onepreflagList) & FuzzyFlagDict["memory"]) != 0:
                 return True
-        return (realflag // 10) * 10 in preflagList or realflag in preflagList
+        return (onerealflag // 10) * 10 in onepreflagList or onerealflag in onepreflagList
 
     if excludeflags is None:
         excludeflags = []
@@ -411,9 +413,13 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
                                                    {141})
 
-    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist())
-    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(), excludeflags={0})
-    accuracy_nonormal_fuzzy = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(), preflags=predictpd["preFlag"].tolist(), excludeflags={0}, isFuzzy=True)
+    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                           preflags=predictpd["preFlag"].tolist())
+    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                             preflags=predictpd["preFlag"].tolist(), excludeflags={0})
+    accuracy_nonormal_fuzzy = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                                   preflags=predictpd["preFlag"].tolist(), excludeflags={0},
+                                                   isFuzzy=True)
 
     # ===================================== 将信息进行保存
     if spath is not None:
@@ -424,7 +430,6 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
             "1. 包含正常准确率: {:.2%}\n".format(accuracy_normal),
             "2.去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
             "2.去除正常模糊准确率: {:.2%}\n".format(accuracy_nonormal_fuzzy),
-
         ]
         with open(os.path.join(spath, "4.准确率.txt"), "w", encoding="utf-8") as f:
             f.writelines(wrfteinfo)
