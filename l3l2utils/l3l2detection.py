@@ -428,8 +428,8 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
         # 写入准确率信息
         wrfteinfo = [
             "1. 包含正常准确率: {:.2%}\n".format(accuracy_normal),
-            "2.去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
-            "2.去除正常模糊准确率: {:.2%}\n".format(accuracy_nonormal_fuzzy),
+            "2. 去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
+            "3. 去除正常模糊准确率: {:.2%}\n".format(accuracy_nonormal_fuzzy),
         ]
         with open(os.path.join(spath, "4.准确率.txt"), "w", encoding="utf-8") as f:
             f.writelines(wrfteinfo)
