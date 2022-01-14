@@ -223,20 +223,17 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
     FANSFeatures1 = [
-        'FAN1_F_Speed', "FAN1_R_Speed",
-        'FAN2_F_Speed', "FAN2_R_Speed",
-        'FAN3_F_Speed', "FAN3_R_Speed",
-        'FAN4_F_Speed', "FAN4_R_Speed",
-        'FAN5_F_Speed', "FAN5_R_Speed",
-        'FAN6_F_Speed', "FAN6_R_Speed",
-        'FAN7_F_Speed', "FAN7_R_Speed",
+        'FAN1_F_Speed',
+        'FAN2_F_Speed',
+        'FAN3_F_Speed',
+        'FAN4_F_Speed',
     ]
     TEMPERATUREFeatures1 = [
         'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
         'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
     ]
-    FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
-    TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])
+    # FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
+    # TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])
 
 
     def get_extended_features(prefix):
