@@ -49,6 +49,8 @@ def getOneDirPd(dirpath: str):
 
 def changeDataFrame(serverpd: pd.DataFrame, addflagpd: pd.DataFrame) -> pd.DataFrame:
     addflagpd = addflagpd.copy()
+    if FAULT_FLAG in addflagpd.columns.array:
+        return pd.DataFrame()
     serverTimesList = serverpd[TIME_COLUMN_NAME].tolist()
     serverFlagsList = serverpd[FAULT_FLAG].tolist()
     addflagpdTimeList = addflagpd[TIME_COLUMN_NAME].tolist()
@@ -63,6 +65,8 @@ def changeDataFrame(serverpd: pd.DataFrame, addflagpd: pd.DataFrame) -> pd.DataF
     return addflagpd
 def saveDirPdFromDict(spath, PDDict: Dict):
     for keypath, valuepd in PDDict.items():
+        if len(valuepd) == 0:
+            continue
         tpath = os.path.join(spath, keypath)
         filename = F[keypath]
         savepdfile(valuepd, tpath, filename)
