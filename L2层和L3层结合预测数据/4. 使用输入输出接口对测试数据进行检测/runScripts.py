@@ -23,6 +23,9 @@ if __name__ == "__main__":
         with subprocess.Popen(scriptorder1, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
             while p.poll() is None:
                 line = p.stdout.readline().strip()
+                if len(line) == 0:
+                    time.sleep(1)
+                    continue
                 print(line)
             stat = p.poll()
             if stat == 0:
