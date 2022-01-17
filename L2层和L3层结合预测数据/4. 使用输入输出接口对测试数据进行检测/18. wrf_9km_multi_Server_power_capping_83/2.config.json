@@ -1,6 +1,6 @@
 {
     "predictdirjsonpath": "DATA/2022-01-14新的测试数据/18.wrf_9km_multi_Server_power_capping_83/centos16/jsonfile/alljson.json",
-    "spath": "DATA/2022-01-14新的测试数据/18.wrf_9km_multi_Server_power_capping_83/jsonfile/中间结果文件生成",
+    "spath": "DATA/2022-01-14新的测试数据/18.wrf_9km_multi_Server_power_capping_83/centos16/jsonfile/中间结果文件生成",
     "processcpu_modelpath":"tmp/modelpath/singlefeature/process_cpu_model",
     "servermemory_modelpath":"tmp/modelpath/singlefeature/memory_leak_model",
     "serverbandwidth_modelpath":"tmp/modelpath/singlefeature/memory_bandwidth_model",
