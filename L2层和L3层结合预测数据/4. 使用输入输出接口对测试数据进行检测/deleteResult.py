@@ -9,7 +9,7 @@ import time
 """
 runSeries = list(range(1, 20))
 if __name__ == "__main__":
-    runscriptpath = os.path.join(sys.path[0])  # 得到当前脚本的相对路径
+    runscriptpath = R"DATA/2022-01-14新的测试数据/"  # 得到当前脚本的相对路径
     dirs = os.listdir(runscriptpath)
     for idir in dirs:
         # 不是目录就continue
