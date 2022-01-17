@@ -1,5 +1,5 @@
 {
-    "predictdirjsonpath": "DATA/2022-01-14新的测试数据/14.wrf_1km_multi_pfc_78/centos16/jsonfile/alljson.json",
+    "predictdirjsonpath": "DATA/2022-01-14新的测试数据/14.wrf_1km_multi_pfc_78/centos11/jsonfile/alljson.json",
     "spath": "DATA/2022-01-14新的测试数据/14.wrf_1km_multi_pfc_78/jsonfile/中间结果文件生成",
     "processcpu_modelpath":"tmp/modelpath/singlefeature/process_cpu_model",
     "servermemory_modelpath":"tmp/modelpath/singlefeature/memory_leak_model",
