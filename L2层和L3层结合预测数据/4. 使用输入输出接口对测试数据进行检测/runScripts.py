@@ -13,6 +13,9 @@ if __name__ == "__main__":
     runscriptpath = os.path.join(sys.path[0])  # 得到当前脚本的相对路径
     dirs = os.listdir(runscriptpath)
     for idir in dirs:
+        # 不是目录就continue
+        if not os.path.isdir(os.path.join(runscriptpath, idir)):
+            continue
         dirnumber = int(idir.split(".")[0])
         if dirnumber not in runSeries:
             result1.append("处理-----{} 跳过".format(idir))
