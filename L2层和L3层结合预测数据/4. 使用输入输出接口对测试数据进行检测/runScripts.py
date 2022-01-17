@@ -24,7 +24,7 @@ if __name__ == "__main__":
         scriptorder1 = [R"C:\Users\lWX1084330\AppData\Local\Programs\Python\Python39\python.exe ", R"{}".format(filepath)]
         with subprocess.Popen(scriptorder1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
             while p.poll() is None:
-                line = p.stdout.readline().strip()
+                line = p.stdout.readline().strip().decode("utf-8")
                 if len(line) == 0:
                     time.sleep(1)
                     continue
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         scriptorder1 = [R"C:\Users\lWX1084330\AppData\Local\Programs\Python\Python39\python.exe ", R"{}".format(filepath)]
         with subprocess.Popen(scriptorder1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
             while p.poll() is None:
-                line = p.stdout.readline().strip()
+                line = p.stdout.readline().strip().decode("utf-8")
                 if len(line) == 0:
                     time.sleep(1)
                     continue
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             stat = p.poll()
             if stat == 0:
                 result1.append("处理-{} 成功运行".format(filepath))
-                break
+                continue
             else:
                 line = p.stderr.readline().strip()
                 print(line)
