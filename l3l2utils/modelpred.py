@@ -231,6 +231,7 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
     TEMPERATUREFeatures = [
         'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
         'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
+        'PCH_Temp',
     ]
     # FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
     # TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])

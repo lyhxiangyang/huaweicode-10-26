@@ -86,7 +86,8 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
         "cpu1_mem_temp": "CPU1_MEM_Temp",
         "cpu2_mem_temp": "CPU2_MEM_Temp",
         "cpu3_mem_temp": "CPU3_MEM_Temp",
-        "cpu4_mem_temp": "CPU4_MEM_Temp"
+        "cpu4_mem_temp": "CPU4_MEM_Temp",
+        "pch_temp": "PCH_Temp",
     }
     networknameDict = {
         "tx_packets_phy": "tx_packets_phy",
