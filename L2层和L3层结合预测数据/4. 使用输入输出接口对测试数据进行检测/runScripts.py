@@ -16,20 +16,16 @@ if __name__ == "__main__":
         if dirnumber not in runSeries:
             print("跳过")
             continue
+
         scriptorder1 = "python3 " + os.path.join(runscriptpath, idir, "1.generateJson.py")
-        p = subprocess.Popen(
-            scriptorder1,
-            shell=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        p.communicate()
-        time.sleep(0.01)
-        stat = p.poll()
-        if stat != 0:
-            print("运行异常")
-            break
-        print("运行成功")
+        with subprocess.Popen(scriptorder1, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
+            p.communicate()
+            time.sleep(0.01)
+            stat = p.poll()
+            if stat != 0:
+                print("运行异常")
+                break
+            print("运行成功")
 
 
 
