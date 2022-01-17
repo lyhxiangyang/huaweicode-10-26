@@ -21,5 +21,6 @@ if __name__ == "__main__":
         nowpath = os.path.join(runscriptpath, idir)
         deletepath = os.path.join(nowpath, "centos11", "jsonfile")
         if os.path.exists(deletepath):
+            print("删除: {}".format(deletepath))
             shutil.rmtree(deletepath)
 
