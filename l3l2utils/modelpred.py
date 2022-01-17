@@ -308,5 +308,5 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
     if isExistFlag:
         result[FAULT_FLAG] = data[FAULT_FLAG]
     result['preFlag'] = prenet
-    # result.set_index(TIME_COLUMN_NAME, inplace=True)
+    # result1.set_index(TIME_COLUMN_NAME, inplace=True)
     return result
