@@ -37,37 +37,37 @@ def copyallDirToDstDir(srcdir, dstdir, prefixname):
 
     tsrcdir = os.path.join(srcdir, "l2")
     tdstdir = os.path.join(dstdir, "l2")
-    for ifile in tsrcdir:
+    for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
     tsrcdir = os.path.join(srcdir, "network")
     tdstdir = os.path.join(dstdir, "network")
-    for ifile in tsrcdir:
+    for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
     tsrcdir = os.path.join(srcdir, "ping")
     tdstdir = os.path.join(dstdir, "ping")
-    for ifile in tsrcdir:
+    for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
     tsrcdir = os.path.join(srcdir, "process")
     tdstdir = os.path.join(dstdir, "process")
-    for ifile in tsrcdir:
+    for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
     tsrcdir = os.path.join(srcdir, "server")
     tdstdir = os.path.join(dstdir, "server")
-    for ifile in tsrcdir:
+    for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
     tsrcdir = os.path.join(srcdir, "topdown")
     tdstdir = os.path.join(dstdir, "topdown")
-    for ifile in tsrcdir:
+    for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
@@ -85,8 +85,9 @@ if __name__ == "__main__":
         dirnumber = int(idir.split(".")[0])
         if dirnumber not in centos11Series11 and dirnumber not in centos16Series16:
             continue
+        print("拷贝{}".format(idir))
         srcdir = os.path.join(runscriptpath, idir, "centos11")
         if dirnumber in centos16Series16:
             srcdir = os.path.join(runscriptpath, idir, "centos16")
-        copyallDirToDstDir(srcdir, saveDatapath)
+        copyallDirToDstDir(srcdir, saveDatapath, prefixname=idir)
 
