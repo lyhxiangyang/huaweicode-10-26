@@ -89,5 +89,5 @@ if __name__ == "__main__":
         srcdir = os.path.join(runscriptpath, idir, "centos11")
         if dirnumber in centos16Series16:
             srcdir = os.path.join(runscriptpath, idir, "centos16")
-        copyallDirToDstDir(srcdir, saveDatapath, prefixname=idir)
+        copyallDirToDstDir(srcdir, saveDatapath, prefixname="{}_".format(idir))
 
