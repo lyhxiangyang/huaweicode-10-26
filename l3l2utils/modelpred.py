@@ -181,8 +181,11 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
                 iscpulist.append(10)
             elif len(ilastlist) == 0: # 上一个是正常
                 iscpulist.append(10)
-            elif len(ilastlist) >= coresnumber // 2:
+            elif len(ilastlist) >= coresnumber // 2 and set(ilastlist) == set(ilist): # 上一个指标大于一半 并且和现在的列表一样
                 iscpulist.append(10)
+            elif len(ilastlist) >= coresnumber //  and set(ilastlist) != set(ilist): # 上一个指标的数量大于一半，却和现在的列表不是一个核
+                iscpulist[-1] = 80
+                iscpulist.append(80)
             else: # 介于1-一半之间
                 iscpulist[-1] = 80
                 iscpulist.append(80)
