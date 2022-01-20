@@ -175,10 +175,11 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
         #         iscpulist.append(80)
         #     ilastlist = ilist
         #     continue
-        if len(ilist) >= coresnumber // 2: # 现在就是全核心抢占了
-            if ilastlist is None:
+        # 如果
+        if len(ilist) >= coresnumber // 2: # 现在就是全核心抢占 判断是全核心抢占还是随即抢占
+            if ilastlist is None: # 上一个cpu不存在
                 iscpulist.append(10)
-            elif len(ilastlist) == 0:
+            elif len(ilastlist) == 0: # 上一个是正常
                 iscpulist.append(10)
             elif len(ilastlist) >= coresnumber // 2:
                 iscpulist.append(10)
@@ -188,7 +189,7 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
             ilastlist = ilist
             continue
         # =======================
-        # 现在就是多核心cpu的数据
+        # 现在就是多核心cpu的数据  判断是多CPU还是随机CPU
         if ilastlist is None:
             iscpulist.append(30)
         elif len(ilastlist) == 0:
