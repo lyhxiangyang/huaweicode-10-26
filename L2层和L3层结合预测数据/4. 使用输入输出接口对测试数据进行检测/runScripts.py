@@ -21,7 +21,7 @@ def judgeHaveDirectory(dirpath):
 
 def runFunctions(runscriptpath, idir):
     filepath = os.path.join(runscriptpath, idir, "1.generateJson.py")
-    scriptorder1 = [R"C:\Users\lWX1084330\AppData\Locs al\Programs\Python\Python39\python.exe ", R"{}".format(filepath)]
+    scriptorder1 = [R"C:\Users\lWX1084330\AppData\Local\Programs\Python\Python39\python.exe ", R"{}".format(filepath)]
     with subprocess.Popen(scriptorder1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         while p.poll() is None:
             line = p.stdout.readline().strip().decode("utf-8")
