@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
         print("处理{}中".format(idir).center(50, "#"))
 
-        issubdir, subdirs = judgeHaveDirectory(idir)
+        issubdir, subdirs = judgeHaveDirectory(os.path.join(runscriptpath,idir))
         if issubdir:
             for isubdir in subdirs:
                 runFunctions(os.path.join(runscriptpath, idir), isubdir)
