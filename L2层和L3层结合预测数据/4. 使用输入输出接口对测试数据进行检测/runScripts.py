@@ -6,7 +6,7 @@ import time
 """
 脚本作用自动运行1-19中的脚本
 """
-runSeries = list(range(1, 20))
+runSeries = list(range(11, 13))
 result1 = []
 result2 = []
 
