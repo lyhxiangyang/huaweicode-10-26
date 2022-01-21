@@ -93,7 +93,7 @@ def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepat
                             processFeatures=None):
     if processFeatures is None:
         processFeatures = ["cpu"]
-    nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]
+    nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime] # 包含了process各个核心的值
     if len(nowdf) == 0:
         return 0, None, None
     cpuusefulFeatures = getTrainedFeatures(processpds.columns.tolist(), processFeatures)
@@ -102,9 +102,9 @@ def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepat
     # 核的编号
     cores_serialnumber = list(nowdf.loc[:, CPU_FEATURE])
     # 核的cpu时间
-    cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME])
+    cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME]) # 每个核的CPU时间
     predictflag = select_and_pred(nowdf[cpuusefulFeatures], MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-    predictflag = [True if i != 0 else False for i in predictflag]
+    predictflag = [True if i != 0 else False for i in predictflag] # 非0就是异常
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
     assert len(predictflag) == len(cores_serialnumber)

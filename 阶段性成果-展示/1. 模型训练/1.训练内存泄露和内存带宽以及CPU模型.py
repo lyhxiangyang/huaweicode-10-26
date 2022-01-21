@@ -22,11 +22,11 @@ if __name__ == "__main__":
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
     # 预测CPU的模型路径 保存的路径
-    processcpu_modelpath = R"tmp/modelpath/singlefeature/process_cpu_model"
+    processcpu_modelpath = R"tmp/modelpath1/singlefeature/process_cpu_model"
     # 预测内存泄露的模型路径
-    servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
+    servermemory_modelpath = R"tmp/modelpath1/singlefeature/memory_leak_model"
     # 预测内存带宽的模型路径
-    serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
+    serverbandwidth_modelpath = R"tmp/modelpath1/singlefeature/memory_bandwidth_model"
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/模型训练中间数据/1.训练三种模型"
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     maxdepth = 5
     model_memLeak_features = ["used_mean"] # 训练内存泄漏模型需要的指标
     model_memBandwidth_features = ["pgfree_mean"]
-    model_cpu_features = ["cpu_mean"]
+    model_cpu_features = ["cpu", "cpu_mean"]
 
 
 

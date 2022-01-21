@@ -170,6 +170,7 @@ def featureExtractionPd(df: pd.DataFrame, extraFeature: List[str], windowSize: i
 
 """
 函数功能：特征提取一个进程数据Dataframe
+如何特征提取的每个pid数据数量都必须删除前三个和后三个
 """
 
 
