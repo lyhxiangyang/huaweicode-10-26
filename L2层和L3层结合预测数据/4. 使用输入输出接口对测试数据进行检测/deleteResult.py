@@ -28,3 +28,11 @@ if __name__ == "__main__":
             print("删除: {}".format(deletepath))
             shutil.rmtree(deletepath)
 
+        deletepath = os.path.join(nowpath, "centos21", "jsonfile")
+        if os.path.exists(deletepath):
+            print("删除: {}".format(deletepath))
+            shutil.rmtree(deletepath)
+        deletepath = os.path.join(nowpath, "centos26", "jsonfile")
+        if os.path.exists(deletepath):
+            print("删除: {}".format(deletepath))
+            shutil.rmtree(deletepath)
