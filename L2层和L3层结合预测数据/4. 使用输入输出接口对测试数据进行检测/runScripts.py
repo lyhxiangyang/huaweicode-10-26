@@ -15,7 +15,7 @@ result2 = []
 true 代表有目录
 """
 def judgeHaveDirectory(dirpath):
-    dirs = [idir for idir in dirpath if os.path.isdir(idir)]
+    dirs = [idir for idir in os.listdir(dirpath) if os.path.isdir(idir)]
     return len(dirs) != 0, dirs
 
 
