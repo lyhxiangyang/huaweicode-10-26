@@ -15,13 +15,13 @@ result2 = []
 true 代表有目录
 """
 def judgeHaveDirectory(dirpath):
-    dirs = [idir for idir in os.listdir(dirpath) if os.path.isdir(idir)]
+    dirs = [idir for idir in os.listdir(dirpath) if os.path.isdir(os.path.join(dirpath, idir))]
     return len(dirs) != 0, dirs
 
 
 def runFunctions(runscriptpath, idir):
     filepath = os.path.join(runscriptpath, idir, "1.generateJson.py")
-    scriptorder1 = [R"C:\Users\lWX1084330\AppData\Local\Programs\Python\Python39\python.exe ", R"{}".format(filepath)]
+    scriptorder1 = [R"C:\Users\lWX1084330\AppData\Locs al\Programs\Python\Python39\python.exe ", R"{}".format(filepath)]
     with subprocess.Popen(scriptorder1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         while p.poll() is None:
             line = p.stdout.readline().strip().decode("utf-8")
