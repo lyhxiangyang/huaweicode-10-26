@@ -18,16 +18,22 @@ def dealOneTopDownPD(topdownpd: pd.DataFrame) -> pd.DataFrame:
         "int")
     # 对ddrc_rd进行滑动窗口处理
     cname = "ddrc_wr"
-    topdownpd[cname + "_rolling"] = topdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
+    topdownpd[cname + "_sliding"] = topdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
         "int")
     # 对ddrc_rd进行滑动窗口处理
     cname = "llcm"
-    topdownpd[cname + "_rolling"] = topdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
+    topdownpd[cname + "_sliding"] = topdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
         "int")
     # 对ddrc_rd进行滑动窗口处理
     cname = "mflops"
-    topdownpd[cname + "_rolling"] = topdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
+    topdownpd[cname + "_sliding"] = topdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
         "int")
+
+    # mflops平均值
+    cname = "mflops_sliding"
+    mflops_mean = topdownpd[cname][0:3].mean()
+    print(mflops_mean)
+
     return topdownpd
 
 
