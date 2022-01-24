@@ -35,7 +35,8 @@ if __name__ == "__main__":
     alltopdownpds = []
     for ipath in topdownfilepath:
         itpd = getfilepd(ipath)
-        alltopdownpds.append(itpd)
+        dealpd = dealOneTopDownPD(itpd)
+        alltopdownpds.append(dealpd)
 
     for i, ipd in enumerate(alltopdownpds):
-        savepdfile(savefilepath, "topdown{}.csv".format(i))
+        savepdfile(ipd, savefilepath, "topdown{}.csv".format(i))
