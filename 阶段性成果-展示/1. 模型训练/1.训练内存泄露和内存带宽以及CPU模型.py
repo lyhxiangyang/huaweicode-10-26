@@ -56,7 +56,7 @@ if __name__ == "__main__":
     maxdepth = 5
     model_memLeak_features = ["used_mean"] # 训练内存泄漏模型需要的指标
     model_memBandwidth_features = ["pgfree_mean"]
-    model_cpu_features = ["cpu", "cpu_mean"]
+    model_cpu_features = ["cpu"]
 
 
 
