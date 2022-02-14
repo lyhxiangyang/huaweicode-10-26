@@ -263,6 +263,20 @@ def outputJsonFromDetection(l2l3predetectresultpd: pd.DataFrame) -> Dict:
     return outputDict
 
 
+
+def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
+    # =================================  默认情况下，在当前目录生成output.json
+    resultsavepath = "."
+    outputJsonFilename = "output.json"
+    if "resultsavepath" in inputDict and inputDict["resultsavepath"] is not None: # 路径不能为空，如果为空，默认为当前目录
+        resultsavepath = inputDict["resultsavepath"]
+        if not os.path.exists(resultsavepath):
+            print("输出结果路径:{}不存在".format(resultsavepath))
+            exit(1)
+    if "outputJsonFilename" in inputDict and inputDict["outputJsonFilename"] is not None:
+        outputJsonFilename = inputDict["outputJsonFilename"]
+    saveDictToJson(outputJsonDict, resultsavepath, outputJsonFilename)
+
 """
 从输入json文件中读取信息，进行检测
 """
@@ -293,4 +307,213 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
         tpath = os.path.join(inputDict["spath"], "6.L2L3总的预测结果")
         savepdfile(l2l3predetectresultpd, tpath, "总预测结果.csv")
         saveDictToJson(outputDict, tpath, "output.json")
+
+
+    # ============================生成outputjson
+    saveoutputJsonFilename(inputDict)
+
+
+
+
+
+
     return outputDict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
