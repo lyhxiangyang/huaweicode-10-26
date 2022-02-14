@@ -153,7 +153,9 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
 
     print("对L3层CPU异常进行预测".center(40, "*"))
-    tpath = os.path.join(inputDict["spath"], "4.CPU异常检测中间文件")
+    tpath = None
+    if inputDict["spath"] is not None:
+        tpath = os.path.join(inputDict["spath"], "4.CPU异常检测中间文件")
     l3cpuresult = pd.DataFrame()
     l3cpuresult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
     l3cpuresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
