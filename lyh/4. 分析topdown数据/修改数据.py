@@ -9,7 +9,8 @@ topdownfilepath = [
     "DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11-flag/topdown/topdown.csv", # 1km异常
     "DATA/2022-01-14新的测试数据/3.wrf_3km_multi_l3/centos11-flag/topdown/topdown.csv",  # 3km异常
     "DATA/2022-01-14新的测试数据/4.wrf_9km_multi_L3/centos11-flag/topdown/topdown.csv",  # 9km异常
-    "DATA/2022-01-14新的测试数据/22.grapes_test1p_multi_l3/centos11-flag/topdown/topdown.csv",  # grape
+    "DATA/2022-01-14新的测试数据/22.grapes_test1p_multi_l3/centos11-flag/topdown/topdown.csv",  # grape异常
+    "",
 ]
 savefilepath = "tmp/topdown"
 
@@ -44,8 +45,6 @@ def dealOneTopDownPD(topdownpd: pd.DataFrame) -> pd.DataFrame:
     print("{}平均值：{}".format(cname, ddrc_rd_mean))
     topdownpd[cname+"_recover"] = topdownpd[cname] + ddrc_rd_mean * mflops_change
     topdownpd[cname+"_recover1"] = topdownpd[cname+"_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
-
-
     return topdownpd
 
 
