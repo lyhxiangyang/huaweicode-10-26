@@ -268,9 +268,11 @@ def outputJsonFromDetection(l2l3predetectresultpd: pd.DataFrame) -> Dict:
 
 def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
     # =================================  默认情况下，在当前目录生成output.json
-    resultsavepath = "."
+    resultsavepath = sys.path[0]
     outputJsonFilename = "output.json"
     if "resultsavepath" in inputDict and inputDict["resultsavepath"] is not None: # 路径不能为空，如果为空，默认为当前目录
+        if inputDict["resultsavepath"] == ".":
+            resultsavepath = sys.path[0]
         resultsavepath = os.path.abspath(inputDict["resultsavepath"])
         print("绝对路径：{}".format(resultsavepath))
         if not os.path.exists(resultsavepath):
