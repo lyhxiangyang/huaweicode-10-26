@@ -20,7 +20,16 @@ F = {
     "topdown": "topdown.csv",
 }
 addFlagDir = [
-    R"C:\Users\lWX1084330\Desktop\json输入输出格式\test_all\test\grapes_test1p_multi_l3\centos11"
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos11-flag",
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos16-flag",
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos21",
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos26",
+
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos11",
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos16-flag",
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos21",
+    R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos26",
+
 ]
 
 
@@ -78,8 +87,8 @@ def saveDirPdFromDict(spath, PDDict: Dict):
 
 
 if __name__ == "__main__":
-    dirs = getDirs(R"DATA/2022-01-14新的测试数据")
-    # dirs = addFlagDir
+    # dirs = getDirs(R"DATA/2022-01-14新的测试数据")
+    dirs = addFlagDir
     for idir in dirs:
         PD = getOneDirPd(dirpath=idir)
         savePD = {}
