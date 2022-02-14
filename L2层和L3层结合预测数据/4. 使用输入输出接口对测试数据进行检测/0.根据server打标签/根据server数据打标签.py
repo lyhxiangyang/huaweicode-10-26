@@ -25,10 +25,10 @@ addFlagDir = [
     R"DATA/2022-01-14新的测试数据/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos21",
     R"DATA/2022-01-14新的测试数据/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos26",
 
-    R"DATA/2022-01-14新的测试数据/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos11",
-    R"DATA/2022-01-14新的测试数据/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos16-flag",
-    R"DATA/2022-01-14新的测试数据/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos21",
-    R"DATA/2022-01-14新的测试数据/23.复合错误wrf_1km_multi_node_single_50cpu_309/centos26",
+    R"DATA/2022-01-14新的测试数据/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos11",
+    R"DATA/2022-01-14新的测试数据/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos16-flag",
+    R"DATA/2022-01-14新的测试数据/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos21",
+    R"DATA/2022-01-14新的测试数据/24.复合错误wrf_1km_single_50cpu_server_power_capping_310/centos26",
 
 ]
 
@@ -87,7 +87,7 @@ def saveDirPdFromDict(spath, PDDict: Dict):
 
 
 if __name__ == "__main__":
-    # dirs = getDirs(R"DATA/2022-01-14新的测试数据")
+    dirs = getDirs(R"DATA/2022-01-14新的测试数据")
     dirs = addFlagDir
     for idir in dirs:
         PD = getOneDirPd(dirpath=idir)
