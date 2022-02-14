@@ -298,9 +298,12 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
     print("对L3 L2层的数据进行预测".center(40, "*"))
     l2l3predetectresultpd = detectionL2L3Data(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds,
                                               allpingpds)
+    tpath = None
+    if inputDict["spath"] is not None:
+        tpath = os.path.join(inputDict["spath"], "5.准确率结果分析")
     # 对预测结果进行分析
     print("对预测结果进行准确率及其他分析".center(40, "*"))
-    analysePredictResult(l2l3predetectresultpd, spath=os.path.join(inputDict["spath"], "5.准确率结果分析"), windowsize=3)
+    analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
     print("对预测结果进行时间段分析，输出时间文件".center(40, "*"))
     outputDict = outputJsonFromDetection(l2l3predetectresultpd)
 
