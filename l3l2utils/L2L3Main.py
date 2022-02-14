@@ -315,7 +315,7 @@ def detectionFromInputDict(inputDict: Dict) -> Dict:
 
 
     # ============================生成outputjson
-    saveoutputJsonFilename(inputDict)
+    saveoutputJsonFilename(inputDict, outputDict)
 
 
 
