@@ -35,7 +35,7 @@ if __name__ == "__main__":
     normalserverfiles = getfilespath(os.path.join(normaldirpath, "server"))
     normalprocessfiles = getfilespath(os.path.join(normaldirpath, "process"))
     # 预测CPU的模型路径
-    processcpu_modelpath = R"hpc/models/l3/process_cpu_model"
+    processcpu_modelpath = R"hpc/models/l3/memory_bandwidth_model"
     processcpu_modeltype = 0
     # 预测内存泄露的模型路径
     servermemory_modelpath = R"hpc/models/l3/memory_leak_model"
