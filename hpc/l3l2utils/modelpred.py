@@ -5,9 +5,9 @@ from typing import List, Dict, Tuple, Set
 import joblib
 import pandas as pd
 
-from Classifiers.ModelPred import select_and_pred
-from l3l2utils.DataOperation import pushLabelToFirst
-from l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
+from hpc.Classifiers import select_and_pred
+from hpc.l3l2utils.DataOperation import pushLabelToFirst
+from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
 
 """
 得到以prefixnames中元素为前缀的所有值

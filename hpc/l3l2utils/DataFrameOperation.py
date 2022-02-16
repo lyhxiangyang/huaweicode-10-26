@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
+from hpc.l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 
 """
 True 表示所有的列名是相同的

@@ -4,8 +4,8 @@ from typing import List, Union, Set, Dict
 
 import pandas as pd
 
-from l3l2utils.DataFrameOperation import mergeDataFrames
-from l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE
+from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
+from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE
 
 """
 根据字符串自动得到时间串格式

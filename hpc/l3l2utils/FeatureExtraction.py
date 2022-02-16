@@ -4,9 +4,9 @@ from typing import List, Union
 import numpy as np
 import pandas as pd
 
-from l3l2utils.DataFrameOperation import mergeDataFrames
-from l3l2utils.DataOperation import pushLabelToEnd, pushLabelToFirst, sortLabels
-from l3l2utils.DefineData import PID_FEATURE, TIME_COLUMN_NAME, FAULT_FLAG
+from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
+from hpc.l3l2utils.DataOperation import pushLabelToEnd, pushLabelToFirst, sortLabels
+from hpc.l3l2utils.DefineData import PID_FEATURE, TIME_COLUMN_NAME, FAULT_FLAG
 
 """
 -   功能介绍：

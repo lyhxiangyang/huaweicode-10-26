@@ -3,9 +3,9 @@ from typing import List, Dict
 
 import pandas as pd
 
-from l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
-from l3l2utils.DataOperation import changeTimeFromOnepd
-from l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG
+from hpc.l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
+from hpc.l3l2utils import changeTimeFromOnepd
+from hpc.l3l2utils import TIME_COLUMN_NAME, FAULT_FLAG
 
 """
 这个文件用来根据server数据的时间对其他文件打上标签

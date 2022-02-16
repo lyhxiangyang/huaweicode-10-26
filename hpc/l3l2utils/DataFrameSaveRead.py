@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from l3l2utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
+from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, PID_FEATURE, CPU_FEATURE, FAULT_FLAG
 
 """
 将[dataframe1, dataframe2, dataframe3] 这种结构进行存储 name为0.csv 1.csv 2.csv

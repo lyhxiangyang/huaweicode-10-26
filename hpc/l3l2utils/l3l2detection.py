@@ -4,9 +4,9 @@ from typing import List, Tuple, Dict, Set
 
 import pandas as pd
 
-from l3l2utils.DataFrameSaveRead import savepdfile
-from l3l2utils.DataOperation import remove_Abnormal_Head_Tail, removeAllHeadTail
-from l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, errorFeatureDict, CPU_ABNORMAL_TYPE, MEMORY_ABNORMAL_TYPE
+from hpc.l3l2utils.DataFrameSaveRead import savepdfile
+from hpc.l3l2utils.DataOperation import remove_Abnormal_Head_Tail, removeAllHeadTail
+from hpc.l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, errorFeatureDict, CPU_ABNORMAL_TYPE, MEMORY_ABNORMAL_TYPE
 
 """
 修改preFlag那些单独存在的点

@@ -1,9 +1,6 @@
-import os
-import sys
-
 import pandas as pd
 
-from l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
+from hpc.l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
 
 topdownfilepath = [
     "DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11-flag/topdown/topdown.csv", # 1km异常

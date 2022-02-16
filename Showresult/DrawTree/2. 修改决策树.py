@@ -1,4 +1,4 @@
-from Classifiers.TrainToTest import show_threshold, change_threshold
+from AAAA_old.TrainToTest import show_threshold, change_threshold
 
 if __name__ == '__main__':
     # 温度过高由于模型训练的是相当于低强度，我们这里是高强度  所以修改原始数据集

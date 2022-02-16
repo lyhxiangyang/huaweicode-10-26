@@ -5,8 +5,8 @@ from typing import List
 import joblib
 import pandas as pd
 
-from Classifiers.ModelPred import select_and_pred
-from Classifiers.ModelTrain import model_train, getTestRealLabels, getTestPreLabels
+from hpc.Classifiers.ModelPred import select_and_pred
+from hpc.Classifiers.ModelTrain import model_train, getTestRealLabels, getTestPreLabels
 from utils.DataFrameOperation import PushLabelToFirst, PushLabelToEnd
 from utils.DefineData import MODEL_TYPE, FAULT_FLAG, TIME_COLUMN_NAME
 from utils.GetMetrics import get_metrics
