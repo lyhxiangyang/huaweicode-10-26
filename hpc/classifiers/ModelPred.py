@@ -5,7 +5,7 @@ from typing import Dict
 import joblib
 import pandas as pd
 
-from utils.DefineData import SaveModelPath, MODEL_TYPE
+from hpc.l3l2utils.DefineData import SaveModelPath, MODEL_TYPE
 
 
 def model_pred(x_pred, model_type, saved_model_path=SaveModelPath):

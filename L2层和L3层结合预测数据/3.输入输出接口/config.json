@@ -20,6 +20,7 @@
     "meanNormalDataNumber": 10,
     "spath": "tmp/总过程分析/L3l2数据集合输入输出",
     "resultsavepath": null,
+    "outputJsonFilename": "output.json",
 
     "isExistFaultFlag": true,
     "server_feature": ["used", "pgfree", "freq"],

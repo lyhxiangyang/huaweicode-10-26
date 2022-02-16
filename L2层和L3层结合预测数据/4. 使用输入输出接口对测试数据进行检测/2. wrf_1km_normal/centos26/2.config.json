@@ -19,6 +19,7 @@
     "network_txhang_type":0,
     "meanNormalDataNumber": 10,
     "resultsavepath": null,
+    "outputJsonFilename": "output.json",
     "isExistFaultFlag": true,
     "server_feature": ["used", "pgfree", "freq"],
     "server_accumulate_feature": ["pgfree"],
