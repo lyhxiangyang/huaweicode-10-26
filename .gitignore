@@ -260,5 +260,5 @@ out
 gen
 
 # myself
-#tmp/*
+tmp/*
 test.ipynb
