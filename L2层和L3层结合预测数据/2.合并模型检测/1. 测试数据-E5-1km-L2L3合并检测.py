@@ -42,11 +42,11 @@ if __name__ == "__main__":
     # 指定正常server和process文件路径
     normaldirpath = R"DATA\L3l2数据集合正常值"
     # 预测CPU的模型路径
-    processcpu_modelpath = R"hpc/models/l3/memory_bandwidth_model"
+    processcpu_modelpath = R"hpc/models/l3/process_cpu_model"
     # 预测内存泄露的模型路径
     servermemory_modelpath = R"hpc/models/l3/memory_leak_model"
     # 预测内存带宽的模型路径
-    serverbandwidth_modelpath = R"hpc/models/l3/memory_bandwidth_model"
+    serverbandwidth_modelpath = R"hpc/models/l3/process_cpu_model"
     # =========下面是l2层需要的模型
     # server_power_capping
     power_machine_modelpath = R"tmp/modelpath/l2/server_power_capping"
