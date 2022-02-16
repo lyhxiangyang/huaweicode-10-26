@@ -290,3 +290,23 @@ def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], featur
         if featureVaule is not None:
             meanSeries[ifeaturename] = featureVaule
     return meanSeries
+
+
+def JoinWorkingDirPathFromConfig(workpath: str, configJsonDict: Dict) -> Dict:
+    # predictdirjsonpath
+    keynames = [
+        "predictdirjsonpath",
+        "spath",
+        "processcpu_modelpath",
+        "servermemory_modelpath",
+        "serverbandwidth_modelpath",
+        "power_machine_modelpath",
+        "power_cabinet_modelpath",
+        "temperature_modelpath",
+        "network_pfcpath",
+        "network_tx_hangpath",
+        "resultsavepath",
+    ]
+    for ikeynames in keynames:
+        if ikeynames in configJsonDict and configJsonDict[ikeynames] is not None:
+            configJsonDict[ikeynames] = os.path.join(workpath, configJsonDict[ikeynames])
