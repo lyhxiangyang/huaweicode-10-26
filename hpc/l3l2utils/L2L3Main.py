@@ -49,12 +49,17 @@ def add_cpu_column(pds: List[pd.DataFrame]):
 
 """
 将数据进行特征提取
+
+如果requestData为None，那么数据将从inputDict中的predictdirjsonpath字段找到我们的数据来源
+如果requestData不为空，那么将直接使用requestData中的来源
 """
 
 
-def FeatureextractionData(inputDict: Dict):
+def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("将数据从文件中读取".center(40, "*"))
-    detectionJson = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
+    detectionJson = requestData
+    if detectionJson is None:
+        detectionJson = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
     predictserverpds = getServerPdFromJsonDict(sdict=detectionJson)
     predictprocesspds = getProcessPdFromJsonDict(sdict=detectionJson)
     predictl2pds = getL2PdFromJsonDict(sdict=detectionJson)
@@ -283,13 +288,16 @@ def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
 
 """
 从输入json文件中读取信息，进行检测
+
+如果requestData为None，那么数据将从inputDict中的predictdirjsonpath字段找到我们的数据来源
+如果requestData不为空，那么将直接使用requestData中的来源
 """
 
 
-def detectionFromInputDict(inputDict: Dict) -> Dict:
+def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
     # =====================将数据进行特征提取
     extraction_server_pds, extraction_process_pds, extraction_l2_pds, extraction_network_pds, extraction_ping_pds = FeatureextractionData(
-        inputDict)
+        inputDict, requestData)
     # =====================数据合并
     allserverpds = mergeDataFrames(extraction_server_pds)
     allprocesspds = mergeDataFrames(extraction_process_pds)
