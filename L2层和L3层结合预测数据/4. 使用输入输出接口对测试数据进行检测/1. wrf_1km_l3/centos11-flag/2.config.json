@@ -18,7 +18,7 @@
     "network_model1type":0,
     "network_model2type":0,
     "meanNormalDataNumber": 10,
-    "resultsavepath": ".",
+    "resultsavepath": null,
     "outputJsonFilename": "output.json",
     "isExistFaultFlag": true,
     "server_feature": ["used", "pgfree", "freq"],

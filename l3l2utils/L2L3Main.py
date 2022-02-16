@@ -271,9 +271,9 @@ def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
     outputJsonFilename = "output.json"
     if "resultsavepath" in inputDict and inputDict["resultsavepath"] is not None: # 路径不能为空，如果为空，默认为当前目录
         resultsavepath = os.path.abspath(inputDict["resultsavepath"])
-        if inputDict["resultsavepath"] == ".":
-            resultsavepath = sys.path[0]
-        print("绝对路径：{}".format(resultsavepath))
+        # if inputDict["resultsavepath"] == ".":
+        #     resultsavepath = sys.path[0]
+        # print("绝对路径：{}".format(resultsavepath))
         if not os.path.exists(resultsavepath):
             print("输出结果路径:{}不存在".format(resultsavepath))
             exit(1)
