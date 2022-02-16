@@ -3,7 +3,7 @@
     "spath": "DATA/2022-01-14新的测试数据/2.wrf_1km_multi_normal/centos26/jsonfile/中间结果文件生成",
     "processcpu_modelpath":"hpc/models/l3/process_cpu_model",
     "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
-    "serverbandwidth_modelpath":"hpc/models/l3/process_cpu_model",
+    "serverbandwidth_modelpath":"hpc/models/l3/memory_bandwidth_model",
     "power_machine_modelpath":"hpc/models/l2/server_power_capping",
     "power_cabinet_modelpath":"hpc/models/l2/cabinet_power_capping",
     "temperature_modelpath":"hpc/models/l2/over_temp",
