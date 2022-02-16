@@ -8,7 +8,7 @@ from typing import List, Dict, Union, Any, Set, Tuple, Optional
 import numpy as np
 import pandas as pd
 
-from hpc.Classifiers import select_and_pred, select_and_pred_probability
+from hpc.classifiers.ModelPred import select_and_pred, select_and_pred_probability
 from utils.DataFrameOperation import mergeDataFrames, SortLabels, PushLabelToFirst, PushLabelToEnd, \
     subtractLastLineFromDataFrame
 from utils.DataScripts import TranslateTimeListStrToStr, standardPDfromOriginal1, removeTimeAndfaultFlagFromList

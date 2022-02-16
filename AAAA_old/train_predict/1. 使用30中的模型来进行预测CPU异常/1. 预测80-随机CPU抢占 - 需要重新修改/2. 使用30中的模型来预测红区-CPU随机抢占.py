@@ -4,7 +4,7 @@ from typing import Dict, List
 
 import pandas as pd
 
-from hpc.Classifiers import select_and_pred
+from hpc.classifiers.ModelPred import select_and_pred
 from utils.DataScripts import TranslateTimeToInt, TranslateTimeToStr
 from utils.DataScripts import TranslateTimeToInt as c, getTime_AbnormalCore
 from utils.DefineData import MODEL_TYPE, FAULT_FLAG

@@ -3,7 +3,7 @@ from typing import Set, Tuple, List
 
 import pandas as pd
 
-from hpc.Classifiers import select_and_pred
+from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils import predictTemp
 from utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from utils.DataScripts import getDFmean
