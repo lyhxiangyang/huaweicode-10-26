@@ -222,8 +222,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
     l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     l2networkresult2["preFlag"] = ThransferRightLabels(
-        select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_model1type"]],
-                        saved_model_path=inputDict["network_model1path"]))
+        select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_pfctype"]],
+                        saved_model_path=inputDict["network_pfcpath"]))
     l2networkresult2 = makeL2networkresultMergedByMin(l2networkresult2)
 
     print("将L2 L3 Network数据合并分析".center(40, "*"))

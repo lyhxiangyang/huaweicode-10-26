@@ -1,6 +1,6 @@
 import os.path
 
-from hpc.l3l2utils import covertCSVToJsonDict, saveDictToJson
+from hpc.l3l2utils.ParsingJson import covertCSVToJsonDict, saveDictToJson
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义

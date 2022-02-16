@@ -42,31 +42,31 @@ if __name__ == "__main__":
     # 指定正常server和process文件路径
     normaldirpath = R"DATA\L3l2数据集合正常值"
     # 预测CPU的模型路径
-    processcpu_modelpath = R"tmp/modelpath/singlefeature/process_cpu_model"
+    processcpu_modelpath = R"hpc/models/l3/process_cpu_model"
     # 预测内存泄露的模型路径
-    servermemory_modelpath = R"tmp/modelpath/singlefeature/memory_leak_model"
+    servermemory_modelpath = R"hpc/models/l3/memory_leak_model"
     # 预测内存带宽的模型路径
-    serverbandwidth_modelpath = R"tmp/modelpath/singlefeature/memory_bandwidth_model"
+    serverbandwidth_modelpath = R"hpc/models/l3/process_cpu_model"
     # =========下面是l2层需要的模型
-    # 机器功率封顶
-    power_machine_modelpath = R"tmp/modelpath/l2/机器功率封顶"
-    # 机柜功率封顶
-    power_cabinet_modelpath = R"tmp/modelpath/l2/机柜功率封顶"
+    # server_power_capping
+    power_machine_modelpath = R"tmp/modelpath/l2/server_power_capping"
+    # cabinet_power_capping
+    power_cabinet_modelpath = R"tmp/modelpath/l2/cabinet_power_capping"
     # 温度过高异常
-    temperature_modelpath = R"tmp/modelpath/l2/温度过高"
+    temperature_modelpath = R"tmp/modelpath/l2/over_temp"
     # 网络异常
     # 网络异常PFC风暴注入
-    network_model1path = R"tmp/modelpath/l2/网络异常1"
-    network_model2path = R"tmp/modelpath/l2/网络异常2"
+    network_pfcpath = R"tmp/modelpath/l2/network_pfc"
+    network_tx_hangpath = R"tmp/modelpath/l2/network_tx_hang"
     # 使用哪个模型
     processcpu_modeltype = 0
     servermemory_modeltype = 0
     serverbandwidth_modeltype = 0
-    power_machine_modeltype = 0 # 机器功率封顶
-    power_cabinet_modeltype = 0 # 机柜功率封顶
-    tempertature_modeltype = 0 # 温度过高
-    network_model1type = 0 # 网络异常1
-    network_model2type = 0 # 网络异常2
+    power_machine_modeltype = 0 # server_power_capping
+    power_cabinet_modeltype = 0 # cabinet_power_capping
+    tempertature_modeltype = 0 # over_temp
+    network_pfctype = 0 # network_pfc
+    network_txhang_type = 0 # network_tx_hang
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/总过程分析/L3l2数据集合"
     # 是否有存在faultFlag
@@ -328,13 +328,13 @@ if __name__ == "__main__":
         l2networkresult1 = pd.DataFrame()
         l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
         l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
-        l2networkresult1["preFlag"] = ThransferRightLabels(select_and_pred(allnetworkpds, MODEL_TYPE[network_model1type], saved_model_path=network_model1path))
+        l2networkresult1["preFlag"] = ThransferRightLabels(select_and_pred(allnetworkpds, MODEL_TYPE[network_pfctype], saved_model_path=network_pfcpath))
         l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
         # ******* 对网络异常2进行预测
         l2networkresult2 = pd.DataFrame()
         l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
         l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
-        l2networkresult2["preFlag"] = ThransferRightLabels(select_and_pred(allnetworkpds, MODEL_TYPE[network_model2type], saved_model_path=network_model2path))
+        l2networkresult2["preFlag"] = ThransferRightLabels(select_and_pred(allnetworkpds, MODEL_TYPE[network_txhang_type], saved_model_path=network_tx_hangpath))
         l2networkresult2 = makeL2networkresultMergedByMin(l2networkresult2)
         # ******* 所有结果分析
         allresults = mergeouterPredictResult([L3restult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])

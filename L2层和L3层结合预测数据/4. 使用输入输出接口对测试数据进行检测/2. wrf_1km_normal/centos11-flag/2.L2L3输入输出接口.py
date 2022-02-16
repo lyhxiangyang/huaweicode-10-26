@@ -3,7 +3,7 @@ import sys
 import time
 
 from hpc.l3l2utils.L2L3Main import detectionFromInputDict
-from hpc.l3l2utils import readJsonToDict
+from hpc.l3l2utils.ParsingJson import readJsonToDict
 
 
 if __name__ == "__main__":

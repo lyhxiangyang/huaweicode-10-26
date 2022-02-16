@@ -9,7 +9,7 @@ from hpc.l3l2utils import changeTimeToFromPdlists
 from hpc.l3l2utils import TIME_COLUMN_NAME, FAULT_FLAG, MODEL_TYPE
 from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer, standardLists, extractionProcessPdLists, \
     extractionServerPdLists
-from hpc.l3l2utils import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
+from hpc.l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
     getNormalNetworkMean, saveDictToJson
 from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, getTimePeriodInfo, \
@@ -190,8 +190,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
     l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     l2networkresult1["preFlag"] = ThransferRightLabels(
-        select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_model1type"]],
-                        saved_model_path=inputDict["network_model1path"]))
+        select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_pfctype"]],
+                        saved_model_path=inputDict["network_pfcpath"]))
     l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
 
     print("对网络异常2进行预测".center(40, "#"))
@@ -199,8 +199,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
     l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     l2networkresult2["preFlag"] = ThransferRightLabels(
-        select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_model2type"]],
-                        saved_model_path=inputDict["network_model2path"]))
+        select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_txhang_type"]],
+                        saved_model_path=inputDict["network_tx_hangpath"]))
     l2networkresult2 = makeL2networkresultMergedByMin(l2networkresult2)
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult([l3cpuresult,l3memleakresult,l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult, l2networkresult1, l2networkresult2])
