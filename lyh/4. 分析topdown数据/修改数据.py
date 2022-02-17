@@ -41,7 +41,15 @@ def dealOneTopDownPD(topdownpd: pd.DataFrame) -> pd.DataFrame:
     ddrc_rd_mean = topdownpd[cname][0:3].mean() # 得到一个正常值
     print("{}平均值：{}".format(cname, ddrc_rd_mean))
     topdownpd[cname+"_recover"] = topdownpd[cname] + ddrc_rd_mean * mflops_change
-    topdownpd[cname+"_recover1"] = topdownpd[cname+"_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+    topdownpd[cname+"_recover_sliding"] = topdownpd[cname+"_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+
+    # 对ddrc_wr进行分析
+    cname = "ddrc_wr_sliding"
+    ddrc_rd_mean = topdownpd[cname][0:3].mean() # 得到一个正常值
+    print("{}平均值：{}".format(cname, ddrc_rd_mean))
+    topdownpd[cname+"_recover"] = topdownpd[cname] + ddrc_rd_mean * mflops_change
+    topdownpd[cname+"_recover_sliding"] = topdownpd[cname+"_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+
     return topdownpd
 
 
