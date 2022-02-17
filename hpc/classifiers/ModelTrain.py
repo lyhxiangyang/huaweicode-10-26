@@ -20,7 +20,7 @@ def getTestRealLabels() -> List:
 def getTestPreLabels() -> List:
     return TestPreLabels
 
-
+#
 def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: List[str] = None, maxdepth: int = 5):
     """
     Train the model of selected type
@@ -54,32 +54,19 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     # Split the data into train and test set
     if TIME_COLUMN_NAME in df.columns:
         df = df.drop(TIME_COLUMN_NAME, axis=1)
-    x = df.drop(FAULT_FLAG, axis=1)
-    y = df[FAULT_FLAG]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=0)
+    x_train = df.drop(FAULT_FLAG, axis=1)
+    y_train = df[FAULT_FLAG]
 
     # Train the model
     model.fit(x_train, y_train)
 
     # 将所有的标签值按照顺序存起来
-    alllabels = sorted(list(set(y)))
+    alllabels = sorted(list(set(y_train)))
     alllabels = [str(i) for i in alllabels]
-    with open("{}".format(os.path.join(saved_model_path, "alllabels.txt")), "w") as f:
-        f.write("\n".join(alllabels))
-
-
-    # Test the accuracy of the model
-    y_eval = model.predict(x_test)
-
-    global TestRealLabels
-    global TestPreLabels
-    TestRealLabels = list(y_test)
-    TestPreLabels = list(y_eval)
-
-    accuracy = metrics.accuracy_score(y_test, y_eval)
-
     if not os.path.exists(saved_model_path):
         os.makedirs(saved_model_path)
+    with open("{}".format(os.path.join(saved_model_path, "alllabels.txt")), "w") as f:
+        f.write("\n".join(alllabels))
 
     # Save model
     joblib.dump(model, '%s/%s.pkl' % (saved_model_path, model_type))
@@ -90,4 +77,3 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     f = open('%s/header.txt' % saved_model_path, 'w')
     f.write('\n'.join(header))
     f.close()
-    return accuracy
