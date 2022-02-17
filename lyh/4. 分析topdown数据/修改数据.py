@@ -3,9 +3,9 @@ import pandas as pd
 from hpc.l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
 
 topdownfilepath = [
-    "DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11-flag/topdown/topdown.csv", # 1km异常
-    "DATA/2022-01-14新的测试数据/3.wrf_3km_multi_l3/centos11-flag/topdown/topdown.csv",  # 3km异常
-    "DATA/2022-01-14新的测试数据/4.wrf_9km_multi_L3/centos11-flag/topdown/topdown.csv",  # 9km异常
+    "DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11/topdown/topdown.csv", # 1km异常
+    "DATA/2022-01-14新的测试数据/3.wrf_3km_multi_l3/centos11/topdown/topdown.csv",  # 3km异常
+    "DATA/2022-01-14新的测试数据/4.wrf_9km_multi_L3/centos11/topdown/topdown.csv",  # 9km异常
     "DATA/2022-01-14新的测试数据/22.grapes_test1p_multi_l3/centos11-flag/topdown/topdown.csv",  # grape异常
 ]
 savefilepath = "tmp/topdown"
