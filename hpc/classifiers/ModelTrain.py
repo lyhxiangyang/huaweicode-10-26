@@ -33,8 +33,8 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
     if trainedFeature is not None:
         if FAULT_FLAG not in trainedFeature:
             trainedFeature.append(FAULT_FLAG)
-        if TIME_COLUMN_NAME not in trainedFeature:
-            trainedFeature.append(TIME_COLUMN_NAME)
+        # if TIME_COLUMN_NAME not in trainedFeature:
+            # trainedFeature.append(TIME_COLUMN_NAME)
         df = df[trainedFeature]
 
     # 如果有Intensity这个 就使用Intensity
