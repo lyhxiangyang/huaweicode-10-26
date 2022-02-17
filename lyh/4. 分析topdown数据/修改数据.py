@@ -49,6 +49,9 @@ def dealOneTopDownPD(topdownpd: pd.DataFrame) -> pd.DataFrame:
     topdownpd[cname+"_recover"] = topdownpd[cname] + ddrc_rd_mean * mflops_change
     topdownpd[cname+"_recover_sliding"] = topdownpd[cname+"_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
 
+    # 将ddrc_wr和ddrc_rd加在一起
+    topdownpd["rd_wr_sum"] = topdownpd["ddrc_rd_sliding_recover_sliding"] + topdownpd["ddrc_wr_sliding_recover_sliding"]
+
     return topdownpd
 
 
