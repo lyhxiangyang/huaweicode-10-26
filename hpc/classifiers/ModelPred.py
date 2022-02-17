@@ -17,7 +17,7 @@ def model_pred(x_pred, model_type, saved_model_path=SaveModelPath):
     :return y_pred: Class labels for samples in x_pred
     """
     # Load saved model
-    model = joblib.load('%s\\%s.pkl' % (saved_model_path, model_type))
+    model = joblib.load('%s/%s.pkl' % (saved_model_path, model_type))
 
     y_pred = model.predict(x_pred)
     return y_pred
@@ -26,7 +26,7 @@ def model_pred(x_pred, model_type, saved_model_path=SaveModelPath):
 判断预测的概率
 """
 def model_pred_probability(x_pred, model_type, saved_model_path=SaveModelPath):
-    model = joblib.load('%s\\%s.pkl' % (saved_model_path, model_type))
+    model = joblib.load('%s/%s.pkl' % (saved_model_path, model_type))
 
     y_pred = model.predict_proba(x_pred)
     return y_pred

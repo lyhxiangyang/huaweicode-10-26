@@ -82,12 +82,12 @@ def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: 
         os.makedirs(saved_model_path)
 
     # Save model
-    joblib.dump(model, '%s\\%s.pkl' % (saved_model_path, model_type))
+    joblib.dump(model, '%s/%s.pkl' % (saved_model_path, model_type))
 
     # Save the header without label
     header = list(df.columns)
     header.remove(FAULT_FLAG)
-    f = open('%s\\header.txt' % saved_model_path, 'w')
+    f = open('%s/header.txt' % saved_model_path, 'w')
     f.write('\n'.join(header))
     f.close()
     return accuracy

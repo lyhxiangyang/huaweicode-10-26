@@ -20,7 +20,7 @@ DEBUG = False
 FDR = 0.01
 
 # 存放模型的路径
-SaveModelPath = 'Classifiers\\saved_model'
+SaveModelPath = 'Classifiers/saved_model'
 
 # 需要排除的特征名字
 EXCLUDE_FEATURE_NAME = ["time", FAULT_FLAG]
