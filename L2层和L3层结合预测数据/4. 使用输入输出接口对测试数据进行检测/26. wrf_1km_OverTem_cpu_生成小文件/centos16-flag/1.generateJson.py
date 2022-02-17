@@ -6,7 +6,7 @@ if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
     # 先将所有的server文件和process文件进行指定
     # 其中单个server文件我默认是连续的
-    predictdirpath = R"DATA/2022-01-14新的测试数据/226.wrf_1km_multi_OverTem_cpu_生成小文件_生成小文件/centos16"
+    predictdirpath = R"DATA/2022-01-14新的测试数据/26.wrf_1km_multi_OverTem_cpu_生成小文件_生成小文件/centos16"
     spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
     jsonfilename = "alljson.json"
     normalMeanDict = {

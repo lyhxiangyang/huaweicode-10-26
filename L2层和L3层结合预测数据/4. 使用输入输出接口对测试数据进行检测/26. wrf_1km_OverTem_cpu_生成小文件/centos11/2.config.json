@@ -1,6 +1,6 @@
 {
-    "predictdirjsonpath": "DATA/2022-01-14新的测试数据/226.wrf_1km_multi_OverTem_cpu_生成小文件_生成小文件/centos11/jsonfile/alljson.json",
-    "spath": "DATA/2022-01-14新的测试数据/226.wrf_1km_multi_OverTem_cpu_生成小文件_生成小文件/centos11/jsonfile/中间结果文件生成",
+    "predictdirjsonpath": "DATA/2022-01-14新的测试数据/26.wrf_1km_multi_OverTem_cpu_生成小文件_生成小文件/centos11/jsonfile/alljson.json",
+    "spath": "DATA/2022-01-14新的测试数据/26.wrf_1km_multi_OverTem_cpu_生成小文件_生成小文件/centos11/jsonfile/中间结果文件生成",
     "processcpu_modelpath":"hpc/models/l3/process_cpu_model",
     "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
     "serverbandwidth_modelpath":"hpc/models/l3/memory_bandwidth_model",
