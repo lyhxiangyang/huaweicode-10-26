@@ -103,6 +103,7 @@ def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, pro
 读一个文件 
 如果ifile为None表示ipath本身就表示一个文件的名字
 如果ifile不为None表示ipath只是一个路径， ifile表示此路径下
+如果features为空
 """
 
 
