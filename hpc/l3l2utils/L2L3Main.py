@@ -68,7 +68,7 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: Li
             itopdownpd["ddrc_wr_sliding"] = itopdownpd["ddrc_wr_sliding"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
             ddrc_rd_wr_sum += itopdownpd["ddrc_wr_sliding"]
         if ddrc_rd_wr_sum is not None:
-            itopdownpd["ddrc_rd_wr_sum"] = ddrc_rd_wr_sum
+            itopdownpd["ddrc_ddwr_sum"] = ddrc_rd_wr_sum
 
     for ipd in predicttopdwnpds:
         proceeOneTopdownPd(ipd, processFeatures)
