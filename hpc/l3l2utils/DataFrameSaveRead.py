@@ -107,7 +107,7 @@ def getServer_Process_l2_Network_Ping_TopdownList(dirpath: str, server_feature=N
         tpd = getfilepd(ifile)
         if topdown_feature is not None:
             tpd = tpd.loc[:, time_topdown_feature]
-        pingpds.append(tpd)
+        topdownpds.append(tpd)
     return serverpds, processpds, l2pds, networkpds, pingpds, topdownpds
 
 
