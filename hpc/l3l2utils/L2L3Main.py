@@ -125,7 +125,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
     # 对topdown数据进行处理
     predicttopdwnpds = processTopdownList(predicttopdwnpds, inputDict["topdown_feature"])
-    inputDict["topdown_feature"] = ["ddrc_rd_wr_sum"]
+    inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
 
 
