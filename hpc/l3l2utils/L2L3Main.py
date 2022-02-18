@@ -73,7 +73,7 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: Li
         ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
         print("{}平均值：{}".format(cname, ddrc_rd_mean))
         itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
-        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").atype("int")
+        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
 
         cname = "ddrc_wr"
         cname_sliding = cname + "_sliding"
@@ -81,7 +81,7 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: Li
         ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
         print("{}平均值：{}".format(cname, ddrc_rd_mean))
         itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
-        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").atype("int")
+        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
 
         itopdownpd["ddrc_ddwr_sum"] = itopdownpd["ddrc_rd_sliding_recover_sliding"] + itopdownpd["ddrc_wr_sliding_recover_sliding"]
 
