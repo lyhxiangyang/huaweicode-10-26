@@ -60,15 +60,30 @@ def add_cpu_column(pds: List[pd.DataFrame]):
 
 def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: List[str]=None) -> List[pd.DataFrame]:
     def proceeOneTopdownPd(itopdownpd: pd.DataFrame, processFeatures: List[str] = None):
-        ddrc_rd_wr_sum = None
-        if processFeatures is None or "ddrc_rd" in processFeatures:
-            itopdownpd["ddrc_rd_sliding"] = itopdownpd["ddrc_rd"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
-            ddrc_rd_wr_sum = itopdownpd["ddrc_rd_sliding"].copy()
-        if processFeatures is None or "ddrc_wr" in processFeatures:
-            itopdownpd["ddrc_wr_sliding"] = itopdownpd["ddrc_wr_sliding"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
-            ddrc_rd_wr_sum += itopdownpd["ddrc_wr_sliding"]
-        if ddrc_rd_wr_sum is not None:
-            itopdownpd["ddrc_ddwr_sum"] = ddrc_rd_wr_sum
+        # 对mflops进行分析
+        itopdownpd["mflops_sliding"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        mflops_mean = itopdownpd["mflops_sliding"][0:3].mean()
+        print("mflops平均值：{}".format(mflops_mean))
+        mflops_change = itopdownpd["mflops_sliding"].apply(lambda x: (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0)  # 如果是-20% 那么对应的值应该增加20%
+
+        # 对指标进行补偿性分析
+        cname = "ddrc_rd"
+        cname_sliding = cname + "_sliding"
+        itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
+        print("{}平均值：{}".format(cname, ddrc_rd_mean))
+        itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
+        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").atype("int")
+
+        cname = "ddrc_wr"
+        cname_sliding = cname + "_sliding"
+        itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
+        print("{}平均值：{}".format(cname, ddrc_rd_mean))
+        itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
+        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").atype("int")
+
+        itopdownpd["ddrc_ddwr_sum"] = itopdownpd["ddrc_rd_sliding_recover_sliding"] + itopdownpd["ddrc_wr_sliding_recover_sliding"]
 
     for ipd in predicttopdwnpds:
         proceeOneTopdownPd(ipd, processFeatures)
