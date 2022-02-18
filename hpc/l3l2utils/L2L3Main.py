@@ -232,8 +232,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
 
     print("对L3层内存泄露进行检测".center(40, "*"))
     l3memleakresult = pd.DataFrame()
-    l3memleakresult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
-    l3memleakresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+    l3memleakresult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
+    l3memleakresult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3memleakresult["preFlag"] = detectL3MemLeakAbnormal(allserverpds=l3_server_topdownpds,
                                                          modelfilepath=inputDict["servermemory_modelpath"],
                                                          modeltype=inputDict["servermemory_modeltype"],
@@ -241,8 +241,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
 
     print("对L3层内存带宽进行检测".center(40, "*"))
     l3BandWidthResult = pd.DataFrame()
-    l3BandWidthResult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
-    l3BandWidthResult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+    l3BandWidthResult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
+    l3BandWidthResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3BandWidthResult["preFlag"] = detectL3BandWidthAbnormal(allserverpds=l3_server_topdownpds,
                                                              modelfilepath=inputDict["serverbandwidth_modelpath"],
                                                              modeltype=inputDict["serverbandwidth_modeltype"],
