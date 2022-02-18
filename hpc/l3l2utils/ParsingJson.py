@@ -9,7 +9,7 @@ import pandas as pd
 
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
 from hpc.l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_Ping_TopdownList
-from hpc.l3l2utils.DataOperation import renamePds
+from hpc.l3l2utils.DataOperation import renamePds, remove_AllAbnormalAndHeadTail
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 
 """
@@ -312,6 +312,22 @@ def getNormalTopdownMean(detectionJson: Dict, datapd: List[pd.DataFrame], featur
         if featureVaule is not None:
             meanSeries[ifeaturename] = featureVaule
     return meanSeries
+
+
+"""
+获得特征的平均值，去除里面的异常状态以及里面异常状态下的前两个异常，然后获得
+参数1：pd的列表
+参数2：要获取的特征值的平均值
+"""
+
+
+def getPDMeanFromNormal(datapds: List[pd.DataFrame], featuresnames: List[str]) -> pd.Series:
+    # 先合并
+    alldatapds = mergeDataFrames(datapds)
+    # 先去掉每个异常及其首位数据
+    alldatapds = remove_AllAbnormalAndHeadTail(alldatapds, windowsize=4)
+    # 获得对应特征的平均值
+    alldatapds[featuresnames].mean()
 
 
 def JoinWorkingDirPathFromConfig(workpath: str, configJsonDict: Dict) -> Dict:

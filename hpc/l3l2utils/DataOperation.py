@@ -75,12 +75,13 @@ isremoveDuplicate true表示去除重复， false 表示不去除重复
 
 
 def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
-                            timefeaturename: str = TIME_COLUMN_NAME, isremoveDuplicate: bool = False) -> List[pd.DataFrame]:
+                            timefeaturename: str = TIME_COLUMN_NAME, isremoveDuplicate: bool = False) -> List[
+    pd.DataFrame]:
     changed_pds = []
     print("一个pdlist改变时间".center(20, "*"))
     for i, ipd in enumerate(pds):
         tpd = changeTimeFromOnepd(ipd, leastTime=leastTime, timefeaturename=timefeaturename)
-        if isremoveDuplicate: #将时间进行去重
+        if isremoveDuplicate:  # 将时间进行去重
             beforelen = len(tpd)
             tpd = tpd[~tpd[timefeaturename].duplicated()]
             afterlen = len(tpd)
@@ -196,6 +197,15 @@ def remove_Abnormal_Head_Tail(predictPd: pd.DataFrame, abnormals: Set[int], wind
 
     savelines = predictPd[FAULT_FLAG].rolling(window=windowsize, min_periods=1).agg([judge])["judge"].astype("bool")
     return predictPd[savelines]
+
+
+# 去除每个异常及其首尾数据
+def remove_AllAbnormalAndHeadTail(predictPd: pd.DataFrame, windowsize: int = 3) -> pd.DataFrame:
+    allabnormals = set(predictPd[FAULT_FLAG])
+    if 0 in allabnormals:
+        allabnormals.remove(0)
+    predictPd = remove_Abnormal_Head_Tail(predictPd, allabnormals, windowsize=windowsize)
+    return predictPd
 
 
 """

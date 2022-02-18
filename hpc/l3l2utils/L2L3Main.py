@@ -53,12 +53,13 @@ def add_cpu_column(pds: List[pd.DataFrame]):
 """
 对topdown数据列表进行处理
 主要是对ddrc_rd 以及 ddrc_wr进行处理
+spath 需要往里面写入topdwon的平均值， 平均值可以有多种获得方法，1. 前三个的平均值  2.前10个的平均值 3. 去除异常之后的平均值
 """
 
 
 
 
-def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: List[str]=None) -> List[pd.DataFrame]:
+def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: List[str]=None, spath: str = None) -> List[pd.DataFrame]:
     def proceeOneTopdownPd(itopdownpd: pd.DataFrame, processFeatures: List[str] = None):
         # 对mflops进行分析
         itopdownpd["mflops_sliding"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
