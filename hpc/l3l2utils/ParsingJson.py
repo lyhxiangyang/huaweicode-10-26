@@ -8,7 +8,7 @@ from typing import Dict, List, Set
 import pandas as pd
 
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
-from hpc.l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_PingList
+from hpc.l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_Ping_TopdownList
 from hpc.l3l2utils.DataOperation import renamePds
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 
@@ -48,17 +48,16 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
                         process_feature=None,
                         l2_feature=None,
                         network_feature=None,
+                        topdown_feature=None,
+                        ping_feature=None,
                         isExistFlag: bool = True,
                         jobid: int = 16,
                         type: str = 'L3',
                         requestdataType: str = 'wrf',
                         normalMeanDict: Dict = None):
-    serverpds, processpds, l2pds, networkpds, pingpds = getServer_Process_l2_Network_PingList(predictdir,
-                                                                                              server_feature=server_feature,
-                                                                                              process_feature=process_feature,
-                                                                                              l2_feature=l2_feature,
-                                                                                              network_feature=network_feature,
-                                                                                              isExistFlag=isExistFlag)
+    serverpds, processpds, l2pds, networkpds, pingpds, topdownpds = getServer_Process_l2_Network_Ping_TopdownList(
+        predictdir, server_feature=server_feature, process_feature=process_feature, l2_feature=l2_feature,
+        network_feature=network_feature, topdown_feature=topdown_feature, isExistFlag=isExistFlag)
 
     print("将数据关键名字进行改名操作".center(40, "*"))
     servernameDict = {
@@ -107,6 +106,7 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
     l2allpd = mergeDataFrames(l2pds)
     networkallpd = mergeDataFrames(networkpds)
     pingpd = mergeDataFrames(pingpds)
+    topdownpd = mergeDataFrames(topdownpds)
 
     jsonDict = {}
     jsonDict["JobID"] = jobid
@@ -119,6 +119,7 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
     jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(networkallpd)
     jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(l2allpd)
     jsonDict["RequestData"]["data"]["ping"] = convertDataFrameToDict(pingpd)
+    jsonDict["RequestData"]["data"]["topdown"] = convertDataFrameToDict(topdownpd)
     if normalMeanDict is not None:
         jsonDict["RequestData"]["normalDataMean"] = normalMeanDict
     return jsonDict
@@ -184,6 +185,17 @@ def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getPingPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     pingDict = sdict["RequestData"]["data"]["ping"]
+    pingpd = pd.DataFrame(data=pingDict).T
+    return [pingpd]
+
+
+"""
+从读取到的json文件中得到topdown数据
+"""
+
+
+def getTopdownPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
+    pingDict = sdict["RequestData"]["data"]["topdown"]
     pingpd = pd.DataFrame(data=pingDict).T
     return [pingpd]
 
@@ -287,6 +299,16 @@ def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], featur
     meanSeries = getMeanFromNumberDataFrom(datapd, "network", features, datanumber)
     for ifeaturename in features:
         featureVaule = getMeanFromExistMean(detectionJson, "network", ifeaturename)
+        if featureVaule is not None:
+            meanSeries[ifeaturename] = featureVaule
+    return meanSeries
+
+
+def getNormalTopdownMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
+                         datanumber: int = 10) -> pd.Series:
+    meanSeries = getMeanFromNumberDataFrom(datapd, "topdown", features, datanumber)
+    for ifeaturename in features:
+        featureVaule = getMeanFromExistMean(detectionJson, "topdown", ifeaturename)
         if featureVaule is not None:
             meanSeries[ifeaturename] = featureVaule
     return meanSeries

@@ -7,14 +7,17 @@ from hpc.l3l2utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataF
 from hpc.l3l2utils.DataFrameSaveRead import saveDFListToFiles, savepdfile
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, MODEL_TYPE
-from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer, standardLists, extractionProcessPdLists, \
+from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer, standardLists, \
+    extractionProcessPdLists, \
     extractionServerPdLists
 from hpc.l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
-    getNormalNetworkMean, saveDictToJson, getPingPdFromJsonDict
-from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, getTimePeriodInfo, \
+    getNormalNetworkMean, saveDictToJson, getPingPdFromJsonDict, getTopdownPdFromJsonDict, getNormalTopdownMean
+from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, \
+    getTimePeriodInfo, \
     analysePredictResult
-from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, predictTemp, \
+from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
+    predictTemp, \
     detectNetwork_TXHangAbnormal
 
 """
@@ -48,6 +51,31 @@ def add_cpu_column(pds: List[pd.DataFrame]):
 
 
 """
+对topdown数据列表进行处理
+主要是对ddrc_rd 以及 ddrc_wr进行处理
+"""
+
+
+
+
+def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: List[str]=None) -> List[pd.DataFrame]:
+    def proceeOneTopdownPd(itopdownpd: pd.DataFrame, processFeatures: List[str] = None):
+        ddrc_rd_wr_sum = None
+        if processFeatures is None or "ddrc_rd" in processFeatures:
+            itopdownpd["ddrc_rd_sliding"] = itopdownpd["ddrc_rd"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+            ddrc_rd_wr_sum = itopdownpd["ddrc_rd_sliding"].copy()
+        if processFeatures is None or "ddrc_wr" in processFeatures:
+            itopdownpd["ddrc_wr_sliding"] = itopdownpd["ddrc_wr_sliding"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+            ddrc_rd_wr_sum += itopdownpd["ddrc_wr_sliding"]
+        if ddrc_rd_wr_sum is not None:
+            itopdownpd["ddrc_rd_wr_sum"] = ddrc_rd_wr_sum
+
+    for ipd in predicttopdwnpds:
+        proceeOneTopdownPd(ipd, processFeatures)
+    return predicttopdwnpds
+
+
+"""
 将数据进行特征提取
 
 如果requestData为None，那么数据将从inputDict中的predictdirjsonpath字段找到我们的数据来源
@@ -65,6 +93,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictl2pds = getL2PdFromJsonDict(sdict=detectionJson)
     predictnetworkpds = getNetworkPdFromJsonDict(sdict=detectionJson)
     predictpingpds = getPingPdFromJsonDict(sdict=detectionJson)
+    predicttopdwnpds = getTopdownPdFromJsonDict(sdict=detectionJson)
 
     print("对读取到的原始数据进行差分".format(40, "*"))
     # 对异常数据进行差分处理之后，得到cpu特征值
@@ -75,7 +104,15 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictnetworkpds = differenceServer(predictnetworkpds, inputDict["network_accumulate_feature"])
     predictl2pds = differenceServer(predictl2pds, inputDict["l2_accumulate_feature"])
     predictpingpds = differenceServer(predictpingpds, inputDict["ping_accumulate_feature"])
-    inputDict["process_feature"] = ["cpu"]
+    predicttopdwnpds = differenceServer(predicttopdwnpds, inputDict["topdown_accumulate_feature"])
+
+    # ===================================== 对数据进行修改
+    inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
+    # 对topdown数据进行处理
+    predicttopdwnpds = processTopdownList(predicttopdwnpds, inputDict["topdown_feature"])
+    inputDict["topdown_feature"] = ["ddrc_rd_wr_sum"]
+
+
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
     normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, predictprocesspds,
@@ -87,7 +124,9 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
                                          datanumber=inputDict["meanNormalDataNumber"])
     normalnetwork_meanvalue = getNormalNetworkMean(detectionJson, predictnetworkpds, inputDict["network_feature"],
                                                    datanumber=inputDict["meanNormalDataNumber"])
+    normaltopdown_meanvalue = getNormalTopdownMean(detectionJson, predicttopdwnpds, inputDict["topdown_feature"], datanumber=inputDict["meanNormalDataNumber"])
     # ---- 不对ping求平均值
+
     # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "1.正常数据的平均值")
@@ -95,6 +134,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv")
         savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv")
         savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv")
+        savepdfile(normaltopdown_meanvalue, tpath, "meanvalue_topdown.csv")
     # ========================================
 
     print("标准化要预测的process和server数据".center(40, "*"))
@@ -106,6 +146,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
                                     meanValue=normall2_meanvalue, standardValue=100)
     standard_network_pds = standardLists(pds=predictnetworkpds, standardFeatures=inputDict["network_feature"],
                                          meanValue=normalnetwork_meanvalue, standardValue=100)
+    standard_topdown_pds = standardLists(pds=predicttopdwnpds, standardFeatures=inputDict["topdown_feature"], meanValue=normaltopdown_meanvalue, standardValue=100)
     # -----不对ping进行标准化
     standard_ping_pds = predictpingpds
     # 将数据进行保存
@@ -116,6 +157,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         saveDFListToFiles(os.path.join(tpath, "l2_standard"), standard_l2_pds)
         saveDFListToFiles(os.path.join(tpath, "network_standard"), standard_network_pds)
         saveDFListToFiles(os.path.join(tpath, "ping_standard"), standard_ping_pds)
+        saveDFListToFiles(os.path.join(tpath, "topdown_standard"), standard_topdown_pds)
+
 
     print("将数据的时间进行统一化处理".center(40, "*"))
     standard_server_pds = changeTimeToFromPdlists(standard_server_pds, isremoveDuplicate=True)
@@ -123,6 +166,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     standard_l2_pds = changeTimeToFromPdlists(standard_l2_pds, isremoveDuplicate=True)
     standard_network_pds = changeTimeToFromPdlists(standard_network_pds, isremoveDuplicate=True)
     standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds, isremoveDuplicate=False)
+    standard_topdown_pds = changeTimeToFromPdlists(standard_topdown_pds, isremoveDuplicate=False)
 
     print("process、server、l2、network特征处理".center(40, "*"))
     extraction_process_pds = extractionProcessPdLists(standard_process_pds,
@@ -133,6 +177,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     extraction_l2_pds = extractionServerPdLists(standard_l2_pds, extractFeatures=inputDict["l2_feature"], windowsSize=3)
     extraction_network_pds = extractionServerPdLists(standard_network_pds, extractFeatures=inputDict["network_feature"],
                                                      windowsSize=3)
+    extraction_topdown_pds = extractionServerPdLists(standard_topdown_pds, extractFeatures=inputDict["topdown_feature"], windowsSize=3)
     # ----- 不对ping数据进行特征处理
     extraction_ping_pds = standard_ping_pds
     # 将数据进行保存
@@ -142,7 +187,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         saveDFListToFiles(os.path.join(tpath, "process_extraction"), extraction_process_pds)
         saveDFListToFiles(os.path.join(tpath, "l2_extraction"), extraction_l2_pds)
         saveDFListToFiles(os.path.join(tpath, "network_extraction"), extraction_network_pds)
-    return extraction_server_pds, extraction_process_pds, extraction_l2_pds, extraction_network_pds, extraction_ping_pds
+        saveDFListToFiles(os.path.join(tpath, "topdown_extraction"), extraction_topdown_pds)
+    return extraction_server_pds, extraction_process_pds, extraction_l2_pds, extraction_network_pds, extraction_ping_pds, extraction_topdown_pds
 
 
 """
@@ -151,7 +197,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 
 
 def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
-                      alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame) -> pd.DataFrame:
+                      alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame, alltopdownpds: pd.DataFrame) -> pd.DataFrame:
     # 需要用到的特征值
     resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
 
@@ -167,11 +213,13 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
                                                  modeltype=inputDict["processcpu_modeltype"],
                                                  processFeatures=inputDict["process_feature"])
 
+    l3_server_topdownpds = mergeinnerTwoDataFrame(lpd=allserverpds, rpd=alltopdownpds)  # 根据时间得到server和topdown的合并结果
+
     print("对L3层内存泄露进行检测".center(40, "*"))
     l3memleakresult = pd.DataFrame()
     l3memleakresult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
     l3memleakresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
-    l3memleakresult["preFlag"] = detectL3MemLeakAbnormal(allserverpds=allserverpds,
+    l3memleakresult["preFlag"] = detectL3MemLeakAbnormal(allserverpds=l3_server_topdownpds,
                                                          modelfilepath=inputDict["servermemory_modelpath"],
                                                          modeltype=inputDict["servermemory_modeltype"],
                                                          serverFeatures=inputDict["server_feature"])
@@ -180,10 +228,10 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3BandWidthResult = pd.DataFrame()
     l3BandWidthResult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
     l3BandWidthResult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
-    l3BandWidthResult["preFlag"] = detectL3BandWidthAbnormal(allserverpds=allserverpds,
+    l3BandWidthResult["preFlag"] = detectL3BandWidthAbnormal(allserverpds=l3_server_topdownpds,
                                                              modelfilepath=inputDict["serverbandwidth_modelpath"],
                                                              modeltype=inputDict["serverbandwidth_modeltype"],
-                                                             serverFeatures=inputDict["server_feature"])
+                                                             serverFeatures=inputDict["topdown_feature"])
 
     print("对L2层数据进行预测".center(40, "*"))
     l2_serverpds = mergeinnerTwoDataFrame(lpd=alll2pds, rpd=allserverpds)  # 根据时间得到l2的合并结果
@@ -268,11 +316,10 @@ def outputJsonFromDetection(l2l3predetectresultpd: pd.DataFrame) -> Dict:
     return outputDict
 
 
-
 def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
     # =================================  默认情况下，在当前目录生成output.json
     outputJsonFilename = "output.json"
-    if "resultsavepath" in inputDict and inputDict["resultsavepath"] is not None: # 路径不能为空，如果为空，默认为当前目录
+    if "resultsavepath" in inputDict and inputDict["resultsavepath"] is not None:  # 路径不能为空，如果为空，默认为当前目录
         resultsavepath = os.path.abspath(inputDict["resultsavepath"])
         # if inputDict["resultsavepath"] == ".":
         #     resultsavepath = sys.path[0]
@@ -281,10 +328,11 @@ def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
             print("输出结果路径:{}不存在".format(resultsavepath))
             exit(1)
     else:
-        return # 不进行保存
+        return  # 不进行保存
     if "outputJsonFilename" in inputDict and inputDict["outputJsonFilename"] is not None:
         outputJsonFilename = inputDict["outputJsonFilename"]
     saveDictToJson(outputJsonDict, resultsavepath, outputJsonFilename)
+
 
 """
 从输入json文件中读取信息，进行检测
@@ -296,18 +344,20 @@ def saveoutputJsonFilename(inputDict: Dict, outputJsonDict):
 
 def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
     # =====================将数据进行特征提取
-    extraction_server_pds, extraction_process_pds, extraction_l2_pds, extraction_network_pds, extraction_ping_pds = FeatureextractionData(
-        inputDict, requestData)
+    # extraction_server_pds, extraction_process_pds, extraction_l2_pds, extraction_network_pds, extraction_ping_pds, extraction_topdown_pds = FeatureextractionData(inputDict, requestData)
+    extractionpds = FeatureextractionData(inputDict, requestData)
+
     # =====================数据合并
-    allserverpds = mergeDataFrames(extraction_server_pds)
-    allprocesspds = mergeDataFrames(extraction_process_pds)
-    alll2pds = mergeDataFrames(extraction_l2_pds)
-    allnetworkpds = mergeDataFrames(extraction_network_pds)
-    allpingpds = mergeDataFrames(extraction_ping_pds)
+    allserverpds = mergeDataFrames(extractionpds[0])
+    allprocesspds = mergeDataFrames(extractionpds[1])
+    alll2pds = mergeDataFrames(extractionpds[2])
+    allnetworkpds = mergeDataFrames(extractionpds[3])
+    allpingpds = mergeDataFrames(extractionpds[4])
+    alltopdownpds = mergeDataFrames(extractionpds[5])
 
     print("对L3 L2层的数据进行预测".center(40, "*"))
     l2l3predetectresultpd = detectionL2L3Data(inputDict, allserverpds, allprocesspds, alll2pds, allnetworkpds,
-                                              allpingpds)
+                                              allpingpds, alltopdownpds)
     tpath = None
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "5.准确率结果分析")
@@ -323,212 +373,7 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
         savepdfile(l2l3predetectresultpd, tpath, "总预测结果.csv")
         saveDictToJson(outputDict, tpath, "output.json")
 
-
     # ============================生成outputjson
     saveoutputJsonFilename(inputDict, outputDict)
 
-
-
-
-
-
     return outputDict
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

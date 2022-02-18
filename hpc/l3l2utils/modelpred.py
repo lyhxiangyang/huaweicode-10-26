@@ -288,7 +288,9 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = Non
 
 
 def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = None, modeltype=0, serverFeatures=None):
-    bandwidthUserfulFeatures = getTrainedFeatures(allserverpds.columns.tolist(), serverFeatures)
+    bandwidthUserfulFeatures = allserverpds.columns.tolist()
+    if serverFeatures is not None:
+        bandwidthUserfulFeatures = getTrainedFeatures(allserverpds.columns.tolist(), serverFeatures)
     testPd = allserverpds[bandwidthUserfulFeatures]
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     return bandwidthPreFlagList

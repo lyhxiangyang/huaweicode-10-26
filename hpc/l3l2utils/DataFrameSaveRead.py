@@ -18,9 +18,9 @@ def saveDFListToFiles(spath: str, pds: List[pd.DataFrame]):
         pds[i].to_csv(savefilepath, index=False)
 
 
-def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, process_feature=None, l2_feature=None,
+def getServer_Process_l2_Network_Ping_TopdownList(dirpath: str, server_feature=None, process_feature=None, l2_feature=None,
                                           ping_feature=None,
-                                          network_feature=None, isExistFlag: bool = True):
+                                          network_feature=None, topdown_feature=None,isExistFlag: bool = True):
     def getfilespath(filepath: str) -> List[str]:
         if not os.path.exists(filepath):
             print("{}路径不存在".format(filepath))
@@ -34,6 +34,7 @@ def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, pro
     l2files = getfilespath(os.path.join(dirpath, "l2"))
     networkfiles = getfilespath(os.path.join(dirpath, "network"))
     pingfiles = getfilespath(os.path.join(dirpath, "ping"))
+    topdownfiles = getfilespath(os.path.join(dirpath, "topdown"))
     if server_feature is not None:
         time_server_feature = server_feature.copy()
         time_server_feature.extend([TIME_COLUMN_NAME])
@@ -49,6 +50,9 @@ def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, pro
     if ping_feature is not None:
         time_ping_feature = ping_feature.copy()
         time_ping_feature.extend([TIME_COLUMN_NAME])
+    if topdown_feature is not None:
+        time_topdown_feature = topdown_feature.copy()
+        time_topdown_feature.extend([TIME_COLUMN_NAME])
 
     if isExistFlag:
         if server_feature is not None:
@@ -61,12 +65,15 @@ def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, pro
             time_network_feature.extend([FAULT_FLAG])
         if ping_feature is not None:
             time_ping_feature.extend([FAULT_FLAG])
+        if topdown_feature is not None:
+            time_topdown_feature.extend([FAULT_FLAG])
 
     processpds = []
     serverpds = []
     l2pds = []
     networkpds = []
     pingpds = []
+    topdownpds = []
     # 预测进程数据
     for ifile in processfiles:
         tpd = getfilepd(ifile)
@@ -96,7 +103,12 @@ def getServer_Process_l2_Network_PingList(dirpath: str, server_feature=None, pro
         if ping_feature is not None:
             tpd = tpd.loc[:, time_ping_feature]
         pingpds.append(tpd)
-    return serverpds, processpds, l2pds, networkpds, pingpds
+    for ifile in topdownfiles:
+        tpd = getfilepd(ifile)
+        if topdown_feature is not None:
+            tpd = tpd.loc[:, time_topdown_feature]
+        pingpds.append(tpd)
+    return serverpds, processpds, l2pds, networkpds, pingpds, topdownpds
 
 
 """
