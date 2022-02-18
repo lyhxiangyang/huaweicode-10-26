@@ -146,11 +146,11 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "1.正常数据的平均值")
-        savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv")
-        savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv")
-        savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv")
-        savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv")
-        savepdfile(normaltopdown_meanvalue, tpath, "meanvalue_topdown.csv")
+        savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv", index=True)
+        savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv", index=True)
+        savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv", index=True)
+        savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv",index=True)
+        savepdfile(normaltopdown_meanvalue, tpath, "meanvalue_topdown.csv",index=True)
     # ========================================
 
     print("标准化要预测的process和server数据".center(40, "*"))
