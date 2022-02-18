@@ -30,5 +30,7 @@
     "network_feature":["tx_packets_phy", "rx_packets_phy"],
     "network_accumulate_feature": ["tx_packets_phy", "rx_packets_phy"],
     "ping_feature": ["avg_lat"],
-    "ping_accumulate_feature": []
+    "ping_accumulate_feature": [],
+    "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
+    "topdown_accumulate_feature": []
 }
