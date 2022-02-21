@@ -9,18 +9,6 @@ from sklearn.tree import DecisionTreeClassifier
 
 from utils.DefineData import *
 
-TestRealLabels: List
-TestPreLabels: List
-
-
-def getTestRealLabels() -> List:
-    return TestRealLabels
-
-
-def getTestPreLabels() -> List:
-    return TestPreLabels
-
-#
 def model_train(df, model_type, saved_model_path=SaveModelPath, trainedFeature: List[str] = None, maxdepth: int = 5):
     """
     Train the model of selected type
