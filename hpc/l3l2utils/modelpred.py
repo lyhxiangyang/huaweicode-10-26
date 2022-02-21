@@ -33,24 +33,20 @@ def getTrainedFeatures(dfcolumns: List[str], prefixnames: List[str]):
 
 
 def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, spath: str = None,
-                        modelfilepath: str = None, modeltype=0,
-                        processFeatures=None):
+                        modelfilepath: str = None, modeltype=0,):
     def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
         coresSet = set(list(processpd[CPU_FEATURE]))
         coresnum = len(coresSet)
         return coresnum, coresSet
 
     # ======== detectL3CPUAbnormal运行
-    if processFeatures is None:
-        processFeatures = ["cpu"]
     # 将allserverpds里面所有的时间搜集起来
     timecolumns = allserverpds[TIME_COLUMN_NAME]
     serverinformationDict = defaultdict(list)
     serverinformationDict[TIME_COLUMN_NAME] = timecolumns  # 加入时间
     for stime in timecolumns:
         # 检测某个时间点下
-        detectresult = detectionCPUInPointTime(allprocesspds, stime, modelfilepath=modelfilepath, modeltype=modeltype,
-                                               processFeatures=processFeatures)
+        detectresult = detectionCPUInPointTime(allprocesspds, stime, modelfilepath=modelfilepath, modeltype=modeltype)
         wrf_cpu_time = detectresult[0]
         abnormalcores = detectresult[1]
         abnormalcoremaxtime = detectresult[2]
@@ -89,21 +85,17 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
 """
 
 
-def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepath: str = None, modeltype=0,
-                            processFeatures=None):
-    if processFeatures is None:
-        processFeatures = ["cpu"]
+def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepath: str = None, modeltype=0,):
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime] # 包含了process各个核心的值
     if len(nowdf) == 0:
         return 0, None, None
-    cpuusefulFeatures = getTrainedFeatures(processpds.columns.tolist(), processFeatures)
     # 先得到总的CPUTIME的时间
     cputime = nowdf[PROCESS_CPUNAME].sum()
     # 核的编号
     cores_serialnumber = list(nowdf.loc[:, CPU_FEATURE])
     # 核的cpu时间
     cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME]) # 每个核的CPU时间
-    predictflag = select_and_pred(nowdf[cpuusefulFeatures], MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+    predictflag = select_and_pred(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     predictflag = [True if i != 0 else False for i in predictflag] # 非0就是异常
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
@@ -275,9 +267,8 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
 """
 
 
-def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = None, modeltype=0, serverFeatures=None):
-    memleakUserfulFeatures = getTrainedFeatures(allserverpds.columns.tolist(), serverFeatures)
-    testPd = allserverpds[memleakUserfulFeatures]
+def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = None, modeltype=0):
+    testPd = allserverpds
     memleakPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     return memleakPreFlagList
 
@@ -287,11 +278,8 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = Non
 """
 
 
-def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = None, modeltype=0, serverFeatures=None):
-    bandwidthUserfulFeatures = allserverpds.columns.tolist()
-    if serverFeatures is not None:
-        bandwidthUserfulFeatures = getTrainedFeatures(allserverpds.columns.tolist(), serverFeatures)
-    testPd = allserverpds[bandwidthUserfulFeatures]
+def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = None, modeltype=0):
+    testPd = allserverpds
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     return bandwidthPreFlagList
 

@@ -226,8 +226,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3cpuresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
     l3cpuresult["preFlag"] = detectL3CPUAbnormal(allserverpds=allserverpds, allprocesspds=allprocesspds, spath=tpath,
                                                  modelfilepath=inputDict["processcpu_modelpath"],
-                                                 modeltype=inputDict["processcpu_modeltype"],
-                                                 processFeatures=inputDict["process_feature"])
+                                                 modeltype=inputDict["processcpu_modeltype"])
 
     l3_server_topdownpds = mergeinnerTwoDataFrame(lpd=allserverpds, rpd=alltopdownpds)  # 根据时间得到server和topdown的合并结果
 
@@ -237,8 +236,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3memleakresult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3memleakresult["preFlag"] = detectL3MemLeakAbnormal(allserverpds=l3_server_topdownpds,
                                                          modelfilepath=inputDict["servermemory_modelpath"],
-                                                         modeltype=inputDict["servermemory_modeltype"],
-                                                         serverFeatures=inputDict["server_feature"])
+                                                         modeltype=inputDict["servermemory_modeltype"])
 
     print("对L3层内存带宽进行检测".center(40, "*"))
     l3BandWidthResult = pd.DataFrame()
@@ -246,8 +244,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3BandWidthResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3BandWidthResult["preFlag"] = detectL3BandWidthAbnormal(allserverpds=l3_server_topdownpds,
                                                              modelfilepath=inputDict["serverbandwidth_modelpath"],
-                                                             modeltype=inputDict["serverbandwidth_modeltype"],
-                                                             serverFeatures=inputDict["topdown_feature"])
+                                                             modeltype=inputDict["serverbandwidth_modeltype"])
 
     print("对L2层数据进行预测".center(40, "*"))
     l2_serverpds = mergeinnerTwoDataFrame(lpd=alll2pds, rpd=allserverpds)  # 根据时间得到l2的合并结果
