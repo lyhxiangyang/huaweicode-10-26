@@ -88,7 +88,8 @@ if __name__ == "__main__":
         itopdownpd = getfilepd(ipath)
 
         iserverpd = getfilepd(serverfilepath[i])
-        iserverpd = processServer(iserverpd)[0]
+        iserverpds = processServer(iserverpd)
+        iserverpd = iserverpds[0]
 
         itpd = mergeinnerTwoDataFrame(lpd=iserverpd, rpd=itopdownpd)
         dealpd = dealOneTopDownPD(itpd)
