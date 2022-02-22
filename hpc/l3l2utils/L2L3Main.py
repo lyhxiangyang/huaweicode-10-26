@@ -125,7 +125,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         topdownchooseindex: Union[Union[DataFrame, Series], Any] = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         # return datapd[chooseindex][featuresnames].mean()
-        return servertimepd[serverchooseindex], alltopdownspd[topdownchooseindex]
+        return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(drop=True)
 
 
     def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
@@ -143,6 +143,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         itopdowndpd[cnamesliding] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
         mflops_mean = getMeanFromNumberDataFrom([itopdowndpd], "", featuresnames=[cnamesliding], datanumber=3)[cnamesliding]
         mflops_change = itopdowndpd[cnamesliding].apply(lambda x : (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0 ) # 如果是-20% 那么对应的值应该增加20%
+        # mflops_change.reset_index(drop=True, inplace=True) 必须保证
 
         # 对iserverpd中的
         cname = "pgfree"
