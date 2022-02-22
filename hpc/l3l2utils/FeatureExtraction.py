@@ -73,12 +73,6 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
     会将传入参数的列表中dataframe本身数值进行修改
     """
 
-    def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
-        pgfree_name = "pgfree"
-        for ipd in serverpds:
-            if pgfree_name in ipd.columns.array:
-                ipd[pgfree_name] = ipd[pgfree_name].rolling(window=smoothwinsize, min_periods=1, center=True).median()
-        return serverpds
 
     # ============函数运行
     if len(accumulateFeatures) == 0:
@@ -88,7 +82,7 @@ def differenceServer(serverpds: List[pd.DataFrame], accumulateFeatures: List[str
         subtractpd = subtractLastLineFromDataFrame(iserverpd, columns=accumulateFeatures)
         differencepds.append(subtractpd)
     # 中位数进行平滑操作
-    differencepds = smooth_pgfree(differencepds, smoothwinsize=7)
+    # differencepds = smooth_pgfree(differencepds, smoothwinsize=7)
     return differencepds
 
 

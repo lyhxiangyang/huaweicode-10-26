@@ -1,6 +1,8 @@
 import os
-from typing import List, Dict
+from typing import List, Dict, Tuple, Union, Any
 import pandas as pd
+from pandas import Series, DataFrame
+from pandas.core.generic import NDFrame
 
 from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
@@ -12,7 +14,8 @@ from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer,
     extractionServerPdLists
 from hpc.l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
-    getNormalNetworkMean, saveDictToJson, getPingPdFromJsonDict, getTopdownPdFromJsonDict, getNormalTopdownMean
+    getNormalNetworkMean, saveDictToJson, getPingPdFromJsonDict, getTopdownPdFromJsonDict, getNormalTopdownMean, \
+    getMeanFromNumberDataFrom
 from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, \
     getTimePeriodInfo, \
     analysePredictResult
@@ -56,39 +59,103 @@ def add_cpu_column(pds: List[pd.DataFrame]):
 spath 需要往里面写入topdwon的平均值， 平均值可以有多种获得方法，1. 前三个的平均值  2.前10个的平均值 3. 去除异常之后的平均值
 """
 
+"""
+处理对topdown数据
+"""
 
 
-
-def processTopdownList(predicttopdwnpds: List[pd.DataFrame], processFeatures: List[str]=None, spath: str = None) -> List[pd.DataFrame]:
-    def proceeOneTopdownPd(itopdownpd: pd.DataFrame, processFeatures: List[str] = None):
+def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    def proceeOneTopdownPd(itopdownpd: pd.DataFrame):
         # 对mflops进行分析
-        itopdownpd["mflops_sliding"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        itopdownpd["mflops_sliding"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).agg(
+            "max").astype("int")
         mflops_mean = itopdownpd["mflops_sliding"][0:3].mean()
         print("mflops平均值：{}".format(mflops_mean))
-        mflops_change = itopdownpd["mflops_sliding"].apply(lambda x: (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0)  # 如果是-20% 那么对应的值应该增加20%
+        mflops_change = itopdownpd["mflops_sliding"].apply(
+            lambda x: (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0)  # 如果是-20% 那么对应的值应该增加20%
 
         # 对指标进行补偿性分析
         cname = "ddrc_rd"
         cname_sliding = cname + "_sliding"
-        itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
+            "int")
         ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
         print("{}平均值：{}".format(cname, ddrc_rd_mean))
         itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
-        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5,
+                                                                                                        center=True,
+                                                                                                        min_periods=1).agg(
+            "max").astype("int")
 
         cname = "ddrc_wr"
         cname_sliding = cname + "_sliding"
-        itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
+            "int")
         ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
         print("{}平均值：{}".format(cname, ddrc_rd_mean))
         itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
         itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
 
-        itopdownpd["ddrc_ddwr_sum"] = itopdownpd["ddrc_rd_sliding_recover_sliding"] + itopdownpd["ddrc_wr_sliding_recover_sliding"]
+        itopdownpd["ddrc_ddwr_sum"] = itopdownpd["ddrc_rd_sliding_recover_sliding"] + itopdownpd[
+            "ddrc_wr_sliding_recover_sliding"]
 
     for ipd in predicttopdwnpds:
-        proceeOneTopdownPd(ipd, processFeatures)
+        proceeOneTopdownPd(ipd)
     return predicttopdwnpds
+
+
+"""
+处理server 但是需要用到topdown的数据topdown的结合数据
+
+会对原始数值进行处理
+"""
+
+
+def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame]) -> List[
+    pd.DataFrame]:
+    resserverpds = []
+    alltopdownspd = mergeDataFrames(predicttopdownpds)
+
+    def getSameTime(servertimes: List[str], topdowntimes: List[str]) -> List[str]:
+        sametimes = sorted(list(set(servertimes) & set(topdowntimes)))
+        return sametimes
+
+    def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tuple[Any, Any]:
+        sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
+        chooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+        # return datapd[chooseindex][featuresnames].mean()
+        return servertimepd[chooseindex], alltopdownspd[chooseindex]
+
+
+    def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
+        pgfree_name = "pgfree"
+        for ipd in serverpds:
+            if pgfree_name in ipd.columns.array:
+                ipd[pgfree_name] = ipd[pgfree_name].rolling(window=smoothwinsize, min_periods=1, center=True).median()
+        return serverpds
+
+    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame) -> pd.DataFrame:
+        assert len(iserverpd) == len(itopdowndpd)
+        # 对itopdownpd中的mflops进行平滑处理
+        cname = "mflops"
+        cnamesliding = cname + "_sliding"
+        itopdowndpd[cnamesliding] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        mflops_mean = getMeanFromNumberDataFrom([itopdowndpd], featuresnames=[cnamesliding], datanumber=3)
+        mflops_change = itopdowndpd[cnamesliding].apply(lambda x : (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0 ) # 如果是-20% 那么对应的值应该增加20%
+
+        # 对iserverpd中的
+        cname = "pgfree"
+        pgfree_mean = getMeanFromNumberDataFrom([iserverpd], featuresnames=[cnamesliding], datanumber=3)
+        iserverpd[cname] = iserverpd[cname].rolling(window=6, min_periods=1, center=True).median()
+        iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
+        return iserverpd
+
+
+    for iserverpd in predictserverpds:
+        spd, tpd = getsametimepd(iserverpd, alltopdownspd)
+        dealServerpdAndTopdownpd(spd, tpd)
+    return predictserverpds
 
 
 """
@@ -111,10 +178,17 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictpingpds = getPingPdFromJsonDict(sdict=detectionJson)
     predicttopdwnpds = getTopdownPdFromJsonDict(sdict=detectionJson)
 
+    print("将数据的时间进行统一化处理".center(40, "*"))
+    predictserverpds = changeTimeToFromPdlists(predictserverpds, isremoveDuplicate=True)
+    predictprocesspds = changeTimeToFromPdlists(predictprocesspds)
+    predictl2pds = changeTimeToFromPdlists(predictl2pds, isremoveDuplicate=True)
+    predictnetworkpds = changeTimeToFromPdlists(predictnetworkpds, isremoveDuplicate=True)
+    predictpingpds = changeTimeToFromPdlists(predictpingpds, isremoveDuplicate=False)
+    predicttopdwnpds = changeTimeToFromPdlists(predicttopdwnpds, isremoveDuplicate=False)
+
     print("对读取到的原始数据进行差分".format(40, "*"))
     # 对异常数据进行差分处理之后，得到cpu特征值
     predictprocesspds = differenceProcess(predictprocesspds, inputDict["process_accumulate_feature"])
-    add_cpu_column(predictprocesspds)
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, inputDict["server_accumulate_feature"])
     predictnetworkpds = differenceServer(predictnetworkpds, inputDict["network_accumulate_feature"])
@@ -122,13 +196,19 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictpingpds = differenceServer(predictpingpds, inputDict["ping_accumulate_feature"])
     predicttopdwnpds = differenceServer(predicttopdwnpds, inputDict["topdown_accumulate_feature"])
 
-    # ===================================== 对数据进行修改
-    inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
-    # 对topdown数据进行处理
-    predicttopdwnpds = processTopdownList(predicttopdwnpds, inputDict["topdown_feature"])
-    inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
+    # ============================================================ 对数据进行修改
+    # 1. 对inputDict中的特征进行修改  目前没有必要
+    # inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
+    # inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
+    # 2. 对topdown原始数据数据进行处理
+    predicttopdwnpds = processTopdownList(predicttopdwnpds)
 
+    # 3. 对process数据进行处理
+    add_cpu_column(predictprocesspds)
+
+    # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
+    processServerList(predictserverpds, predicttopdwnpds)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
     normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, predictprocesspds,
@@ -140,7 +220,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
                                          datanumber=inputDict["meanNormalDataNumber"])
     normalnetwork_meanvalue = getNormalNetworkMean(detectionJson, predictnetworkpds, inputDict["network_feature"],
                                                    datanumber=inputDict["meanNormalDataNumber"])
-    normaltopdown_meanvalue = getNormalTopdownMean(detectionJson, predicttopdwnpds, inputDict["topdown_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    normaltopdown_meanvalue = getNormalTopdownMean(detectionJson, predicttopdwnpds, inputDict["topdown_feature"],
+                                                   datanumber=inputDict["meanNormalDataNumber"])
     # ---- 不对ping求平均值
 
     # 将数据进行保存
@@ -149,8 +230,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv", index=True)
         savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv", index=True)
         savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv", index=True)
-        savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv",index=True)
-        savepdfile(normaltopdown_meanvalue, tpath, "meanvalue_topdown.csv",index=True)
+        savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv", index=True)
+        savepdfile(normaltopdown_meanvalue, tpath, "meanvalue_topdown.csv", index=True)
     # ========================================
 
     print("标准化要预测的process和server数据".center(40, "*"))
@@ -162,7 +243,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
                                     meanValue=normall2_meanvalue, standardValue=100)
     standard_network_pds = standardLists(pds=predictnetworkpds, standardFeatures=inputDict["network_feature"],
                                          meanValue=normalnetwork_meanvalue, standardValue=100)
-    standard_topdown_pds = standardLists(pds=predicttopdwnpds, standardFeatures=inputDict["topdown_feature"], meanValue=normaltopdown_meanvalue, standardValue=100)
+    standard_topdown_pds = standardLists(pds=predicttopdwnpds, standardFeatures=inputDict["topdown_feature"],
+                                         meanValue=normaltopdown_meanvalue, standardValue=100)
     # -----不对ping进行标准化
     standard_ping_pds = predictpingpds
     # 将数据进行保存
@@ -175,14 +257,13 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         saveDFListToFiles(os.path.join(tpath, "ping_standard"), standard_ping_pds)
         saveDFListToFiles(os.path.join(tpath, "topdown_standard"), standard_topdown_pds)
 
-
-    print("将数据的时间进行统一化处理".center(40, "*"))
-    standard_server_pds = changeTimeToFromPdlists(standard_server_pds, isremoveDuplicate=True)
-    standard_process_pds = changeTimeToFromPdlists(standard_process_pds)
-    standard_l2_pds = changeTimeToFromPdlists(standard_l2_pds, isremoveDuplicate=True)
-    standard_network_pds = changeTimeToFromPdlists(standard_network_pds, isremoveDuplicate=True)
-    standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds, isremoveDuplicate=False)
-    standard_topdown_pds = changeTimeToFromPdlists(standard_topdown_pds, isremoveDuplicate=False)
+    # print("将数据的时间进行统一化处理".center(40, "*"))
+    # standard_server_pds = changeTimeToFromPdlists(standard_server_pds, isremoveDuplicate=True)
+    # standard_process_pds = changeTimeToFromPdlists(standard_process_pds)
+    # standard_l2_pds = changeTimeToFromPdlists(standard_l2_pds, isremoveDuplicate=True)
+    # standard_network_pds = changeTimeToFromPdlists(standard_network_pds, isremoveDuplicate=True)
+    # standard_ping_pds = changeTimeToFromPdlists(standard_ping_pds, isremoveDuplicate=False)
+    # standard_topdown_pds = changeTimeToFromPdlists(standard_topdown_pds, isremoveDuplicate=False)
 
     print("process、server、l2、network特征处理".center(40, "*"))
     extraction_process_pds = extractionProcessPdLists(standard_process_pds,
@@ -193,7 +274,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     extraction_l2_pds = extractionServerPdLists(standard_l2_pds, extractFeatures=inputDict["l2_feature"], windowsSize=3)
     extraction_network_pds = extractionServerPdLists(standard_network_pds, extractFeatures=inputDict["network_feature"],
                                                      windowsSize=3)
-    extraction_topdown_pds = extractionServerPdLists(standard_topdown_pds, extractFeatures=inputDict["topdown_feature"], windowsSize=3)
+    extraction_topdown_pds = extractionServerPdLists(standard_topdown_pds, extractFeatures=inputDict["topdown_feature"],
+                                                     windowsSize=3)
     # ----- 不对ping数据进行特征处理
     extraction_ping_pds = standard_ping_pds
     # 将数据进行保存
@@ -213,7 +295,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 
 
 def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
-                      alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame, alltopdownpds: pd.DataFrame) -> pd.DataFrame:
+                      alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame,
+                      alltopdownpds: pd.DataFrame) -> pd.DataFrame:
     # 需要用到的特征值
     resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
 
