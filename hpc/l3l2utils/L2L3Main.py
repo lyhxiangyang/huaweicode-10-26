@@ -113,7 +113,6 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFram
 
 def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame]) -> List[
     pd.DataFrame]:
-    resserverpds = []
     alltopdownspd = mergeDataFrames(predicttopdownpds)
 
     def getSameTime(servertimes: List[str], topdowntimes: List[str]) -> List[str]:
@@ -154,10 +153,12 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         return iserverpd
 
 
+    resserverpds = []
     for iserverpd in predictserverpds:
         spd, tpd = getsametimepd(iserverpd, alltopdownspd)
-        dealServerpdAndTopdownpd(spd, tpd)
-    return predictserverpds
+        ispd = dealServerpdAndTopdownpd(spd, tpd)
+        resserverpds.append(ispd)
+    return resserverpds
 
 
 """
@@ -210,7 +211,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     add_cpu_column(predictprocesspds)
 
     # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
-    processServerList(predictserverpds, predicttopdwnpds)
+    predictserverpds = processServerList(predictserverpds, predicttopdwnpds)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
     normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, predictprocesspds,
