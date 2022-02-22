@@ -393,6 +393,8 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
                                                   {61, 62, 63, 64, 65})
     analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
                                                   {81, 82, 83, 84, 85})
+    analyseDict[90] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {91, 92, 93, 94, 95})
     analyseDict["cpu"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {
         11, 12, 13, 14, 15,
         21, 22, 23, 24, 25,
