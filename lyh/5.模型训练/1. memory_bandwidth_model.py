@@ -16,7 +16,7 @@ if __name__ == "__main__":
     savemodelpath = os.path.join(nowpath, "models")
     traindatapath = os.path.join(nowpath, "topdown_train.csv")
     # trainFeatures = ["ddrc_ddwr_sum"]
-    trainFeatures = ["pgfree_mean", "ddrc_ddwr_sum"]
+    trainFeatures = ["used", "pgfree_mean", "ddrc_ddwr_sum"]
 
     # ============================================================= 对训练数据进行读取
     trainpd = getfilepd(ipath=traindatapath)
