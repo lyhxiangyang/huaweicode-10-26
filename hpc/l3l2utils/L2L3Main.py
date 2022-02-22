@@ -123,7 +123,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
     def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tuple[Any, Any]:
         sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
         serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
-        topdownchooseindex = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+        topdownchooseindex: Union[Union[DataFrame, Series], Any] = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         # return datapd[chooseindex][featuresnames].mean()
         return servertimepd[serverchooseindex], alltopdownspd[topdownchooseindex]
 
@@ -141,12 +141,12 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         cname = "mflops"
         cnamesliding = cname + "_sliding"
         itopdowndpd[cnamesliding] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
-        mflops_mean = getMeanFromNumberDataFrom([itopdowndpd], featuresnames=[cnamesliding], datanumber=3)
+        mflops_mean = getMeanFromNumberDataFrom([itopdowndpd], "", featuresnames=[cnamesliding], datanumber=3)
         mflops_change = itopdowndpd[cnamesliding].apply(lambda x : (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0 ) # 如果是-20% 那么对应的值应该增加20%
 
         # 对iserverpd中的
         cname = "pgfree"
-        pgfree_mean = getMeanFromNumberDataFrom([iserverpd], featuresnames=[cnamesliding], datanumber=3)
+        pgfree_mean = getMeanFromNumberDataFrom([iserverpd],"", featuresnames=[cnamesliding], datanumber=3)
         iserverpd[cname] = iserverpd[cname].rolling(window=6, min_periods=1, center=True).median()
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
