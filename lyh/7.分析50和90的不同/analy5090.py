@@ -47,6 +47,7 @@ def dealOneTopDownPD(topdownpd: pd.DataFrame) -> pd.DataFrame:
     mflops_mean = topdownpd[cname][0:3].mean()
     print("mflops平均值：{}".format(mflops_mean))
     mflops_change = topdownpd[cname].apply(lambda x : (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0 ) # 如果是-20% 那么对应的值应该增加20%
+    topdownpd["mflops_change"] = mflops_change
 
     # 对ddrc_rd进行分析
     cname = "ddrc_rd_sliding"
