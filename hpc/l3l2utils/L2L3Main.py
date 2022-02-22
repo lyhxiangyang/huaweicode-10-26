@@ -147,8 +147,8 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
 
         # 对iserverpd中的
         cname = "pgfree"
+        iserverpd[cname] = iserverpd[cname].rolling(window=6, min_periods=1, center=True).median() # 先对其进行平滑处理
         pgfree_mean = getMeanFromNumberDataFrom([iserverpd],"", featuresnames=[cname], datanumber=3)[cname]
-        iserverpd[cname] = iserverpd[cname].rolling(window=6, min_periods=1, center=True).median()
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
         return iserverpd
