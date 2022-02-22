@@ -199,9 +199,9 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predicttopdwnpds = differenceServer(predicttopdwnpds, inputDict["topdown_accumulate_feature"])
 
     # ============================================================ 对数据进行修改
-    # 1. 对inputDict中的特征进行修改  目前没有必要
-    # inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
-    # inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
+    # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
+    inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
+    inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
     # 2. 对topdown原始数据数据进行处理
     predicttopdwnpds = processTopdownList(predicttopdwnpds)
