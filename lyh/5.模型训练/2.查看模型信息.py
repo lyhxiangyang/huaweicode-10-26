@@ -20,7 +20,6 @@ if __name__ == "__main__":
     # 需要用到的三个路径
     nowpath = sys.path[0]
     savemodelpath = os.path.join(nowpath, "models", "decision_tree.pkl")
-    savemodelpath1 = os.path.join(nowpath, "models1", "decision_tree.pkl")
     # ============================================================= 对模型数据进行分析
     f = open(savemodelpath, 'rb')
     model = joblib.load(f)
@@ -30,7 +29,6 @@ if __name__ == "__main__":
     tree_ = model.tree_
     print("threshold: {}".format(tree_.threshold))
     print("feature: {}".format(tree_.feature))
-
 
     print("tree_left: {}".format(tree_.children_left)) # 前序遍历
     print("tree_right: {}".format(tree_.children_right))
