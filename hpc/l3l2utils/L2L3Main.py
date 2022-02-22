@@ -122,9 +122,10 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
 
     def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tuple[Any, Any]:
         sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
-        chooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+        serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+        topdownchooseindex = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         # return datapd[chooseindex][featuresnames].mean()
-        return servertimepd[chooseindex], alltopdownspd[chooseindex]
+        return servertimepd[serverchooseindex], alltopdownspd[topdownchooseindex]
 
 
     def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
