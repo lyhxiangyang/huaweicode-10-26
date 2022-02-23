@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Dict
 
 import pandas as pd
@@ -85,7 +86,8 @@ changedigitrange = list(range(28,29))
 if __name__ == "__main__":
     dirs = getDirs(R"DATA/2022-01-14新的测试数据")
     for idir in dirs:
-        dirnumber = int(idir.split(".")[0])
+        iidir = Path(idir).parent.name
+        dirnumber = int(iidir.split(".")[0])
         if not dirnumber in changedigitrange:
             continue
         PD = getOneDirPd(dirpath=idir)
