@@ -122,7 +122,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
     def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tuple[Any, Any]:
         sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
         serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
-        topdownchooseindex: Union[Union[DataFrame, Series], Any] = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+        topdownchooseindex = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         # return datapd[chooseindex][featuresnames].mean()
         return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(drop=True)
 
@@ -147,6 +147,10 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         # 对iserverpd中的
         cname = "pgfree"
         iserverpd[cname] = iserverpd[cname].rolling(window=6, min_periods=1, center=True).median() # 先对其进行平滑处理
+        # 进行保存
+        nname = cname + "_original_sliding"
+        iserverpd[nname] = iserverpd[cname]
+
         pgfree_mean = getMeanFromNumberDataFrom([iserverpd],"", featuresnames=[cname], datanumber=3)[cname]
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
@@ -173,7 +177,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("将数据从文件中读取".center(40, "*"))
     detectionJson = requestData
     if detectionJson is None:
-        detectionJson = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
+        # detectionJson = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
+        detectionJson = getDetectionJsonFrominputconfig(inputDict)
     predictserverpds = getServerPdFromJsonDict(sdict=detectionJson)
     predictprocesspds = getProcessPdFromJsonDict(sdict=detectionJson)
     predictl2pds = getL2PdFromJsonDict(sdict=detectionJson)
@@ -187,7 +192,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictl2pds = changeTimeToFromPdlists(predictl2pds, isremoveDuplicate=True)
     predictnetworkpds = changeTimeToFromPdlists(predictnetworkpds, isremoveDuplicate=True)
     predictpingpds = changeTimeToFromPdlists(predictpingpds, isremoveDuplicate=False)
-    predicttopdwnpds = changeTimeToFromPdlists(predicttopdwnpds, isremoveDuplicate=False)
+    predicttopdwnpds = changeTimeToFromPdlists(predicttopdwnpds, isremoveDuplicate=True)
 
     print("对读取到的原始数据进行差分".format(40, "*"))
     # 对异常数据进行差分处理之后，得到cpu特征值
@@ -476,3 +481,22 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
     saveoutputJsonFilename(inputDict, outputDict)
 
     return outputDict
+
+
+"""
+对输入的配置文件进行修改
+"""
+detectJsonDict = None
+def getDetectionJsonFrominputconfig(inputDict: Dict) -> Dict:
+    global detectJsonDict
+    if detectJsonDict is None:
+        detectJsonDict = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
+    # 修改内存带宽中的模型路径
+    if detectJsonDict["Type"] == "grape":
+        inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "grape")
+    else:
+        inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "wrf")
+    return detectJsonDict
+
+
+

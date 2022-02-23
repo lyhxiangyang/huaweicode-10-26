@@ -5,7 +5,7 @@
     "processcpu_feature": ["cpu"],
     "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
     "servermemory_feature": ["used_mean"],
-    "serverbandwidth_modelpath":"lyh/5.模型训练/models",
+    "serverbandwidth_modelpath":"lyh/5.模型训练/models/wrf",
     "serverbandwidth_feature": ["pgfree_mean"],
     "power_machine_modelpath":"hpc/models/l2/server_power_capping",
     "power_machine_feature": [],

@@ -60,6 +60,6 @@ if __name__ == "__main__":
 
 
     # ========================================================= 进行读取
-    jsonDict = covertCSVToJsonDict(predictdir=predictdirpath, normalMeanDict=normalMeanDict)
+    jsonDict = covertCSVToJsonDict(predictdir=predictdirpath, normalMeanDict=normalMeanDict,type="grape")
     saveDictToJson(jsonDict, spath=spath, filename=jsonfilename)
 
