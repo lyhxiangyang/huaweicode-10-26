@@ -175,10 +175,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
 
 def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("将数据从文件中读取".center(40, "*"))
-    detectionJson = requestData
-    if detectionJson is None:
-        # detectionJson = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
-        detectionJson = getDetectionJsonFrominputconfig(inputDict)
+    detectionJson = getDetectionJsonFrominputconfig(inputDict, requestData)
     predictserverpds = getServerPdFromJsonDict(sdict=detectionJson)
     predictprocesspds = getProcessPdFromJsonDict(sdict=detectionJson)
     predictl2pds = getL2PdFromJsonDict(sdict=detectionJson)
@@ -486,17 +483,18 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
 """
 对输入的配置文件进行修改
 """
-detectJsonDict = None
-def getDetectionJsonFrominputconfig(inputDict: Dict) -> Dict:
-    global detectJsonDict
-    if detectJsonDict is None:
-        detectJsonDict = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
+def getDetectionJsonFrominputconfig(inputDict: Dict, requestData = None, isChangeInfo = True) -> Dict:
+    if requestData is None:
+        requestData = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
     # 修改内存带宽中的模型路径
-    if detectJsonDict["Type"] == "grape":
+    if not isChangeInfo:
+        return requestData
+
+    if requestData["RequestData"]["type"] == "grapes":
         inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "grape")
     else:
         inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "wrf")
-    return detectJsonDict
+    return requestData
 
 
 
