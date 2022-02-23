@@ -81,10 +81,13 @@ def saveDirPdFromDict(spath, PDDict: Dict):
 
 def getDigitalListDir():
     pass
-
+changedigitrange = list(range(28,29))
 if __name__ == "__main__":
     dirs = getDirs(R"DATA/2022-01-14新的测试数据")
     for idir in dirs:
+        dirnumber = int(idir.split(".")[0])
+        if not dirnumber in changedigitrange:
+            continue
         PD = getOneDirPd(dirpath=idir)
         savePD = {}
         savePD["server"] = PD["server"]
