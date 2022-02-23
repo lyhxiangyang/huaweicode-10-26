@@ -90,6 +90,7 @@ if __name__ == "__main__":
         dirnumber = int(iidir.split(".")[0])
         if not dirnumber in changedigitrange:
             continue
+        print(idir)
         PD = getOneDirPd(dirpath=idir)
         savePD = {}
         savePD["server"] = PD["server"]
