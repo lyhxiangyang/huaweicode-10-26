@@ -176,6 +176,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
 def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("将数据从文件中读取".center(40, "*"))
     detectionJson = getDetectionJsonFrominputconfig(inputDict, requestData)
+
     predictserverpds = getServerPdFromJsonDict(sdict=detectionJson)
     predictprocesspds = getProcessPdFromJsonDict(sdict=detectionJson)
     predictl2pds = getL2PdFromJsonDict(sdict=detectionJson)
@@ -491,7 +492,7 @@ def getDetectionJsonFrominputconfig(inputDict: Dict, requestData = None, isChang
         return requestData
 
     if requestData["RequestData"]["type"] == "grapes":
-        inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "grape")
+        inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "grapes")
     else:
         inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "wrf")
     return requestData
