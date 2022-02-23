@@ -9,6 +9,7 @@ topdownfilepath = [
     "DATA/2022-01-14新的测试数据/22.grapes_test1p_multi_l3/centos11/topdown/topdown.csv",  # grape异常
     "DATA/2022-01-14新的测试数据/2.wrf_1km_multi_normal/centos11/topdown/topdown.csv", # 1km正常
     "DATA/2022-01-14新的测试数据/21.grapes_test1p_multi_normal/centos11/topdown/topdown.csv",
+    "DATA/2022-01-14新的测试数据/28.grapes_test_multi_l3/centos11/topdown/topdown.csv",
 
 ]
 savefilepath = "tmp/topdown"
