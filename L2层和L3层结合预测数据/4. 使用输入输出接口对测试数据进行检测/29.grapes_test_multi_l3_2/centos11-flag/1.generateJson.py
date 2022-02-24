@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
         },
         "topdown": {
-
+            "mflops_sliding": 387500,
         }
     }
 

@@ -59,6 +59,9 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             if isallEqual(preflagList, list(map(int, list("11100111"))), i, ifault):
                 preflagList[i].append(ifault)  # 先不管i+1是怎么回事
                 continue
+            if isallEqual(preflagList, list(map(int, list("000111000"))), i, ifault):
+                preflagList[i].remove(ifault)
+                continue
             if isallEqual(preflagList, list(map(int, list("00011000"))), i, ifault):
                 preflagList[i].remove(ifault)
                 continue

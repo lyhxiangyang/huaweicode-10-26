@@ -226,9 +226,9 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
-    inputDict["topdown_feature"].append["ddrc_ddwr_sum"]
+    inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
-    # 2. 对topdown原始数据数据进行处理
+    # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
     predicttopdwnpds = processTopdownList(predicttopdwnpds)
 
     # 3. 对process数据进行处理
