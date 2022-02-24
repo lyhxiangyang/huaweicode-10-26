@@ -7,7 +7,7 @@ from pandas.core.generic import NDFrame
 from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from hpc.l3l2utils.DataFrameSaveRead import saveDFListToFiles, savepdfile
-from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists
+from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, removeProcessUselessData, getRunHPCTimepdsFromProcess
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, MODEL_TYPE
 from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer, standardLists, \
     extractionProcessPdLists, \
@@ -69,7 +69,8 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFram
         # 对mflops进行分析
         itopdownpd["mflops_sliding"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).agg(
             "max").astype("int")
-        mflops_mean = itopdownpd["mflops_sliding"][0:3].mean()
+        mflops_mean = itopdownpd["mflops_sliding"][0:3].mean() # todo
+
         print("mflops平均值：{}".format(mflops_mean))
         mflops_change = itopdownpd["mflops_sliding"].apply(
             lambda x: (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0)  # 如果是-20% 那么对应的值应该增加20%
@@ -79,7 +80,7 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFram
         cname_sliding = cname + "_sliding"
         itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
             "int")
-        ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
+        ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值 todo
         print("{}平均值：{}".format(cname, ddrc_rd_mean))
         itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
         itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5,
@@ -91,7 +92,7 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFram
         cname_sliding = cname + "_sliding"
         itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
             "int")
-        ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值
+        ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值 todo
         print("{}平均值：{}".format(cname, ddrc_rd_mean))
         itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
         itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
@@ -102,6 +103,20 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFram
     for ipd in predicttopdwnpds:
         proceeOneTopdownPd(ipd)
     return predicttopdwnpds
+
+"""
+根据mflops的数值，将较低强度的mflops的数值删除点
+原始数据不会修改
+"""
+def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    def removepdFromtopdown(itopdownpd: pd.DataFrame):
+        isflags = itopdownpd["mflops"].apply(lambda x: x > 2000)
+        return itopdownpd[isflags].reset_index(drop=True, inplace=False)
+    respds = []
+    for ipd in predicttopdownpds:
+        ipd = removepdFromtopdown(ipd)
+        respds.append(ipd)
+    return respds
 
 
 """
@@ -184,6 +199,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictpingpds = getPingPdFromJsonDict(sdict=detectionJson)
     predicttopdwnpds = getTopdownPdFromJsonDict(sdict=detectionJson)
 
+
     print("将数据的时间进行统一化处理".center(40, "*"))
     predictserverpds = changeTimeToFromPdlists(predictserverpds, isremoveDuplicate=True)
     predictprocesspds = changeTimeToFromPdlists(predictprocesspds)
@@ -201,6 +217,11 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictl2pds = differenceServer(predictl2pds, inputDict["l2_accumulate_feature"])
     predictpingpds = differenceServer(predictpingpds, inputDict["ping_accumulate_feature"])
     predicttopdwnpds = differenceServer(predicttopdwnpds, inputDict["topdown_accumulate_feature"])
+
+    print("根据topdown数据对数据进行对齐操作".format(40, "*"))
+    predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
+    # 根据数据对server数据进行补偿操作
+    predicttopdwnpds = getRunHPCTimepdsFromProcess(predictserverpds, predicttopdwnpds)
 
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
