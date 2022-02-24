@@ -1,11 +1,28 @@
 import re
 import time
-from typing import List, Union, Set, Dict
+from typing import List, Union, Set, Dict, Tuple, Any
 
 import pandas as pd
 
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, PID_FEATURE
+
+"""
+字符串转化为数字  按照分钟，秒
+"""
+def str_data_to_num(str_data)->int:
+    # 格式时间成毫秒
+    strptime = time.strptime(str_data,"%Y-%m-%d %H:%M:%S")
+    mktime = int(time.mktime(strptime))
+    return mktime
+"""
+将数字转换为 %Y-%m-%d %H:%M:%S 格式
+"""
+def num_to_str_data(num_data, timeformat: str = "%Y-%m-%d %H:%M:%S"):
+    # 格式毫秒成指定格式时间
+    num_data = time.localtime(num_data)  # 生成一个元祖式的时间
+    strptime = time.strftime(timeformat,num_data) #格式化元祖
+    return strptime
 
 """
 根据字符串自动得到时间串格式
@@ -88,6 +105,14 @@ def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
             print("第{}个pd减少了{}行".format(i, beforelen - afterlen))
         changed_pds.append(tpd)
     return changed_pds
+
+"""
+将时间变成从数字变成字符串
+"""
+def changeTimePdsToStrFromInt(pds: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    for ipd in pds:
+        ipd[TIME_COLUMN_NAME] = ipd[TIME_COLUMN_NAME].apply(lambda x: num_to_str_data(x))
+    return pds
 
 
 '''
@@ -222,3 +247,66 @@ def renamePds(datapds: List[pd.DataFrame], namedict: Dict):
         tpd = ipd.rename(columns=namedict, inplace=False)
         renamepds.append(tpd)
     return renamepds
+
+
+"""
+对process数据的每一个进程进行首尾的截取，去除没用的数据
+"""
+def removeProcessUselessData(datapds: List[pd.DataFrame], isremoveHead: bool=True, isremoveTail: bool=True, removelen:int=0) -> List[pd.DataFrame]:
+    if not isremoveHead and not isremoveTail:
+        return datapds
+    if removelen == 0:
+        return datapds
+
+    processpds = []
+    for iprocesspd in datapds:
+        sumpdLists = []
+        for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
+            # 先将一些不可用的数据进行清除,比如一个进程只运行了两分钟
+            if len(ipd) <= 6:
+                continue
+
+            if isremoveHead and isremoveTail:
+                ipd = ipd.iloc[removelen:-removelen, :]
+            elif isremoveHead:
+                ipd = ipd.iloc[removelen:, :]
+            elif isremoveTail:
+                ipd = ipd.iloc[:-removelen, :]
+            sumpdLists.append(ipd)
+        allsubtractpd = mergeDataFrames(sumpdLists)
+        processpds.append(allsubtractpd)
+    return processpds
+
+"""
+得到相同时间的pd
+"""
+def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tuple[Any, Any]:
+    def getSameTime(servertimes: List[str], topdowntimes: List[str]) -> List[str]:
+        sametimes = sorted(list(set(servertimes) & set(topdowntimes)))
+        return sametimes
+    sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
+    serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+    return servertimepd[serverchooseindex].reset_index(drop=True)
+
+
+
+def getRunHPCTimepdsFromProcess(pds: List[pd.DataFrame], processpds: List[pd.DataFrame])->List[pd.DataFrame]:
+    def getSameTime(servertimes: List[str], topdowntimes: List[str]) -> List[str]:
+        sametimes = sorted(list(set(servertimes) & set(topdowntimes)))
+        return sametimes
+    allprocesspd = mergeDataFrames(processpds)
+    respdList = []
+    for ipd in pds:
+        sametimes = getSameTime(ipd[TIME_COLUMN_NAME].tolist(), allprocesspd[TIME_COLUMN_NAME].tolist())
+        chooseindex = ipd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+        npd = ipd[chooseindex].reset_index(drop=True)
+        respdList.append(npd)
+    return respdList
+
+
+
+
+
+
+
+
