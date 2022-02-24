@@ -18,6 +18,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
     # 判断这个错误是否符合equalFlag
     # 如果exultFlags是奇数如11011那么ipos指向的是0中间位置，如果exultFlags是偶数，如11100111那么ipos指向的是第一个0位置
+    # 2 代表0或者1
     def isallEqual(preFlagsList, equalFlags, ipos,
                    ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
         if len(equalFlags) % 2 == 1:
@@ -61,6 +62,13 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             if isallEqual(preflagList, list(map(int, list("00011000"))), i, ifault):
                 preflagList[i].remove(ifault)
                 continue
+            if isallEqual(preflagList, list(map(int, list("000001111100000"))), i, ifault):
+                preflagList[i].remove(ifault)
+                continue
+            if isallEqual(preflagList, list(map(int, list("000011110000"))), i, ifault):
+                preflagList[i].remove(ifault)
+                continue
+
 
         if len(preflagList[i]) == 0:  # 全部删除干净了，那就等于0
             preflagList[i] = [0]

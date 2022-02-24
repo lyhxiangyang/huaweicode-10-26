@@ -11,7 +11,7 @@ if __name__ == "__main__":
     jsonfilename = "alljson.json"
     normalMeanDict = {
         "server": {
-            # "used": 48935662250,
+            "used": 344862949376,
             # "pgfree": 351644,
             # "freq": 3323,
         },
