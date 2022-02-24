@@ -221,7 +221,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("根据topdown数据对数据进行对齐操作".format(40, "*"))
     predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
     # 根据数据对server数据进行补偿操作
-    predicttopdwnpds = getRunHPCTimepdsFromProcess(predictserverpds, predicttopdwnpds)
+    predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predicttopdwnpds)
 
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
