@@ -160,7 +160,7 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
 """
 
 
-def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame], detectionJson: Dict) -> List[
+def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame], predictprocesspds ,detectionJson: Dict) -> List[
     pd.DataFrame]:
     alltopdownspd = mergeDataFrames(predicttopdownpds)
 
@@ -175,19 +175,19 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         # return datapd[chooseindex][featuresnames].mean()
         return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(drop=True)
 
-    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, detectionJson: Dict) -> pd.DataFrame:
+    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame,predictprocesspds: List[pd.DataFrame], itopdowndpd: pd.DataFrame, detectionJson: Dict) -> pd.DataFrame:
         assert len(iserverpd) == len(itopdowndpd)
         # 对itopdownpd中的mflops进行平滑处理
         cname = "mflops"
         itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
         itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)
+        mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)[cname]
         mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
 
         cname = "pgfree"
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)
+        pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], predictprocesspds, [cname], datanumber=10)[cname]
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
         return iserverpd
 
@@ -195,7 +195,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
     resserverpds = []
     for iserverpd in predictserverpds:
         spd, tpd = getsametimepd(iserverpd, alltopdownspd)
-        ispd = dealServerpdAndTopdownpd(spd, tpd, detectionJson=detectionJson)
+        ispd = dealServerpdAndTopdownpd(spd,predictprocesspds,tpd, detectionJson=detectionJson)
         resserverpds.append(ispd)
     return resserverpds
 
@@ -258,7 +258,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     add_cpu_column(predictprocesspds)
 
     # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
-    predictserverpds = processServerList(predictserverpds, predicttopdwnpds, detectionJson)
+    predictserverpds = processServerList(predictserverpds, predicttopdwnpds,predictprocesspds, detectionJson)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
     normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, predictprocesspds,
