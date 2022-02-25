@@ -87,7 +87,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) // 2 + 1
                 continue
-            i = i + 1
+
 
 
     # for i in range(0, len(preflagList)):
@@ -112,6 +112,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
 
     for i in range(0, len(preflagList)):
+        preflagList[i] = sorted(list(set(preflagList[i]))) # 可能有多个0
         if len(preflagList[i]) == 0:  # 全部删除干净了，那就等于0
             preflagList[i] = [0]
         if len(preflagList[i]) >= 2 and 0 in preflagList[i]:
