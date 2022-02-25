@@ -148,7 +148,7 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
     for ipd in predicttopdownpds:
         len1 = len(ipd)
         ipd = removepdFromtopdown(ipd)
-        print("因为mflops删除数据:{} 行".format(len(len1 - len(ipd))))
+        print("因为mflops删除数据:{} 行".format(len1 - len(ipd)))
         respds.append(ipd)
     return respds
 
