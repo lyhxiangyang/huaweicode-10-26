@@ -141,7 +141,12 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
         return True
 
     def removepdFromtopdown(itopdownpd: pd.DataFrame):
-        isflags = itopdownpd["mflops"].apply(lambda x: x > 2000)
+        # mflopsdelete = itopdownpd["mflops"].
+        # 先平滑，再删除
+        cname = "mflops"
+        mflopsdelete = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先取中位数将单个最大点去掉
+        mflopsdelete = mflopsdelete.rolling(window=5, center=True, min_periods=1).mean()  # 取平均值中和一下
+        isflags = mflopsdelete.apply(lambda x: x > 2000)
         isflags = isflags.rolling(window=5, min_periods=1, center=True).apply(lambda x: addOtherPoint(x)).astype("bool")
         return itopdownpd[isflags].reset_index(drop=True, inplace=False)
     respds = []
@@ -249,10 +254,10 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
-    inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
+    # inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
     # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
-    # predicttopdwnpds = processTopdownList(predicttopdwnpds) # todo
+    predicttopdwnpds = processTopdownList(predicttopdwnpds) # todo
 
     # 3. 对process数据进行处理
     add_cpu_column(predictprocesspds)
