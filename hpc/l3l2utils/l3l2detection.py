@@ -58,7 +58,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 1
             iequalpos = 2
-            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) - iequalpos
                 continue
@@ -67,7 +67,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 1
             iequalpos = 2
-            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) - iequalpos
                 continue
@@ -76,7 +76,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 3
             iequalpos = 3
-            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) - iequalpos
                 continue
@@ -85,7 +85,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 3
             iequalpos = 3
-            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) - iequalpos
                 continue
