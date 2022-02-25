@@ -47,6 +47,8 @@ def dealOneTopDownPD(topdownpd: pd.DataFrame, mflops_mean: int, ddrc_rd_mean: in
 
     # 将ddrc_wr和ddrc_rd加在一起
     topdownpd["rd_wr_sum"] = topdownpd["ddrc_rd_median_mean_recover"] + topdownpd["ddrc_wr_median_mean_recover"]
+    # 平滑一下
+    topdownpd["rd_wr_sum"] = topdownpd["rd_wr_sum"].rolling(window=3, center=True, min_periods=1).median()
 
     cname = "pgfree"
     cnamemedian = cname + "_median"

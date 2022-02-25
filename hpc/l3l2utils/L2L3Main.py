@@ -118,7 +118,7 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
 
     def removepdFromtopdown(itopdownpd: pd.DataFrame):
         isflags = itopdownpd["mflops"].apply(lambda x: x > 2000)
-        isflags = isflags.rolling(window=5, min_periods=1, center=True).apply(lambda x: addOtherPoint(x))
+        isflags = isflags.rolling(window=5, min_periods=1, center=True).apply(lambda x: addOtherPoint(x)).astype("bool")
         return itopdownpd[isflags].reset_index(drop=True, inplace=False)
     respds = []
     for ipd in predicttopdownpds:
