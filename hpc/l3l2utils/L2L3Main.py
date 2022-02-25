@@ -191,9 +191,11 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
 
         cname = "pgfree"
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], predictprocesspds, [cname], datanumber=10)[cname]
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
         return iserverpd
 
 
