@@ -66,6 +66,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 1
             iequalpos = 2
+            isadd = eintlist[0] != 0 # 第1个是0 就删除，第1个是1就添加
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 assignmentValue(preflagList, i, lenerror, evalue, ifault)
                 i += len(eintlist) - iequalpos
