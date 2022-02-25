@@ -20,14 +20,12 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     # 如果exultFlags是奇数如11011那么ipos指向的是0中间位置，如果exultFlags是偶数，如11100111那么ipos指向的是第一个0位置
     # 如果是11111000011111 中间位置的第1个位置
     # 2 代表0或者1
-    def isallEqual(preFlagsList, equalFlags, ipos,
+    # iequelpos指要与ipos对齐的位置 从0开始记数
+    def isallEqual(preFlagsList, equalFlags: List, ipos, iequalpos,
                    ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
-        if len(equalFlags) % 2 == 1:
-            beginpos = ipos - len(equalFlags) // 2
-            endpos = ipos + len(equalFlags) // 2 + 1
-        else:
-            beginpos = ipos - len(equalFlags) // 2 + 1
-            endpos = ipos + len(equalFlags) // 2 + 1
+        beginpos = ipos - iequalpos
+        endpos = ipos + len(equalFlags) - iequalpos
+
         abnormals = []
         for i in range(beginpos, endpos):
             if i < 0:
@@ -59,7 +57,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             eintlist = list(map(int, list("00100")))
             evalue = 0
             lenerror = 1
-            if isallEqual(preflagList, eintlist, i, ifault):
+            iequalpos = 2
+            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) // 2 + 1
                 continue
@@ -67,21 +66,24 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             eintlist = list(map(int, list("11011")))
             evalue = ifault
             lenerror = 1
-            if isallEqual(preflagList, eintlist, i, ifault):
+            iequalpos = 2
+            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) // 2 + 1
                 continue
-            eintlist = list(map(int, list("11122*11")))
+            eintlist = list(map(int, list("11122211")))
             evalue = ifault
             lenerror = 3
-            if isallEqual(preflagList, eintlist, i, ifault):
+            iequalpos = 3
+            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) // 2 + 1
                 continue
-            eintlist = list(map(int, list("00022*00")))
+            eintlist = list(map(int, list("00022200")))
             evalue = ifault
             lenerror = 3
-            if isallEqual(preflagList, eintlist, i, ifault):
+            iequalpos = 3
+            if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
                 i += len(eintlist) // 2 + 1
                 continue
