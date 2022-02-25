@@ -60,7 +60,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             iequalpos = 2
             if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
-                i += i + len(eintlist) - iequalpos
+                i += len(eintlist) - iequalpos
                 continue
 
             eintlist = list(map(int, list("11011")))
@@ -69,24 +69,28 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             iequalpos = 2
             if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
-                i += i + len(eintlist) - iequalpos
+                i += len(eintlist) - iequalpos
                 continue
+
             eintlist = list(map(int, list("11122211")))
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 3
             iequalpos = 3
             if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
-                i += i + len(eintlist) - iequalpos
+                i += len(eintlist) - iequalpos
                 continue
+
             eintlist = list(map(int, list("00022200")))
             evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 3
             iequalpos = 3
             if isallEqual(preflagList, eintlist, i, ifault, iequalpos):
                 assignmentValue(preflagList, i, lenerror, evalue)
-                i += i + len(eintlist) - iequalpos
+                i += len(eintlist) - iequalpos
                 continue
+
+            i += 1
 
 
 
