@@ -33,52 +33,6 @@ savefilepath = "tmp/servertopdown"
 
 
 """
-处理server 但是需要用到topdown的数据topdown的结合数据
-
-会对原始数值进行处理
-"""
-
-
-def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame], predictprocesspds ,detectionJson: Dict) -> List[
-    pd.DataFrame]:
-    alltopdownspd = mergeDataFrames(predicttopdownpds)
-
-    def getSameTime(servertimes: List[str], topdowntimes: List[str]) -> List[str]:
-        sametimes = sorted(list(set(servertimes) & set(topdowntimes)))
-        return sametimes
-
-    def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tuple[Any, Any]:
-        sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
-        serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
-        topdownchooseindex = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
-        # return datapd[chooseindex][featuresnames].mean()
-        return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(drop=True)
-
-    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, detectionJson: Dict) -> pd.DataFrame:
-        assert len(iserverpd) == len(itopdowndpd)
-        # 对itopdownpd中的mflops进行平滑处理
-        cname = "mflops"
-        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
-        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)[cname]
-        mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
-
-        cname = "pgfree"
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [iserverpd], [cname], datanumber=10)[cname]
-        iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
-        return iserverpd
-
-
-    resserverpds = []
-    for iserverpd in predictserverpds:
-        spd, tpd = getsametimepd(iserverpd, alltopdownspd)
-        ispd = dealServerpdAndTopdownpd(spd, tpd, detectionJson=detectionJson)
-        resserverpds.append(ispd)
-    return resserverpds
-
-"""
 传入的是合并的server和topdown数据
 """
 def dealOneTopDownPD(itopdowndpd: pd.DataFrame)->pd.DataFrame:
@@ -90,6 +44,7 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame)->pd.DataFrame:
     mflops_mean = getNormalTopdownMean(None, [itopdowndpd], [cname_median_mean], datanumber=10)[cname_median_mean]
     print("mflops_mean is : {}".format(mflops_mean))
     mflops_change = itopdowndpd[cname_median_mean].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+    itopdowndpd["mflops_change"] = mflops_change
 
 
     cname = "pgfree"
