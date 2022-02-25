@@ -267,50 +267,56 @@ def getNormalServerMean(detectionJson: Dict, serverdatapd: List[pd.DataFrame], p
     intersectionTimes = getServerProcesTimeIntersection(set(allserverpd[TIME_COLUMN_NAME].tolist()),
                                                         set(allprocesspd[TIME_COLUMN_NAME].tolist()), datanumber)
     meanSeries = getMeanFromTimeDataFrom(serverdatapd, "server", features, intersectionTimes)
-    for ifeaturename in features:
-        featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
-        if featureVaule is not None:
-            meanSeries[ifeaturename] = featureVaule
+
+    if detectionJson is not None:
+        for ifeaturename in features:
+            featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
+            if featureVaule is not None:
+                meanSeries[ifeaturename] = featureVaule
     return meanSeries
 
 
 def getNormalProcessMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromNumberDataFrom(datapd, "process", features, datanumber)
-    for ifeaturename in features:
-        featureVaule = getMeanFromExistMean(detectionJson, "process", ifeaturename)
-        if featureVaule is not None:
-            meanSeries[ifeaturename] = featureVaule
+    if detectionJson is not None:
+        for ifeaturename in features:
+            featureVaule = getMeanFromExistMean(detectionJson, "process", ifeaturename)
+            if featureVaule is not None:
+                meanSeries[ifeaturename] = featureVaule
     return meanSeries
 
 
 def getNormalL2Mean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                     datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromNumberDataFrom(datapd, "l2", features, datanumber)
-    for ifeaturename in features:
-        featureVaule = getMeanFromExistMean(detectionJson, "l2", ifeaturename)
-        if featureVaule is not None:
-            meanSeries[ifeaturename] = featureVaule
+    if detectionJson is not None:
+        for ifeaturename in features:
+            featureVaule = getMeanFromExistMean(detectionJson, "l2", ifeaturename)
+            if featureVaule is not None:
+                meanSeries[ifeaturename] = featureVaule
     return meanSeries
 
 
 def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromNumberDataFrom(datapd, "network", features, datanumber)
-    for ifeaturename in features:
-        featureVaule = getMeanFromExistMean(detectionJson, "network", ifeaturename)
-        if featureVaule is not None:
-            meanSeries[ifeaturename] = featureVaule
+    if detectionJson is not None:
+        for ifeaturename in features:
+            featureVaule = getMeanFromExistMean(detectionJson, "network", ifeaturename)
+            if featureVaule is not None:
+                meanSeries[ifeaturename] = featureVaule
     return meanSeries
 
 
 def getNormalTopdownMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromNumberDataFrom(datapd, "topdown", features, datanumber)
-    for ifeaturename in features:
-        featureVaule = getMeanFromExistMean(detectionJson, "topdown", ifeaturename)
-        if featureVaule is not None:
-            meanSeries[ifeaturename] = featureVaule
+    if detectionJson is not None:
+        for ifeaturename in features:
+            featureVaule = getMeanFromExistMean(detectionJson, "topdown", ifeaturename)
+            if featureVaule is not None:
+                meanSeries[ifeaturename] = featureVaule
     return meanSeries
 
 

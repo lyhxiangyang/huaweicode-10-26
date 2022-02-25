@@ -257,7 +257,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
     # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
-    predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds) # todo
+    # predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
 
     # 3. 对process数据进行处理
     add_cpu_column(predictprocesspds)
