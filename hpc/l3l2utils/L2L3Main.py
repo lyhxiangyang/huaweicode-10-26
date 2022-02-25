@@ -107,10 +107,18 @@ def processTopdownList(predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFram
 """
 根据mflops的数值，将较低强度的mflops的数值删除点
 原始数据不会修改
+并且将 连续删除的数据再多删除2个点
 """
 def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> List[pd.DataFrame]:
+    # 传进来的为5个，如果不为5个，那么默认不舍弃 以中间为标准
+    def addOtherPoint(x: pd.Series):
+        if False in x.to_list():
+            return False
+        return True
+
     def removepdFromtopdown(itopdownpd: pd.DataFrame):
         isflags = itopdownpd["mflops"].apply(lambda x: x > 2000)
+        isflags = isflags.rolling(window=5, min_periods=1, center=True).apply(lambda x: addOtherPoint(x))
         return itopdownpd[isflags].reset_index(drop=True, inplace=False)
     respds = []
     for ipd in predicttopdownpds:
@@ -219,6 +227,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predicttopdwnpds = differenceServer(predicttopdwnpds, inputDict["topdown_accumulate_feature"])
 
     print("根据topdown数据对数据进行对齐操作".format(40, "*"))
+    # 对mflops分析然后是删除掉
     predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
     # 根据数据对server数据进行补偿操作
     predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predicttopdwnpds)
