@@ -99,11 +99,11 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     #             continue
 
 
-        for i in range(0, len(preflagList)):
-            if len(preflagList[i]) == 0:  # 全部删除干净了，那就等于0
-                preflagList[i] = [0]
-            if len(preflagList[i]) >= 2 and 0 in preflagList[i]:
-                preflagList[i].remove(0)
+    for i in range(0, len(preflagList)):
+        if len(preflagList[i]) == 0:  # 全部删除干净了，那就等于0
+            preflagList[i] = [0]
+        if len(preflagList[i]) >= 2 and 0 in preflagList[i]:
+            preflagList[i].remove(0)
 
     l2l3predetectresultpd["preFlag"] = preflagList
     l2l3predetectresultpd.reset_index(drop=True, inplace=True)
