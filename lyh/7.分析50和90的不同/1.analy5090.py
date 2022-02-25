@@ -98,6 +98,7 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame)->pd.DataFrame:
     itopdowndpd[cname_median] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
     itopdowndpd[cname_median_mean] = itopdowndpd[cname_median].rolling(window=5, center=True, min_periods=1).mean()
     pgfree_mean = getNormalTopdownMean(None, [itopdowndpd], [cname_median_mean], datanumber=10)[cname_median_mean]
+    print("mflops_mean is : {}".format(pgfree_mean))
     itopdowndpd[cname_median_mean + "_recover"] = itopdowndpd[cname_median_mean] + pgfree_mean * mflops_change
 
     return itopdowndpd
