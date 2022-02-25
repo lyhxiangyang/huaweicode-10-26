@@ -305,3 +305,23 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
     result['preFlag'] = prenet
     # result1.set_index(TIME_COLUMN_NAME, inplace=True)
     return result
+
+
+"""
+预测CPU异常下降导致的161异常
+"""
+def predictL2_CPUDown(l2_serverdata: pd.DataFrame, freqDownResultPds: List[pd.DataFrame])-> List:
+    select_data = l2_serverdata["freq"].tolist()
+    result = []
+    for i in select_data:
+        if i < 91:
+            result.append(161)
+        else:
+            result.append(0)
+    for pd in freqDownResultPds:
+        down_list = pd["preFlag"].tolist()
+        for i in range(len(down_list)):
+            if result[i] == 161 and down_list[i] != 0:
+                result[i] = 0
+    return result
+

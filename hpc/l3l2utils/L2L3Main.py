@@ -21,7 +21,7 @@ from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, g
     analysePredictResult
 from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
     predictTemp, \
-    detectNetwork_TXHangAbnormal
+    detectNetwork_TXHangAbnormal, predictL2_CPUDown
 
 """
 time faultFlag preFlag
@@ -158,7 +158,7 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
 """
 
 
-def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame]) -> List[
+def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame], detectionJson: Dict) -> List[
     pd.DataFrame]:
     alltopdownspd = mergeDataFrames(predicttopdownpds)
 
@@ -173,41 +173,27 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         # return datapd[chooseindex][featuresnames].mean()
         return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(drop=True)
 
-
-    def smooth_pgfree(serverpds: List[pd.DataFrame], smoothwinsize: int = 6) -> List[pd.DataFrame]:
-        pgfree_name = "pgfree"
-        for ipd in serverpds:
-            if pgfree_name in ipd.columns.array:
-                ipd[pgfree_name] = ipd[pgfree_name].rolling(window=smoothwinsize, min_periods=1, center=True).median()
-        return serverpds
-
-    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame) -> pd.DataFrame:
+    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, detectionJson: Dict) -> pd.DataFrame:
         assert len(iserverpd) == len(itopdowndpd)
         # 对itopdownpd中的mflops进行平滑处理
         cname = "mflops"
-        cnamesliding = cname + "_sliding"
-        itopdowndpd[cnamesliding] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
-        mflops_mean = getMeanFromNumberDataFrom([itopdowndpd], "", featuresnames=[cnamesliding], datanumber=3)[cnamesliding]
-        mflops_change = itopdowndpd[cnamesliding].apply(lambda x : (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0 ) # 如果是-20% 那么对应的值应该增加20%
-        # mflops_change.reset_index(drop=True, inplace=True) 必须保证
+        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
+        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)
+        mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
 
-        # 对iserverpd中的
         cname = "pgfree"
-        iserverpd[cname] = iserverpd[cname].rolling(window=6, min_periods=1, center=True).median() # 先对其进行平滑处理
-        # 进行保存
-        nname = cname + "_original_sliding"
-        iserverpd[nname] = iserverpd[cname]
-
-        pgfree_mean = getMeanFromNumberDataFrom([iserverpd],"", featuresnames=[cname], datanumber=3)[cname]
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
         return iserverpd
 
 
     resserverpds = []
     for iserverpd in predictserverpds:
         spd, tpd = getsametimepd(iserverpd, alltopdownspd)
-        ispd = dealServerpdAndTopdownpd(spd, tpd)
+        ispd = dealServerpdAndTopdownpd(spd, tpd, detectionJson=detectionJson)
         resserverpds.append(ispd)
     return resserverpds
 
@@ -264,7 +250,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
 
     # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
-    predicttopdwnpds = processTopdownList(predicttopdwnpds)
+    # predicttopdwnpds = processTopdownList(predicttopdwnpds) # todo
 
     # 3. 对process数据进行处理
     add_cpu_column(predictprocesspds)
@@ -420,6 +406,13 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
                                                                           inputDict["tempertature_modeltype"]],
                                                                       data=l2_serverpds))
 
+    print("对CPU主频下降进行预测".center(40, "#"))
+    l2cpudownresult = pd.DataFrame()
+    l2cpudownresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
+    l2cpudownresult[FAULT_FLAG] = l2_serverpds[TIME_COLUMN_NAME]
+    l2cpudownresult["preFlag"] = predictL2_CPUDown(l2_serverdata=l2_serverpds, freqDownResultPds=[l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult])
+
+
     print("对网络异常1进行预测 TX_Hang".center(40, "#"))
     # REPORT_TIME = "time"
     # l2networkresult1 = pd.DataFrame()
@@ -440,7 +433,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult(
         [l3cpuresult, l3memleakresult, l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult,
-         l2temperamentresult, l2networkresult1, l2networkresult2])
+         l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult])
 
     print("对结果进行优化".center(40, "*"))
     allresultspd = fixFaultFlag(allresultspd)
