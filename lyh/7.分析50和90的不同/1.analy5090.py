@@ -38,14 +38,13 @@ savefilepath = "tmp/servertopdown"
 """
 def dealOneTopDownPD(itopdowndpd: pd.DataFrame)->pd.DataFrame:
     cname = "mflops"
-    itopdowndpd = removeUselessDataFromTopdownList([itopdowndpd])[0]
+    # itopdowndpd = removeUselessDataFromTopdownList([itopdowndpd])[0]
     cname_median = cname + "_median"
     cname_median_mean = cname_median + "_mean"
     itopdowndpd[cname_median] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
     itopdowndpd[cname_median_mean] = itopdowndpd[cname_median].rolling(window=5, center=True, min_periods=1).mean()
     mflops_mean = getNormalTopdownMean(None, [itopdowndpd], [cname_median_mean], datanumber=10)[cname_median_mean]
     print("mflops_mean is : {}".format(mflops_mean))
-    # x = 0 为1
     mflops_change = itopdowndpd[cname_median_mean].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
     itopdowndpd["mflops_change"] = mflops_change
 

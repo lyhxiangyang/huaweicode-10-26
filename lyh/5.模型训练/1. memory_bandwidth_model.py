@@ -13,8 +13,8 @@ from hpc.l3l2utils.DefineData import MODEL_TYPE
 if __name__ == "__main__":
     # 需要用到的三个路径
     nowpath = sys.path[0]
-    savemodelpath = os.path.join(nowpath, "models", "wrf")
-    traindatapath = os.path.join(nowpath, "model_wrf_50.csv")
+    savemodelpath = os.path.join(nowpath, "models", "grapes")
+    traindatapath = os.path.join(nowpath, "model_grape_50.csv")
     # trainFeatures = ["ddrc_ddwr_sum"]
     trainFeatures = ["pgfree_mean",]
 
