@@ -48,57 +48,70 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
     # 为preflagList 从beginpos开始赋值value  长度为lenght, 此时的错误是ifault
     # isadd True添加    False 删除
-    def assignmentValue(preflagList, beginpos, length, value, isadd):
+    def assignmentValue(preflagList, beginpos, length, value):
         for i in range(beginpos, min(len(preflagList), beginpos + length)):
-            if isadd:
-                if value not in preflagList[i]:
-                    preflagList[i].append(value)
-                continue
-            # 不是0 没有添加
+            if value not in preflagList[i]:
+                preflagList[i].append(value)
+    # 删除
+    def removeValue(preflagList, beginpos, length, value):
+        for i in range(beginpos, min(len(preflagList), beginpos + length)):
             if value in preflagList[i]:
                 preflagList[i].remove(value)
-                continue
+
 
     for ifault in allPreFlags:
         i = 0
         while i < len(preflagList):
             eintlist = list(map(int, list("00100")))
-            evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 1
             iequalpos = 2
-            isadd = eintlist[0] != 0 # 第1个是0 就删除，第1个是1就添加
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
-                assignmentValue(preflagList, i, lenerror, evalue, isadd)
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
 
             eintlist = list(map(int, list("11011")))
-            evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 1
             iequalpos = 2
-            isadd = eintlist[0] != 0 # 第1个是0 就删除，第1个是1就添加
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
-                assignmentValue(preflagList, i, lenerror, evalue, isadd)
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
 
             eintlist = list(map(int, list("11122211")))
-            evalue = 0 if eintlist[0] == 0 else ifault
             lenerror = 3
             iequalpos = 3
             isadd = eintlist[0] != 0 # 第1个是0 就删除，第1个是1就添加
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
-                assignmentValue(preflagList, i, lenerror, evalue, isadd)
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
 
-            eintlist = list(map(int, list("00022200")))
-            evalue = 0 if eintlist[0] == 0 else ifault
+            eintlist = list(map(int, list("000222000")))
             lenerror = 3
             iequalpos = 3
-            isadd = eintlist[0] != 0 # 第1个是0 就删除，第1个是1就添加
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
-                assignmentValue(preflagList, i, lenerror, evalue, isadd)
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
 
