@@ -18,6 +18,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
     # 判断这个错误是否符合equalFlag
     # 如果exultFlags是奇数如11011那么ipos指向的是0中间位置，如果exultFlags是偶数，如11100111那么ipos指向的是第一个0位置
+    # 如果是11111000011111 中间位置的第1个位置
     # 2 代表0或者1
     def isallEqual(preFlagsList, equalFlags, ipos,
                    ifault):  # 比较两个列表是否相等  abnormals是preFlag， equalFlags必须是奇数, ipos是当前的位置
@@ -39,38 +40,63 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
         if len(abnormals) != len(equalFlags):
             return False
         abnormals = [1 if ifault in ifautltlists else 0 for ifautltlists in abnormals]
-        compareFlags = [abnormals[i] == equalFlags[i] for i in range(0, len(abnormals))]  # True代表相同 False代表不同
+        compareFlags = [abnormals[i] == equalFlags[i] if equalFlags[i] != 2 else True for i in range(0, len(abnormals))]  # True代表相同 False代表不同
         return compareFlags.count(True) == len(compareFlags)
 
     preflagList = list(l2l3predetectresultpd["preFlag"])
     allPreFlags = sorted(list(set(chain.from_iterable(preflagList))))  # 得到所有的错误
     if 0 in allPreFlags:
         allPreFlags.remove(0)
-    for i in range(0, len(preflagList)):
-        # 对每个异常进行判断
-        for ifault in allPreFlags:  # 对所有出现过的错误进行预判
-            # 0 代表不是这个错误， 1代表是这个错误
-            if isallEqual(preflagList, list(map(int, list("00100"))), i, ifault):
-                preflagList[i].remove(ifault)
-                continue  # 不需要这个异常
-            if isallEqual(preflagList, list(map(int, list("11011"))), i, ifault):
-                preflagList[i].append(ifault)
+
+    # 为preflagList 从beginpos开始赋值value  长度为lenght
+    def assignmentValue(preflagList, beginpos, length, value):
+        for i in range(beginpos, min(len(preflagList), beginpos + length)):
+            preflagList[i].append(value)
+
+    for ifault in allPreFlags:
+        i = 0
+        while i < len(preflagList):
+            eintlist = list(map(int, list("00100")))
+            evalue = ifault
+            if isallEqual(preflagList, eintlist, i, ifault):
+                assignmentValue(preflagList, i, 1, evalue)
+                i += len(eintlist) // 2 + 1
                 continue
-            if isallEqual(preflagList, list(map(int, list("11100111"))), i, ifault):
-                preflagList[i].append(ifault)  # 先不管i+1是怎么回事
+
+            eintlist = list(map(int, list("11011")))
+            evalue = 0
+            if isallEqual(preflagList, eintlist, i, ifault):
+                assignmentValue(preflagList, i, 1, evalue)
+                i += len(eintlist) // 2 + 1
                 continue
-            if isallEqual(preflagList, list(map(int, list("000111000"))), i, ifault):
-                preflagList[i].remove(ifault)
+            eintlist = list(map(int, list("111222111")))
+            evalue = ifault
+            if isallEqual(preflagList, eintlist, i, ifault):
+                assignmentValue(preflagList, i, 3, evalue)
+                i += len(eintlist) // 2 + 1
                 continue
-            if isallEqual(preflagList, list(map(int, list("00011000"))), i, ifault):
-                preflagList[i].remove(ifault)
-                continue
-            if isallEqual(preflagList, list(map(int, list("000001111100000"))), i, ifault):
-                preflagList[i].remove(ifault)
-                continue
-            if isallEqual(preflagList, list(map(int, list("000011110000"))), i, ifault):
-                preflagList[i].remove(ifault)
-                continue
+
+
+    # for i in range(0, len(preflagList)):
+    #     # 对每个异常进行判断
+    #     for ifault in allPreFlags:  # 对所有出现过的错误进行预判
+    #         # 0 代表不是这个错误， 1代表是这个错误
+    #         if isallEqual(preflagList, list(map(int, list("00100"))), i, ifault):
+    #             preflagList[i].remove(ifault)
+    #             continue  # 不需要这个异常
+    #         if isallEqual(preflagList, list(map(int, list("11011"))), i, ifault):
+    #             preflagList[i].append(ifault)
+    #             continue
+    #         if isallEqual(preflagList, list(map(int, list("1110111"))), i, ifault):
+    #             preflagList[i].append(ifault)
+    #             continue
+    #         if isallEqual(preflagList, list(map(int, list("0001000"))), i, ifault):
+    #             preflagList[i].append(ifault)
+    #             continue
+    #         if isallEqual(preflagList, list(map(int, list("0001000"))), i, ifault):
+    #             preflagList[i].append(ifault)
+    #             continue
+
 
 
         if len(preflagList[i]) == 0:  # 全部删除干净了，那就等于0
@@ -426,6 +452,8 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
                                                    {132})
     analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
                                                    {141})
+    analyseDict[161] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {161})
 
     accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
                                            preflags=predictpd["preFlag"].tolist())
