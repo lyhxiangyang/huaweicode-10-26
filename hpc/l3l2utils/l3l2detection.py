@@ -62,6 +62,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     for ifault in allPreFlags:
         i = 0
         while i < len(preflagList):
+            # 1.
             eintlist = list(map(int, list("00100")))
             lenerror = 1
             iequalpos = 2
@@ -74,7 +75,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                     assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
-
+            # 2.
             eintlist = list(map(int, list("11011")))
             lenerror = 1
             iequalpos = 2
@@ -87,7 +88,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                     assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
-
+            # 3.
             eintlist = list(map(int, list("11122211")))
             lenerror = 3
             iequalpos = 3
@@ -101,10 +102,23 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                     assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
-
+            # 4.
             eintlist = list(map(int, list("000222000")))
             lenerror = 3
             iequalpos = 3
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
+                i += len(eintlist) - iequalpos
+                continue
+            # 5.
+            eintlist = list(map(int, list("01000")))
+            lenerror = 1
+            iequalpos = 1
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 if (eintlist[0] == 0):
                     removeValue(preflagList, i , lenerror, ifault)
