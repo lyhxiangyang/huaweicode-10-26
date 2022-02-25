@@ -3,6 +3,7 @@ import pandas as pd
 from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame
 from hpc.l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
 from hpc.l3l2utils.FeatureExtraction import differenceServer
+from hpc.l3l2utils.L2L3Main import removeUselessDataFromTopdownList
 
 topdownfilepath = [
     "DATA/2022-01-14新的测试数据/28.grapes_test_multi_l3_1/centos11/topdown/topdown.csv",
@@ -68,8 +69,8 @@ if __name__ == "__main__":
         itopdownpd = getfilepd(ipath)
 
         iserverpd = getfilepd(serverfilepath[i])
-        iserverpds = processServer(iserverpd)
-        iserverpd = iserverpds[0]
+        iserverpd = processServer(iserverpd)[0]
+        iserverpd = removeUselessDataFromTopdownList([iserverpd])[0]
 
         itpd = mergeinnerTwoDataFrame(lpd=iserverpd, rpd=itopdownpd)
         dealpd = dealOneTopDownPD(itpd, mflops_mean[i], ddrc_rd_mean[i], ddrc_wr_mean[i], pgfree_mean[i])
