@@ -94,7 +94,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd = l2l3predetectresultpd.copy()
     l2l3predetectresultpd = remove_Abnormal_Head_Tail(l2l3predetectresultpd,
-                                                      abnormals={41, 42, 43, 44, 45, 71, 72, 73, 74, 75}, windowsize=4)
+                                                      abnormals={41, 42, 43, 44, 45, 71, 72, 73, 74, 75, 91, 92, 93, 94, 95, 51, 52}, windowsize=4)
     # 修改标签
     l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
         lambda x: 131 if x == 133 else x)
