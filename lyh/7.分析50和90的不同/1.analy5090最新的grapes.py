@@ -70,9 +70,9 @@ if __name__ == "__main__":
 
         iserverpd = getfilepd(serverfilepath[i])
         iserverpd = processServer(iserverpd)[0]
-        iserverpd = removeUselessDataFromTopdownList([iserverpd])[0]
 
         itpd = mergeinnerTwoDataFrame(lpd=iserverpd, rpd=itopdownpd)
+        itpd = removeUselessDataFromTopdownList([itpd])[0]
         dealpd = dealOneTopDownPD(itpd, mflops_mean[i], ddrc_rd_mean[i], ddrc_wr_mean[i], pgfree_mean[i])
         alltopdownpds.append(dealpd)
 
