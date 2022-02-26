@@ -216,6 +216,8 @@ def extractionProcessPdLists(processpds: List[pd.DataFrame], extractFeatures: Li
 
 def extractionServerPdLists(serverpds: List[pd.DataFrame], extractFeatures: List[str],
                             windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
+    if len(extractFeatures) == 0:
+        return serverpds
     extraction_dfs = []
     for i, iserverpd in enumerate(serverpds):
         # 对累计的特征值进行数据的处理, 默认一个server数据里面都是连续的, 就算不连续，也只会影响几个点
