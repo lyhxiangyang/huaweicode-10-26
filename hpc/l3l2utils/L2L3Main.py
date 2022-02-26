@@ -196,6 +196,8 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], predictprocesspds, [cname], datanumber=10)[cname]
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
+        # pgfree 需要减去平均值
+        iserverpd[cname] = iserverpd[cname] - pgfree_mean
         return iserverpd
 
 
@@ -292,8 +294,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # ========================================
 
     print("标准化要预测的process和server数据".center(40, "*"))
-    standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=inputDict["server_feature"],
-                                        meanValue=normalserver_meanvalue, standardValue=100)
+    standardserverfeatures = removeListValues(inputDict["server_feature"], ["pgfree"]) # pgfree的判断不在于标准化
+    standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=standardserverfeatures, meanValue=normalserver_meanvalue, standardValue=100)
     standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=inputDict["process_feature"],
                                          meanValue=normalprocess_meanvalue, standardValue=60)
     standard_l2_pds = standardLists(pds=predictl2pds, standardFeatures=inputDict["l2_feature"],
@@ -555,5 +557,12 @@ def getDetectionJsonFrominputconfig(inputDict: Dict, requestData = None, isChang
         inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "wrf")
     return requestData
 
+def removeListValues(rlist: List, rvalue: List) -> List:
+    resList = []
+    for i in rlist:
+        if i in rvalue:
+            continue
+        resList.append(i)
+    return resList
 
 
