@@ -89,6 +89,7 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     itopdowndpd["ddrc_wr_mean_145"] = [ddrc_wr_mean * 1.45] * len(itopdowndpd)
     itopdowndpd[cname_median_mean + "_recover"] = itopdowndpd[cname_median_mean] + ddrc_wr_mean * mflops_change
 
+    itopdowndpd["rd_wr_sum_mean"] = ddrc_rd_mean + ddrc_wr_mean
     itopdowndpd["rd_wr_sum"] = itopdowndpd["ddrc_rd_median_mean_recover"] + itopdowndpd["ddrc_wr_median_mean_recover"]
     # 平滑一下
     itopdowndpd["rd_wr_sum"] = itopdowndpd["rd_wr_sum"].rolling(window=3, center=True, min_periods=1).median()
