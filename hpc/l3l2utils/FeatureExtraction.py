@@ -102,7 +102,7 @@ def standardDataFrame(df: pd.DataFrame, standardFeatures=None, meanValue=None,
     # 需要先将meanValue中的0值去掉
     meanValue = meanValue[~meanValue.isin([0])]
     columnnames = list(set(meanValue.index) & set(standardFeatures))
-    df.loc[:, columnnames] = (df.loc[:, columnnames] / meanValue * standardValue).astype(standardValueType)
+    df.loc[:, columnnames] = (df.loc[:, columnnames] / meanValue[columnnames] * standardValue).astype(standardValueType)
     return df
 
 
