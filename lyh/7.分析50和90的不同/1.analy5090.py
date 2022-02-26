@@ -38,7 +38,7 @@ savefilepath = "tmp/servertopdown"
 """
 def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     cname = "mflops"
-    # itopdowndpd = removeUselessDataFromTopdownList([itopdowndpd])[0]
+    itopdowndpd = removeUselessDataFromTopdownList([itopdowndpd])[0]
     cname_median = cname + "_median"
     cname_median_mean = cname_median + "_mean"
     itopdowndpd[cname_median] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
@@ -46,8 +46,6 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     mflops_mean = getNormalTopdownMean(None, [itopdowndpd], [cname_median_mean], datanumber=10)[cname_median_mean]
     print("mflops_mean is : {}".format(mflops_mean))
     itopdowndpd["mflops_mean_100"] = [mflops_mean] * len(itopdowndpd)
-    # itopdowndpd["mflops_mean_grapes_110"] = [mflops_mean * 1.1] * len(itopdowndpd)
-    # itopdowndpd["mflops_mean_wrf_145"] = [mflops_mean * 1.45] * len(itopdowndpd)
     mflops_change = itopdowndpd[cname_median_mean].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
     itopdowndpd["mflops_change"] = mflops_change
 
@@ -63,6 +61,8 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     itopdowndpd["pgfree_mean_100"] = [pgfree_mean] * len(itopdowndpd)
     itopdowndpd["pgfree_mean_110"] = [pgfree_mean * 1.1] * len(itopdowndpd)
     itopdowndpd["pgfree_mean_145"] = [pgfree_mean * 1.45] * len(itopdowndpd)
+    itopdowndpd["pgfree_mean_100+2M"] = [pgfree_mean + 2000000] * len(itopdowndpd)
+    itopdowndpd["pgfree_mean_100+2.5M"] = [pgfree_mean + 2500000] * len(itopdowndpd)
     itopdowndpd["pgfree_mean_100+3M"] = [pgfree_mean + 3000000] * len(itopdowndpd)
     itopdowndpd["pgfree_mean_100+5M"] = [pgfree_mean + 5000000] * len(itopdowndpd)
     itopdowndpd[cname_median_mean + "_recover"] = itopdowndpd[cname_median_mean] + pgfree_mean * mflops_change
@@ -91,11 +91,15 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     itopdowndpd["ddrc_wr_mean_145"] = [ddrc_wr_mean * 1.45] * len(itopdowndpd)
     itopdowndpd[cname_median_mean + "_recover"] = itopdowndpd[cname_median_mean] + ddrc_wr_mean * mflops_change
 
-    itopdowndpd["rd_wr_sum_mean_100"] = ddrc_rd_mean + ddrc_wr_mean
-    itopdowndpd["rd_wr_sum_mean_100+6K"] = ddrc_rd_mean + ddrc_wr_mean + 6000
+
     itopdowndpd["rd_wr_sum"] = itopdowndpd["ddrc_rd_median_mean_recover"] + itopdowndpd["ddrc_wr_median_mean_recover"]
     # 平滑一下
-    itopdowndpd["rd_wr_sum"] = itopdowndpd["rd_wr_sum"].rolling(window=3, center=True, min_periods=1).median()
+    itopdowndpd["rd_wr_sum_median"] = itopdowndpd["rd_wr_sum"].rolling(window=3, center=True, min_periods=1).median()
+    rd_wr_sum_mean = getNormalTopdownMean(None, [itopdowndpd], ["rd_wr_sum_median"], datanumber=10)["rd_wr_sum_dedian"]
+    itopdowndpd["rd_wr_sum_mean_100"] = rd_wr_sum_mean
+    itopdowndpd["rd_wr_sum_mean_100+6K"] = rd_wr_sum_mean + 6000
+    itopdowndpd["rd_wr_sum_mean_110"] = rd_wr_sum_mean * 1.1
+    itopdowndpd["rd_wr_sum_mean_120"] = rd_wr_sum_mean * 1.2
 
 
     return itopdowndpd
