@@ -219,7 +219,7 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
 
 def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("将数据从文件中读取".center(40, "*"))
-    detectionJson = getDetectionJsonFrominputconfig(inputDict, requestData)
+    detectionJson = getDetectionJsonFrominputconfig(inputDict, requestData, isChangeInfo=False)
 
     predictserverpds = getServerPdFromJsonDict(sdict=detectionJson)
     predictprocesspds = getProcessPdFromJsonDict(sdict=detectionJson)
@@ -267,6 +267,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     add_cpu_column(predictprocesspds)
 
     # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
+    # 补偿之后对pgfree进行减去平均值，使其与2M进行判断
     predictserverpds = processServerList(predictserverpds, predicttopdwnpds,predictprocesspds, detectionJson)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
@@ -550,11 +551,6 @@ def getDetectionJsonFrominputconfig(inputDict: Dict, requestData = None, isChang
     # 修改内存带宽中的模型路径
     if not isChangeInfo:
         return requestData
-
-    if requestData["RequestData"]["type"] == "grapes":
-        inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "grapes")
-    else:
-        inputDict["serverbandwidth_modelpath"] = os.path.join(inputDict["serverbandwidth_modelpath"], "wrf")
     return requestData
 
 def removeListValues(rlist: List, rvalue: List) -> List:
