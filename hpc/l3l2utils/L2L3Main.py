@@ -95,9 +95,10 @@ def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -
         # 对rd_wr_sum进行结合 减去平均值  阈值与6000比较
         rd_wr_cname = "ddrc_ddwr_sum"
         itopdownpd[rd_wr_cname] = itopdownpd[rd_cname] + itopdownpd[wr_cname]
-        itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=3, center=True, min_periods=1).median()
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
         rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
+        return itopdownpd
 
         # 对ddrc_wr进行滑动窗口处理
 
@@ -134,10 +135,11 @@ def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -
         #
         # itopdownpd["ddrc_ddwr_sum"] = itopdownpd["ddrc_rd_sliding_recover_sliding"] + itopdownpd[
         #     "ddrc_wr_sliding_recover_sliding"]
-
+    rlistpds = []
     for ipd in predicttopdwnpds:
-        proceeOneTopdownPd(ipd)
-    return predicttopdwnpds
+        tpd = proceeOneTopdownPd(ipd)
+        rlistpds.append(tpd)
+    return rlistpds
 
 """
 根据mflops的数值，将较低强度的mflops的数值删除点
