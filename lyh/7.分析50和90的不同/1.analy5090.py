@@ -63,6 +63,7 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     itopdowndpd["pgfree_mean_100"] = [pgfree_mean] * len(itopdowndpd)
     itopdowndpd["pgfree_mean_110"] = [pgfree_mean * 1.1] * len(itopdowndpd)
     itopdowndpd["pgfree_mean_145"] = [pgfree_mean * 1.45] * len(itopdowndpd)
+    itopdowndpd["pgfree_mean_100+5M"] = [pgfree_mean + 5000000] * len(itopdowndpd)
     itopdowndpd[cname_median_mean + "_recover"] = itopdowndpd[cname_median_mean] + pgfree_mean * mflops_change
 
     cname = "ddrc_rd"
@@ -73,7 +74,6 @@ def dealOneTopDownPD(itopdowndpd: pd.DataFrame, pgfree_mean)->pd.DataFrame:
     ddrc_rd_mean = getNormalTopdownMean(None, [itopdowndpd], [cname_median_mean], datanumber=10)[cname_median_mean]
     print("ddrc_rd_mean is : {}".format(ddrc_rd_mean))
     itopdowndpd["ddrc_rd_mean_100"] = [ddrc_rd_mean] * len(itopdowndpd)
-    itopdowndpd["ddrc_rd_mean_100+5M"] = [ddrc_rd_mean + 5000000] * len(itopdowndpd)
     itopdowndpd["ddrc_rd_mean_110"] = [ddrc_rd_mean * 1.1] * len(itopdowndpd)
     itopdowndpd["ddrc_rd_mean_145"] = [ddrc_rd_mean * 1.45] * len(itopdowndpd)
     itopdowndpd[cname_median_mean + "_recover"] = itopdowndpd[cname_median_mean] + ddrc_rd_mean * mflops_change
