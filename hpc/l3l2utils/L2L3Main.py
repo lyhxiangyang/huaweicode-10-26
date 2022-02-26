@@ -21,7 +21,7 @@ from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, g
     analysePredictResult
 from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
     predictTemp, \
-    detectNetwork_TXHangAbnormal, predictL2_CPUDown
+    detectNetwork_TXHangAbnormal, predictL2_CPUDown, predictCacheGrab
 
 """
 time faultFlag preFlag
@@ -398,6 +398,12 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3BandWidthResult["preFlag"] = detectL3BandWidthAbnormal(allserverpds=l3_server_topdownpds,
                                                              modelfilepath=inputDict["serverbandwidth_modelpath"],
                                                              modeltype=inputDict["serverbandwidth_modeltype"])
+    print("对cache抢占进行检测".center(40, "*"))
+    l3CacheGrabResult = pd.DataFrame()
+    l3CacheGrabResult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
+    l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
+    l3CacheGrabResult["preFlag"] = predictCacheGrab(l3_server_topdownpds, l3BandWidthResult, modelfilepath=inputDict["cachegrab_modelpath"], modeltype=inputDict["cachegrab_modeltype"])
+
 
     print("对L2层数据进行预测".center(40, "*"))
     l2_serverpds = mergeinnerTwoDataFrame(lpd=alll2pds, rpd=allserverpds)  # 根据时间得到l2的合并结果
@@ -454,7 +460,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
 
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult(
-        [l3cpuresult, l3memleakresult, l3BandWidthResult, l2machinepowerresult, l2cabinetpowerresult,
+        [l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult,l2machinepowerresult, l2cabinetpowerresult,
          l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult])
 
     print("对结果进行优化".center(40, "*"))

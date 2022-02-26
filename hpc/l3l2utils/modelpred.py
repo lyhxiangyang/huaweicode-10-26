@@ -325,3 +325,22 @@ def predictL2_CPUDown(l2_serverdata: pd.DataFrame, freqDownResultPds: List[pd.Da
                 result[i] = 0
     return result
 
+"""
+预测是否为Cache抢占，由于cachegrab模型的作用是用来判断是否是50和90，所以还需要将50的结果传入进来
+"""
+def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, modelfilepath: str = None, modeltype=0)->List:
+    bandwidthrList = bandwidthResult["preFlag"].tolist()
+    rd_wr_sumList = select_and_pred(l2_serverdata, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+    assert len(rd_wr_sumList) == len(bandwidthrList)
+    resList = []
+    for i in range(0, len(rd_wr_sumList)):
+        if rd_wr_sumList[i] == 0:
+            resList.append(0)
+            continue
+        # 现在预测为50或90
+        if bandwidthrList[i] == 50:
+            resList.append(0) # 现在是50了，那代表不是90
+            continue
+        resList.append(90)
+    return resList
+

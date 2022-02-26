@@ -18,6 +18,7 @@
     "network_tx_hangpath":"hpc/models/l2/network_tx_hang",
     "network_tx_hang_feature": [],
     "processcpu_modeltype":0,
+    "cachegrab_modeltype":0,
     "servermemory_modeltype":0,
     "serverbandwidth_modeltype":0,
     "power_machine_modeltype":0,
