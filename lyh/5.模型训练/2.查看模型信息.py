@@ -27,7 +27,7 @@ if __name__ == "__main__":
     model: DecisionTreeClassifier
     # ============================================================= 对模型数据进行分析
     tree_ = model.tree_
-    tree_.threshold[0] = 2000000
+    tree_.threshold[0] = 6000
     print("threshold: {}".format(tree_.threshold))
     print("feature: {}".format(tree_.feature))
 

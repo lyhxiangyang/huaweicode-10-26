@@ -113,6 +113,8 @@ def standardDataFrame(df: pd.DataFrame, standardFeatures=None, meanValue=None,
 
 def standardLists(pds: List[pd.DataFrame], standardFeatures: List[str], meanValue, standardValue: int = 100) -> List[
     pd.DataFrame]:
+    if len(standardFeatures) == 0: # 如果没有需要提取的特征值，那就直接返回
+        return pds
     # ==== 函数开始运行
     standardList = []
     for ipd in pds:

@@ -67,26 +67,37 @@ spath 需要往里面写入topdwon的平均值， 平均值可以有多种获得
 def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -> List[pd.DataFrame]:
     def proceeOneTopdownPd(itopdownpd: pd.DataFrame):
         # 这个会对mflops进行处理，然后
-        cname = "mflops"
-        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先取中位数将单个最大点去掉
-        mflopsseries = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean() # 取平均值中和一下
-        mflops_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname], datanumber=10)[cname]
-        mflops_change = mflopsseries.apply(lambda x: (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0)
+        if "mflops_change" not in itopdownpd.columns.array:
+            cname = "mflops"
+            itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+            itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+            itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+            mflops_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname], datanumber=10)[cname]
+            mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+            itopdownpd["mflops_change"] = mflops_change
+        mflops_change = itopdownpd["mflops_change"]
+
 
         # 对ddrc_rd进行滑动窗口处理
-        cname_rd = "ddrc_rd"
-        itopdownpd[cname_rd] = itopdownpd[cname_rd].rolling(window=5, center=True, min_periods=1).median() # 去除最大最小的单独点
-        itopdownpd[cname_rd] = itopdownpd[cname_rd].rolling(window=5, center=True, min_periods=1).mean() # 平均值调和
-        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname_rd], datanumber=10)[cname_rd]
-        itopdownpd[cname_rd] = itopdownpd[cname_rd] + ddrc_rd_mean * mflops_change
+        rd_cname = "ddrc_rd"
+        itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).mean()
+        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
+        itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * mflops_change
 
         # 对ddrc_rd进行滑动窗口处理
-        cname_wr = "ddrc_wr"
-        itopdownpd[cname] = itopdownpd[cname_wr].rolling(window=5, center=True, min_periods=1).median() # 去除最大最小的单独点
-        itopdownpd[cname] = itopdownpd[cname_wr].rolling(window=5, center=True, min_periods=1).mean() # 平均值调和
-        ddrc_wr_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname_wr], datanumber=10)[cname_wr]
-        itopdownpd[cname_wr] = itopdownpd[cname_wr] + ddrc_wr_mean * mflops_change
-        itopdownpd["rd_wr_sum"] = itopdownpd[cname_rd] + itopdownpd[cname_wr]
+        wr_cname = "ddrc_wr"
+        itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).mean()
+        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
+        itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * mflops_change
+
+        # 对rd_wr_sum进行结合 减去平均值  阈值与6000比较
+        rd_wr_cname = "ddrc_ddwr_sum"
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_cname] + itopdownpd[wr_cname]
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=3, center=True, min_periods=1).median()
+        rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
 
         # 对ddrc_wr进行滑动窗口处理
 
@@ -250,7 +261,6 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("根据topdown数据对数据进行对齐操作".format(40, "*"))
     # 对mflops分析然后是删除掉不够的部分
     predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
-
     # 将时间与对应位置对齐
     predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predicttopdwnpds)
     predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds)
@@ -258,10 +268,10 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
-    # inputDict["topdown_feature"] = ["ddrc_ddwr_sum"]
+    inputDict["topdown_feature"] = [] # 原因是不需要对任何指标进行特征提取额
 
     # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
-    # predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
+    predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
 
     # 3. 对process数据进行处理
     add_cpu_column(predictprocesspds)

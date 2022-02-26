@@ -14,9 +14,9 @@ if __name__ == "__main__":
     # 需要用到的三个路径
     nowpath = sys.path[0]
     savemodelpath = os.path.join(nowpath, "models")
-    traindatapath = os.path.join(nowpath, "model_grape_50_110.csv")
-    # trainFeatures = ["ddrc_ddwr_sum"]
-    trainFeatures = ["pgfree_mean",]
+    traindatapath = os.path.join(nowpath, "model_grape_50&90_100.csv")
+    trainFeatures = ["ddrc_ddwr_sum"]
+    # trainFeatures = ["pgfree_mean",]
 
     # ============================================================= 对训练数据进行读取
     trainpd = getfilepd(ipath=traindatapath)
