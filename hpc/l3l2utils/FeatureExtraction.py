@@ -200,6 +200,8 @@ def extractionOneProcessPd(processpd: pd.DataFrame, extractFeatures: List[str],
 
 def extractionProcessPdLists(processpds: List[pd.DataFrame], extractFeatures: List[str],
                              windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
+    if len(extractFeatures) == 0:
+        return processpds
     featureExtractiondfs = []
     for ipd in processpds:
         tpd = extractionOneProcessPd(ipd, extractFeatures, windowsSize, spath)
