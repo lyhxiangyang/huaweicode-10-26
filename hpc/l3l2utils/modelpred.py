@@ -311,8 +311,12 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
 """
 def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame):
     select_data = l2_serverdata[["cabinet_power"]]
+    freq = l2_serverdata["freq"].tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
+    for i in range(len(result)):
+        if freq[i] > 80:
+            result[i] = 0
     return result
 
 
@@ -327,7 +331,7 @@ def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: 
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
-        if freq[i] > 80:
+        if freq[i] > 80 or result[i] != 111:
             result[i] = 0
     for pd in resultPds:
         res_list = pd["preFlag"].tolist()
@@ -347,7 +351,7 @@ def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFr
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
-        if freq[i] > 80:
+        if freq[i] > 80 or result[i] != 161:
             result[i] = 0
     for pd in resultPds:
         res_list = pd["preFlag"].tolist()
