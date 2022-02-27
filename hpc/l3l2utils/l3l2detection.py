@@ -41,10 +41,6 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
         compareFlags = [abnormals[i] == equalFlags[i] if equalFlags[i] != 2 else True for i in range(0, len(abnormals))]  # True代表相同 False代表不同
         return compareFlags.count(True) == len(compareFlags)
 
-    preflagList = list(l2l3predetectresultpd["preFlag"])
-    allPreFlags = sorted(list(set(chain.from_iterable(preflagList))))  # 得到所有的错误
-    if 0 in allPreFlags:
-        allPreFlags.remove(0)
 
     # 为preflagList 从beginpos开始赋值value  长度为lenght, 此时的错误是ifault
     # isadd True添加    False 删除
@@ -57,8 +53,21 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
         for i in range(beginpos, min(len(preflagList), beginpos + length)):
             if value in preflagList[i]:
                 preflagList[i].remove(value)
+    # 如果没有CPU异常就删除50，90
+    def removeMemoryIfnotCpu(ilist: List):
+        if len(set(ilist) & set([10,20,30,80])) == 0:
+            if 50 in ilist:
+                ilist.remove(50)
+            if 90 in ilist:
+                ilist.remove(90)
 
 
+
+    # run
+    preflagList = list(l2l3predetectresultpd["preFlag"])
+    allPreFlags = sorted(list(set(chain.from_iterable(preflagList))))  # 得到所有的错误
+    if 0 in allPreFlags:
+        allPreFlags.remove(0)
     for ifault in allPreFlags:
         i = 0
         while i < len(preflagList):
@@ -151,6 +160,9 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     #         if isallEqual(preflagList, list(map(int, list("0001000"))), i, ifault):
     #             preflagList[i].append(ifault)
     #             continue
+
+    # 如果没有CPU异常就删除50 90
+    [removeMemoryIfnotCpu(i) for i in preflagList]
 
 
     for i in range(0, len(preflagList)):
