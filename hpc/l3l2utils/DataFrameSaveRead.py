@@ -32,7 +32,7 @@ def getServer_Process_l2_Network_Ping_TopdownList(dirpath: str, server_feature=N
     serverfiles = getfilespath(os.path.join(dirpath, "server"))
     processfiles = getfilespath(os.path.join(dirpath, "process"))
     l2files = getfilespath(os.path.join(dirpath, "compute"))
-    networkfiles = getfilespath(os.path.join(dirpath, "network"))
+    networkfiles = getfilespath(os.path.join(dirpath, "nic"))
     pingfiles = getfilespath(os.path.join(dirpath, "ping"))
     topdownfiles = getfilespath(os.path.join(dirpath, "topdown"))
     if server_feature is not None:

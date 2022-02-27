@@ -63,7 +63,7 @@ if __name__ == "__main__":
         "process": {
             "cpu": 60,
         },
-        "network": {
+        "nic": {
             "tx_packets_phy": 741384.6,
             "rx_packets_phy": 732001,
         }

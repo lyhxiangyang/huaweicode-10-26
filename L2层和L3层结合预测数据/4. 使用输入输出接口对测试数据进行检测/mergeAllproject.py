@@ -11,7 +11,7 @@ def makealldirexists(dstdir):
     tpath = os.path.join(dstdir, "compute")
     if not os.path.exists(tpath):
         os.makedirs(tpath)
-    tpath = os.path.join(dstdir, "network")
+    tpath = os.path.join(dstdir, "nic")
     if not os.path.exists(tpath):
         os.makedirs(tpath)
     tpath = os.path.join(dstdir, "ping")
@@ -41,8 +41,8 @@ def copyallDirToDstDir(srcdir, dstdir, prefixname):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
 
-    tsrcdir = os.path.join(srcdir, "network")
-    tdstdir = os.path.join(dstdir, "network")
+    tsrcdir = os.path.join(srcdir, "nic")
+    tdstdir = os.path.join(dstdir, "nic")
     for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))

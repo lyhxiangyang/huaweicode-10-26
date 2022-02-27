@@ -69,7 +69,7 @@ def covertCSVToJsonDict(predictdir: str, normaldir: str, server_feature=None,
     jsonDict["RequestData"]["data"] = {}
     jsonDict["RequestData"]["data"]["server"] = convertDataFrameToDict(serverallpd)
     jsonDict["RequestData"]["data"]["process"] = convertDataFrameToDict(processallpd)
-    jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(networkallpd)
+    jsonDict["RequestData"]["data"]["nic"] = convertDataFrameToDict(networkallpd)
     jsonDict["RequestData"]["data"]["compute"] = convertDataFrameToDict(l2allpd)
     if normalMeanDict is not None:
         jsonDict["RequestData"]["normalDataMean"] = normalMeanDict
@@ -124,7 +124,7 @@ def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 
 def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
-    networkDict = sdict["RequestData"]["data"]["network"]
+    networkDict = sdict["RequestData"]["data"]["nic"]
     networkpd = pd.DataFrame(data=networkDict)
     return [networkpd]
 

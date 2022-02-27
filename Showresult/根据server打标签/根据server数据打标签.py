@@ -15,7 +15,7 @@ F = {
     "server": "metric_server.csv",
     "process": "hpc_process.csv",
     "compute": "compute.csv",
-    "network": "nic.csv",
+    "nic": "nic.csv",
     "ping": "ping.csv",
     "topdown": "topdown.csv",
 }
@@ -35,7 +35,7 @@ def getOneDirPd(dirpath: str):
     resDict["server"] = changeTimeFromOnepd(getfilepd(dirpath, F["server"]))
     resDict["process"] = changeTimeFromOnepd(getfilepd(dirpath, F["process"]))
     resDict["compute"] = changeTimeFromOnepd(getfilepd(dirpath, F["compute"]))
-    resDict["network"] = changeTimeFromOnepd(getfilepd(dirpath, F["network"]))
+    resDict["nic"] = changeTimeFromOnepd(getfilepd(dirpath, F["nic"]))
     resDict["ping"] = changeTimeFromOnepd(getfilepd(dirpath, F["ping"]))
     resDict["topdown"] = changeTimeFromOnepd(getfilepd(dirpath, F["topdown"]))
     return resDict
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         savePD["server"] = PD["server"]
         savePD["process"] = changeDataFrame(PD["server"], PD["process"])
         savePD["compute"] = changeDataFrame(PD["server"], PD["compute"])
-        savePD["network"] = changeDataFrame(PD["server"], PD["network"])
+        savePD["nic"] = changeDataFrame(PD["server"], PD["nic"])
         savePD["ping"] = changeDataFrame(PD["server"], PD["ping"])
         savePD["topdown"] = changeDataFrame(PD["server"], PD["topdown"])
         saveDirPdFromDict(idir, savePD)
