@@ -1,0 +1,211 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 88,
+   "metadata": {
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import datetime\n",
+    "import json\n",
+    "import os.path\n",
+    "from itertools import chain\n",
+    "from pathlib import Path\n",
+    "from typing import List\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from scipy import stats\n",
+    "from utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "metadata": {
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['2021-11-21 00:00:00', '2021-11-22 00:00:00', '2021-11-23 00:00:00', '2021-11-24 00:00:00', '2021-11-25 00:00:00', '2021-11-26 00:00:00', '2021-11-27 00:00:00', '2021-11-28 00:00:00', '2021-11-29 00:00:00', '2021-11-30 00:00:00', '2021-12-01 00:00:00', '2021-12-02 00:00:00']\n"
+     ]
+    }
+   ],
+   "source": [
+    "time1 = [\n",
+    "    \"2021-11-22 00:00:00\",\n",
+    "    \"2021-11-21 00:00:00\",\n",
+    "    \"2020-11-21 00:00:01\",\n",
+    "    \"2020-11-21 00:01:02\",\n",
+    "    \"2020-11-21 00:01:02\",\n",
+    "    \"2020-11-21 00:01:02\",\n",
+    "    \"2020-11-21 00:02:03\",\n",
+    "    \"2020-11-21 00:02:03\",\n",
+    "    \"2020-11-21 00:02:03\",\n",
+    "    \"2020-11-21 00:03:04\",\n",
+    "    \"2020-11-21 00:03:04\",\n",
+    "    \"2020-11-21 00:03:04\",\n",
+    "]\n",
+    "time2 = list(map(str,pd.date_range('2021-11-21 00:00:00', periods=12)))\n",
+    "time3 = [1641471544] * 12\n",
+    "print(time2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 90,
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['2021-11-22 00:00:00', '2021-11-21 00:00:00', '2020-11-21 00:00:01', '2020-11-21 00:01:02', '2020-11-21 00:01:02', '2020-11-21 00:01:02', '2020-11-21 00:02:03', '2020-11-21 00:02:03', '2020-11-21 00:02:03', '2020-11-21 00:03:04', '2020-11-21 00:03:04', '2020-11-21 00:03:04']\n",
+      "['2021-11-21 00:00:00', '2021-11-22 00:00:00', '2021-11-23 00:00:00', '2021-11-24 00:00:00', '2021-11-25 00:00:00', '2021-11-26 00:00:00', '2021-11-27 00:00:00', '2021-11-28 00:00:00', '2021-11-29 00:00:00', '2021-11-30 00:00:00', '2021-12-01 00:00:00', '2021-12-02 00:00:00']\n",
+      "['2021-11-21 00:00:00', '2021-11-22 00:00:00']\n",
+      "['2021-11-21 00:00:00', '2021-11-22 00:00:00']\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(time1)\n",
+    "print(time2)\n",
+    "s = list(set(time1) & set(time2))\n",
+    "print(s)\n",
+    "s.sort()\n",
+    "print(s)"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "metadata": {
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": "                   time  pid  user  system  cpu_mean  faultFlag  \\\n0   2021-11-22 00:00:00    1     0      10        10          1   \n1   2021-11-21 00:00:00    2     1      11         1          2   \n2   2020-11-21 00:00:01    3     2      12         1          2   \n3   2020-11-21 00:01:02    1     3      13         2          2   \n4   2020-11-21 00:01:02    2     4      14         2          2   \n5   2020-11-21 00:01:02    3     5      15         2          2   \n6   2020-11-21 00:02:03    1     6      16         3          3   \n7   2020-11-21 00:02:03    2     7      17         3          3   \n8   2020-11-21 00:02:03    3     8      18         3          3   \n9   2020-11-21 00:03:04    1     9      19         4          4   \n10  2020-11-21 00:03:04    2    10      20         3          4   \n11  2020-11-21 00:03:04    3    11      21         2          4   \n\n                          test preFlag  \n0   {'name': 'lyh', 'age': 18}     [0]  \n1   {'name': 'lyh', 'age': 18}     [0]  \n2   {'name': 'lyh', 'age': 18}  [1, 2]  \n3   {'name': 'lyh', 'age': 18}     [0]  \n4   {'name': 'lyh', 'age': 18}     [0]  \n5   {'name': 'lyh', 'age': 18}     [0]  \n6   {'name': 'lyh', 'age': 18}     [0]  \n7   {'name': 'lyh', 'age': 18}     [1]  \n8   {'name': 'lyh', 'age': 18}  [1, 0]  \n9   {'name': 'lyh', 'age': 18}     [0]  \n10  {'name': 'lyh', 'age': 18}     [1]  \n11  {'name': 'lyh', 'age': 18}     [1]  ",
+      "text/html": "<div>\n<style scoped>\n    .dataframe tbody tr th:only-of-type {\n        vertical-align: middle;\n    }\n\n    .dataframe tbody tr th {\n        vertical-align: top;\n    }\n\n    .dataframe thead th {\n        text-align: right;\n    }\n</style>\n<table border=\"1\" class=\"dataframe\">\n  <thead>\n    <tr style=\"text-align: right;\">\n      <th></th>\n      <th>time</th>\n      <th>pid</th>\n      <th>user</th>\n      <th>system</th>\n      <th>cpu_mean</th>\n      <th>faultFlag</th>\n      <th>test</th>\n      <th>preFlag</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th>0</th>\n      <td>2021-11-22 00:00:00</td>\n      <td>1</td>\n      <td>0</td>\n      <td>10</td>\n      <td>10</td>\n      <td>1</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>1</th>\n      <td>2021-11-21 00:00:00</td>\n      <td>2</td>\n      <td>1</td>\n      <td>11</td>\n      <td>1</td>\n      <td>2</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>2</th>\n      <td>2020-11-21 00:00:01</td>\n      <td>3</td>\n      <td>2</td>\n      <td>12</td>\n      <td>1</td>\n      <td>2</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[1, 2]</td>\n    </tr>\n    <tr>\n      <th>3</th>\n      <td>2020-11-21 00:01:02</td>\n      <td>1</td>\n      <td>3</td>\n      <td>13</td>\n      <td>2</td>\n      <td>2</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>4</th>\n      <td>2020-11-21 00:01:02</td>\n      <td>2</td>\n      <td>4</td>\n      <td>14</td>\n      <td>2</td>\n      <td>2</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>5</th>\n      <td>2020-11-21 00:01:02</td>\n      <td>3</td>\n      <td>5</td>\n      <td>15</td>\n      <td>2</td>\n      <td>2</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>6</th>\n      <td>2020-11-21 00:02:03</td>\n      <td>1</td>\n      <td>6</td>\n      <td>16</td>\n      <td>3</td>\n      <td>3</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>7</th>\n      <td>2020-11-21 00:02:03</td>\n      <td>2</td>\n      <td>7</td>\n      <td>17</td>\n      <td>3</td>\n      <td>3</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[1]</td>\n    </tr>\n    <tr>\n      <th>8</th>\n      <td>2020-11-21 00:02:03</td>\n      <td>3</td>\n      <td>8</td>\n      <td>18</td>\n      <td>3</td>\n      <td>3</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[1, 0]</td>\n    </tr>\n    <tr>\n      <th>9</th>\n      <td>2020-11-21 00:03:04</td>\n      <td>1</td>\n      <td>9</td>\n      <td>19</td>\n      <td>4</td>\n      <td>4</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[0]</td>\n    </tr>\n    <tr>\n      <th>10</th>\n      <td>2020-11-21 00:03:04</td>\n      <td>2</td>\n      <td>10</td>\n      <td>20</td>\n      <td>3</td>\n      <td>4</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[1]</td>\n    </tr>\n    <tr>\n      <th>11</th>\n      <td>2020-11-21 00:03:04</td>\n      <td>3</td>\n      <td>11</td>\n      <td>21</td>\n      <td>2</td>\n      <td>4</td>\n      <td>{'name': 'lyh', 'age': 18}</td>\n      <td>[1]</td>\n    </tr>\n  </tbody>\n</table>\n</div>"
+     },
+     "execution_count": 91,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "adict2 = {\n",
+    "    TIME_COLUMN_NAME: time1,\n",
+    "    \"pid\": [1,2,3,1,2,3,1,2,3,1,2,3],\n",
+    "    \"user\": list(range(0, 12)),\n",
+    "    \"system\": list(range(10, 22)),\n",
+    "    \"cpu_mean\": [10,1,1,2,2,2,3,3,3,4,3,2],\n",
+    "    \"faultFlag\": [1,2,2,2, 2, 2,3,3,3, 4, 4, 4],\n",
+    "    \"test\": [{\"name\": \"lyh\", \"age\": 18}] * 12,\n",
+    "    \"preFlag\": [\n",
+    "        [0],\n",
+    "        [0],\n",
+    "        [1,2],\n",
+    "        [0],\n",
+    "        [0],\n",
+    "        [0],\n",
+    "        [0],\n",
+    "        [1],\n",
+    "        [1,0],\n",
+    "        [0],\n",
+    "        [1],\n",
+    "        [1],\n",
+    "    ]\n",
+    "}\n",
+    "df3 = pd.DataFrame(data=adict2)\n",
+    "df3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 92,
+   "outputs": [],
+   "source": [
+    "from typing import Dict\n",
+    "\n",
+    "\n",
+    "def saveDictToJson(sdict: Dict, spath: str, filename: str):\n",
+    "    if not os.path.exists(spath):\n",
+    "        os.makedirs(spath)\n",
+    "    pathfilename = os.path.join(spath, filename)\n",
+    "    with open(pathfilename, \"w\") as f:\n",
+    "        json.dump(sdict, f)"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 94,
+   "outputs": [],
+   "source": [
+    "df3Dict = df3.to_dict(orient=\"list\")\n",
+    "saveDictToJson(df3Dict, \"/tmp/json\", \"test.json\")"
+   ],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "outputs": [],
+   "source": [],
+   "metadata": {
+    "collapsed": false,
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   }
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
