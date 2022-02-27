@@ -1,6 +1,6 @@
 {
-    "predictdirjsonpath": "DATA/2022-01-14新的测试数据/29.grapes_test_multi_l3_2/centos16/jsonfile/alljson.json",
-    "spath": "DATA/2022-01-14新的测试数据/29.grapes_test_multi_l3_2/centos16/jsonfile/中间结果文件生成",
+    "predictdirjsonpath": "DATA/2022-01-14新的测试数据/30.16数据/centos11/jsonfile/alljson.json",
+    "spath": "DATA/2022-01-14新的测试数据/30.16数据/centos11/jsonfile/中间结果文件生成",
     "processcpu_modelpath":"hpc/models/l3/process_cpu_model",
     "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
     "serverbandwidth_modelpath":"hpc/models/l3/memory_bandwidth_model",
