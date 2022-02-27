@@ -311,7 +311,7 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
 """
 def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame):
     select_data = l2_serverdata["cabinet_power"]
-    model = joblib.load(os.path.join(model_path), model_type + ".pkl")
+    model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     return result
 
