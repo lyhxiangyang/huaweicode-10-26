@@ -378,7 +378,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
         tpath = os.path.join(inputDict["spath"], "4.CPU异常检测中间文件")
     l3cpuresult = pd.DataFrame()
     l3cpuresult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
-    l3cpuresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l3cpuresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
     l3cpuresult["preFlag"] = detectL3CPUAbnormal(allserverpds=allserverpds, allprocesspds=allprocesspds, spath=tpath,
                                                  modelfilepath=inputDict["processcpu_modelpath"],
                                                  modeltype=inputDict["processcpu_modeltype"])
@@ -388,7 +389,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对L3层内存泄露进行检测".center(40, "*"))
     l3memleakresult = pd.DataFrame()
     l3memleakresult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
-    l3memleakresult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l3memleakresult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3memleakresult["preFlag"] = detectL3MemLeakAbnormal(allserverpds=l3_server_topdownpds,
                                                          modelfilepath=inputDict["servermemory_modelpath"],
                                                          modeltype=inputDict["servermemory_modeltype"])
@@ -396,14 +398,16 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对L3层内存带宽进行检测".center(40, "*"))
     l3BandWidthResult = pd.DataFrame()
     l3BandWidthResult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
-    l3BandWidthResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l3BandWidthResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3BandWidthResult["preFlag"] = detectL3BandWidthAbnormal(allserverpds=l3_server_topdownpds,
                                                              modelfilepath=inputDict["serverbandwidth_modelpath"],
                                                              modeltype=inputDict["serverbandwidth_modeltype"])
     print("对cache抢占进行检测".center(40, "*"))
     l3CacheGrabResult = pd.DataFrame()
     l3CacheGrabResult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
-    l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     l3CacheGrabResult["preFlag"] = predictCacheGrab(l3_server_topdownpds, l3BandWidthResult, modelfilepath=inputDict["cachegrab_modelpath"], modeltype=inputDict["cachegrab_modeltype"])
 
 
@@ -413,7 +417,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对L2机器封顶进行预测".center(40, "#"))
     l2machinepowerresult = pd.DataFrame()
     l2machinepowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
-    l2machinepowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l2machinepowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     l2machinepowerresult["preFlag"] = ThransferRightLabels(
         select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_machine_modeltype"]],
                         saved_model_path=inputDict["power_machine_modelpath"]))
@@ -421,7 +426,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对L2机柜封顶进行预测".center(40, "#"))
     l2cabinetpowerresult = pd.DataFrame()
     l2cabinetpowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
-    l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     l2cabinetpowerresult["preFlag"] = ThransferRightLabels(
         select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_cabinet_modeltype"]],
                         saved_model_path=inputDict["power_cabinet_modelpath"]))
@@ -429,7 +435,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对温度进行预测".center(40, "#"))
     l2temperamentresult = pd.DataFrame()
     l2temperamentresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
-    l2temperamentresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l2temperamentresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     # l2temperamentresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath))
     l2temperamentresult["preFlag"] = ThransferRightLabels(predictTemp(model_path=inputDict["temperature_modelpath"],
                                                                       model_type=MODEL_TYPE[
@@ -439,7 +446,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对CPU主频下降进行预测".center(40, "#"))
     l2cpudownresult = pd.DataFrame()
     l2cpudownresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
-    l2cpudownresult[FAULT_FLAG] = l2_serverpds[TIME_COLUMN_NAME]
+    if inputDict["isExistFaultFlag"]:
+        l2cpudownresult[FAULT_FLAG] = l2_serverpds[TIME_COLUMN_NAME]
     l2cpudownresult["preFlag"] = predictL2_CPUDown(l2_serverdata=l2_serverpds, freqDownResultPds=[l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult])
 
 
@@ -449,12 +457,13 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     # l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
     # l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     # l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
-    l2networkresult1 = detectNetwork_TXHangAbnormal(allpingpds)
+    l2networkresult1 = detectNetwork_TXHangAbnormal(allpingpds, isExistFlag=inputDict["isExistFaultFlag "])
 
     print("对网络异常2 pfc进行预测".center(40, "#"))
     l2networkresult2 = pd.DataFrame()
     l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
-    l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
+    if inputDict["isExistFaultFlag"]:
+        l2networkresult2[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     l2networkresult2["preFlag"] = ThransferRightLabels(
         select_and_pred(allnetworkpds, MODEL_TYPE[inputDict["network_pfctype"]],
                         saved_model_path=inputDict["network_pfcpath"]))
@@ -466,16 +475,14 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
          l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult])
 
     print("对结果进行优化".center(40, "*"))
-    allresultspd = fixFaultFlag(allresultspd)
+    if inputDict["isExistFaultFlag"]:
+        allresultspd = fixFaultFlag(allresultspd)
     allresultspd = fixIsolatedPointPreFlag(allresultspd)
 
     print("增加此时间点是否预测正确".center(40, "*"))
-    isrightLists = [1 if
-                    allresultspd[FAULT_FLAG][i] != 0 and
-                    (allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or
-                     allresultspd[FAULT_FLAG][i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in
-                    range(0, len(allresultspd))]
-    allresultspd["isright"] = isrightLists
+    if inputDict["isExistFaultFlag"]:
+        isrightLists = [1 if allresultspd[FAULT_FLAG][i] != 0 and (allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or allresultspd[FAULT_FLAG][i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in range(0, len(allresultspd))]
+        allresultspd["isright"] = isrightLists
 
     print("增加概率".center(40, "*"))
     allresultspd["probability"] = getDetectionProbability(allresultspd["preFlag"].tolist())

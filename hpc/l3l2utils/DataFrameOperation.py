@@ -58,7 +58,8 @@ def mergeDataFrames(lpds: List[pd.DataFrame]):
 
 def mergeinnerTwoDataFrame(lpd: pd.DataFrame, rpd: pd.DataFrame, onfeaturename: str = TIME_COLUMN_NAME) -> pd.DataFrame:
     rpdcolumns = list(rpd.columns.array)
-    rpdcolumns.remove(FAULT_FLAG)
+    if FAULT_FLAG in rpdcolumns:
+        rpdcolumns.remove(FAULT_FLAG)
     mergedf = pd.merge(left=lpd, right=rpd[rpdcolumns], left_on=onfeaturename, right_on=onfeaturename)
     return mergedf
 
@@ -71,7 +72,7 @@ time faultFlag  preFlag
 """
 
 
-def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
+def mergeouterPredictResult(pds: List[pd.DataFrame], isExistFlag: bool = True) -> pd.DataFrame:
     def fun_faultFlag(xlist: pd.Series):
         xlist = xlist.dropna()
         # 去重
@@ -108,7 +109,8 @@ def mergeouterPredictResult(pds: List[pd.DataFrame]) -> pd.DataFrame:
     timeindexpds = [ipd.set_index(TIME_COLUMN_NAME) for ipd in pds]
     mergepds = pd.concat(timeindexpds, join="outer", axis=1)  # 将会出现多个faultFlag和多个preFlag 将会按照time进行列的合并，会出现多行
     respd = pd.DataFrame(index=mergepds.index)  # 设置时间
-    respd.loc[:, FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
+    if isExistFlag:
+        respd.loc[:, FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
     respd.loc[:, "preFlag"] = mergepds["preFlag"].apply(fun_preFlag, axis=1)
     respd.sort_values(by="time", inplace=True)
     respd.reset_index(drop=False, inplace=True)
