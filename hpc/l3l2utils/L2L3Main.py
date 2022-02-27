@@ -484,7 +484,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult(
         [l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult,l2machinepowerresult, l2cabinetpowerresult,
-         l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult])
+         l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult], isExistFlag=inputDict["isExistFaultFlag"])
 
     print("对结果进行优化".center(40, "*"))
     if inputDict["isExistFaultFlag"]:
