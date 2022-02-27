@@ -152,7 +152,7 @@ def readJsonToDict(spath: str, filename: str):
 
 def getServerPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     serverDict = sdict["RequestData"]["data"]["server"]
-    serpd = pd.DataFrame(data=serverDict).T
+    serpd = pd.DataFrame(data=serverDict)
     return [serpd]
 
 
@@ -163,7 +163,7 @@ def getServerPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     processDict = sdict["RequestData"]["data"]["process"]
-    processpd = pd.DataFrame(data=processDict).T
+    processpd = pd.DataFrame(data=processDict)
     return [processpd]
 
 
@@ -174,7 +174,7 @@ def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     networkDict = sdict["RequestData"]["data"]["nic"]
-    networkpd = pd.DataFrame(data=networkDict).T
+    networkpd = pd.DataFrame(data=networkDict)
     return [networkpd]
 
 
@@ -185,7 +185,7 @@ def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getPingPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     pingDict = sdict["RequestData"]["data"]["ping"]
-    pingpd = pd.DataFrame(data=pingDict).T
+    pingpd = pd.DataFrame(data=pingDict)
     return [pingpd]
 
 
@@ -196,7 +196,7 @@ def getPingPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getTopdownPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     pingDict = sdict["RequestData"]["data"]["topdown"]
-    pingpd = pd.DataFrame(data=pingDict).T
+    pingpd = pd.DataFrame(data=pingDict)
     return [pingpd]
 
 
@@ -207,7 +207,7 @@ def getTopdownPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getL2PdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     l2Dict = sdict["RequestData"]["data"]["compute"]
-    l2pd = pd.DataFrame(data=l2Dict).T
+    l2pd = pd.DataFrame(data=l2Dict)
     return [l2pd]
 
 
