@@ -310,7 +310,7 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
 预测机柜功率封顶导致的121异常
 """
 def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame):
-    select_data = l2_serverdata["cabinet_power"]
+    select_data = l2_serverdata[["cabinet_power"]]
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     return result
@@ -322,7 +322,7 @@ def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata:
 """
 
 def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame]):
-    select_data = l2_serverdata["power"]
+    select_data = l2_serverdata[["power"]]
     freq = l2_serverdata["freq"].tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
@@ -342,7 +342,7 @@ def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: 
 需要传入121 131结果
 """
 def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame])-> List:
-    select_data = l2_serverdata["power"]
+    select_data = l2_serverdata[["power"]]
     freq = l2_serverdata["freq"].tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
