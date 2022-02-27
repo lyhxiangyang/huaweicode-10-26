@@ -324,7 +324,7 @@ def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata:
 def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame]):
     select_data = l2_serverdata["power"]
     freq = l2_serverdata["freq"].tolist()
-    model = joblib.load(os.path.join(model_path), model_type + ".pkl")
+    model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
         if freq[i] > 80:
@@ -344,7 +344,7 @@ def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: 
 def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame])-> List:
     select_data = l2_serverdata["power"]
     freq = l2_serverdata["freq"].tolist()
-    model = joblib.load(os.path.join(model_path), model_type + ".pkl")
+    model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
         if freq[i] > 80:
