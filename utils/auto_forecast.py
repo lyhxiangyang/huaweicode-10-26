@@ -37,7 +37,7 @@ def getServer_Process_l2_NetworkList(
 ) -> tuple[list[Any], list[Any], list[Any], list[Any]]:
     serverfiles = getfilespath(os.path.join(dirpath, "server"))
     processfiles = getfilespath(os.path.join(dirpath, "process"))
-    l2files = getfilespath(os.path.join(dirpath, "l2"))
+    l2files = getfilespath(os.path.join(dirpath, "compute"))
     networkfiles = getfilespath(os.path.join(dirpath, "network"))
     if server_feature is not None:
         time_server_feature = server_feature.copy()

@@ -117,7 +117,7 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
     jsonDict["RequestData"]["data"]["server"] = convertDataFrameToDict(serverallpd)
     jsonDict["RequestData"]["data"]["process"] = convertDataFrameToDict(processallpd)
     jsonDict["RequestData"]["data"]["network"] = convertDataFrameToDict(networkallpd)
-    jsonDict["RequestData"]["data"]["l2"] = convertDataFrameToDict(l2allpd)
+    jsonDict["RequestData"]["data"]["compute"] = convertDataFrameToDict(l2allpd)
     jsonDict["RequestData"]["data"]["ping"] = convertDataFrameToDict(pingpd)
     jsonDict["RequestData"]["data"]["topdown"] = convertDataFrameToDict(topdownpd)
     if normalMeanDict is not None:
@@ -206,7 +206,7 @@ def getTopdownPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 
 def getL2PdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
-    l2Dict = sdict["RequestData"]["data"]["l2"]
+    l2Dict = sdict["RequestData"]["data"]["compute"]
     l2pd = pd.DataFrame(data=l2Dict).T
     return [l2pd]
 
@@ -289,10 +289,10 @@ def getNormalProcessMean(detectionJson: Dict, datapd: List[pd.DataFrame], featur
 
 def getNormalL2Mean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                     datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromNumberDataFrom(datapd, "l2", features, datanumber)
+    meanSeries = getMeanFromNumberDataFrom(datapd, "compute", features, datanumber)
     if detectionJson is not None:
         for ifeaturename in features:
-            featureVaule = getMeanFromExistMean(detectionJson, "l2", ifeaturename)
+            featureVaule = getMeanFromExistMean(detectionJson, "compute", ifeaturename)
             if featureVaule is not None:
                 meanSeries[ifeaturename] = featureVaule
     return meanSeries

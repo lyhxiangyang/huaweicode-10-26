@@ -14,7 +14,7 @@ from hpc.l3l2utils import TIME_COLUMN_NAME, FAULT_FLAG
 F = {
     "server": "metric_server.csv",
     "process": "hpc_process.csv",
-    "l2": "compute.csv",
+    "compute": "compute.csv",
     "network": "nic.csv",
     "ping": "ping.csv",
     "topdown": "topdown.csv",
@@ -34,7 +34,7 @@ def getOneDirPd(dirpath: str):
     resDict = {}
     resDict["server"] = changeTimeFromOnepd(getfilepd(dirpath, F["server"]))
     resDict["process"] = changeTimeFromOnepd(getfilepd(dirpath, F["process"]))
-    resDict["l2"] = changeTimeFromOnepd(getfilepd(dirpath, F["l2"]))
+    resDict["compute"] = changeTimeFromOnepd(getfilepd(dirpath, F["compute"]))
     resDict["network"] = changeTimeFromOnepd(getfilepd(dirpath, F["network"]))
     resDict["ping"] = changeTimeFromOnepd(getfilepd(dirpath, F["ping"]))
     resDict["topdown"] = changeTimeFromOnepd(getfilepd(dirpath, F["topdown"]))
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         savePD = {}
         savePD["server"] = PD["server"]
         savePD["process"] = changeDataFrame(PD["server"], PD["process"])
-        savePD["l2"] = changeDataFrame(PD["server"], PD["l2"])
+        savePD["compute"] = changeDataFrame(PD["server"], PD["compute"])
         savePD["network"] = changeDataFrame(PD["server"], PD["network"])
         savePD["ping"] = changeDataFrame(PD["server"], PD["ping"])
         savePD["topdown"] = changeDataFrame(PD["server"], PD["topdown"])

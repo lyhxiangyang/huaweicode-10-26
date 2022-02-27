@@ -8,7 +8,7 @@ import shutil
 
 def makealldirexists(dstdir):
     # 先保证dstdir下的网络等目录都存在
-    tpath = os.path.join(dstdir, "l2")
+    tpath = os.path.join(dstdir, "compute")
     if not os.path.exists(tpath):
         os.makedirs(tpath)
     tpath = os.path.join(dstdir, "network")
@@ -35,8 +35,8 @@ srcdir下面有network、l2、ping网络，dstdir下面有network、l2、ping
 def copyallDirToDstDir(srcdir, dstdir, prefixname):
     makealldirexists(dstdir)
 
-    tsrcdir = os.path.join(srcdir, "l2")
-    tdstdir = os.path.join(dstdir, "l2")
+    tsrcdir = os.path.join(srcdir, "compute")
+    tdstdir = os.path.join(dstdir, "compute")
     for ifile in os.listdir(tsrcdir):
         copyfilename = prefixname+ifile
         shutil.copy(os.path.join(tsrcdir, ifile), os.path.join(tdstdir, copyfilename))
