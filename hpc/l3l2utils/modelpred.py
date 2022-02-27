@@ -306,22 +306,53 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
     # result1.set_index(TIME_COLUMN_NAME, inplace=True)
     return result
 
+"""
+预测机柜功率封顶导致的121异常
+"""
+def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame):
+    select_data = l2_serverdata["cabinet_power"]
+    model = joblib.load(os.path.join(model_path), model_type + ".pkl")
+    result = model.predict(select_data)
+    return result
+
+
+"""
+预测机器功率封顶导致的111异常
+需要把121 131结果作为参数传入进来
+"""
+
+def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame]):
+    select_data = l2_serverdata["power"]
+    freq = l2_serverdata["freq"].tolist()
+    model = joblib.load(os.path.join(model_path), model_type + ".pkl")
+    result = model.predict(select_data)
+    for i in range(len(result)):
+        if freq[i] > 80:
+            result[i] = 0
+    for pd in resultPds:
+        res_list = pd["preFlag"].tolist()
+        for i in range(len(res_list)):
+            if result[i] == 111 and res_list[i] != 0:
+                result[i] = 0
+    return result
+
 
 """
 预测CPU异常下降导致的161异常
+需要传入121 131结果
 """
-def predictL2_CPUDown(l2_serverdata: pd.DataFrame, freqDownResultPds: List[pd.DataFrame])-> List:
-    select_data = l2_serverdata["freq"].tolist()
-    result = []
-    for i in select_data:
-        if i < 91:
-            result.append(161)
-        else:
-            result.append(0)
-    for pd in freqDownResultPds:
-        down_list = pd["preFlag"].tolist()
-        for i in range(len(down_list)):
-            if result[i] == 161 and down_list[i] != 0:
+def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame])-> List:
+    select_data = l2_serverdata["power"]
+    freq = l2_serverdata["freq"].tolist()
+    model = joblib.load(os.path.join(model_path), model_type + ".pkl")
+    result = model.predict(select_data)
+    for i in range(len(result)):
+        if freq[i] > 80:
+            result[i] = 0
+    for pd in resultPds:
+        res_list = pd["preFlag"].tolist()
+        for i in range(len(res_list)):
+            if result[i] == 161 and res_list[i] != 0:
                 result[i] = 0
     return result
 

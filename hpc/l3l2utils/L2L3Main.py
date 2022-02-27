@@ -22,7 +22,8 @@ from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, g
     analysePredictResult
 from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
     predictTemp, \
-    detectNetwork_TXHangAbnormal, predictL2_CPUDown, predictCacheGrab
+    detectNetwork_TXHangAbnormal, predictL2_CPUDown, predictCacheGrab, predictCabinet_PowerCapping, \
+    predictServer_PowerCapping
 
 """
 time faultFlag preFlag
@@ -423,25 +424,9 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     print("对L2层数据进行预测".center(40, "*"))
     l2_serverpds = mergeinnerTwoDataFrame(lpd=alll2pds, rpd=allserverpds)  # 根据时间得到l2的合并结果
 
-    print("对L2机器封顶进行预测".center(40, "#"))
-    l2machinepowerresult = pd.DataFrame()
-    l2machinepowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
-    if inputDict["isExistFaultFlag"]:
-        l2machinepowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
-    l2machinepowerresult["preFlag"] = ThransferRightLabels(
-        select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_machine_modeltype"]],
-                        saved_model_path=inputDict["power_machine_modelpath"]))
+    # 1. 先预测温度 131  2. 预测机柜功率封顶 121 3 接着预测  111 机器功率封顶  4. 161
 
-    print("对L2机柜封顶进行预测".center(40, "#"))
-    l2cabinetpowerresult = pd.DataFrame()
-    l2cabinetpowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
-    if inputDict["isExistFaultFlag"]:
-        l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
-    l2cabinetpowerresult["preFlag"] = ThransferRightLabels(
-        select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_cabinet_modeltype"]],
-                        saved_model_path=inputDict["power_cabinet_modelpath"]))
-
-    print("对温度进行预测".center(40, "#"))
+    print("1. 对温度进行预测".center(40, "#"))
     l2temperamentresult = pd.DataFrame()
     l2temperamentresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
     if inputDict["isExistFaultFlag"]:
@@ -451,13 +436,31 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
                                                                       model_type=MODEL_TYPE[
                                                                           inputDict["tempertature_modeltype"]],
                                                                       data=l2_serverpds))
+    print("2. 对L2机柜封顶进行预测".center(40, "#"))
+    l2cabinetpowerresult = pd.DataFrame()
+    l2cabinetpowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
+    if inputDict["isExistFaultFlag"]:
+        l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
+    # l2cabinetpowerresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_cabinet_modeltype"]], saved_model_path=inputDict["power_cabinet_modelpath"]))
+    l2cabinetpowerresult["preFlag"] = predictCabinet_PowerCapping(model_path=inputDict["power_cabinet_modelpath"], model_type=MODEL_TYPE[inputDict["power_cabinet_modeltype"]], l2_serverdata=l2_serverpds)
 
-    print("对CPU主频下降进行预测".center(40, "#"))
+
+    print("3. 对L2机器封顶进行预测".center(40, "#"))
+    l2machinepowerresult = pd.DataFrame()
+    l2machinepowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
+    if inputDict["isExistFaultFlag"]:
+        l2machinepowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
+    # l2machinepowerresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_machine_modeltype"]], saved_model_path=inputDict["power_machine_modelpath"]))
+    l2machinepowerresult["preFlag"] = predictServer_PowerCapping(model_path=inputDict["power_machine_modelpath"], model_type=MODEL_TYPE[inputDict["power_machine_modeltype"]], l2_serverdata=l2_serverpds, resultPds=[l2temperamentresult, l2cabinetpowerresult])
+
+
+    print("4. 对CPU主频下降进行预测".center(40, "#"))
     l2cpudownresult = pd.DataFrame()
     l2cpudownresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
     if inputDict["isExistFaultFlag"]:
         l2cpudownresult[FAULT_FLAG] = l2_serverpds[TIME_COLUMN_NAME]
-    l2cpudownresult["preFlag"] = predictL2_CPUDown(l2_serverdata=l2_serverpds, freqDownResultPds=[l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult])
+    # l2cpudownresult["preFlag"] = predictL2_CPUDown(l2_serverdata=l2_serverpds, freqDownResultPds=[l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult])
+    l2cpudownresult["preFlag"] = predictL2_CPUDown(model_path=inputDict["cpudown_modelpath"], model_type=MODEL_TYPE[inputDict["cpudown_modeltype"]], l2_serverdata=l2_serverpds, resultPds=[l2temperamentresult, l2cabinetpowerresult])
 
 
     print("对网络异常1进行预测 TX_Hang".center(40, "#"))
