@@ -457,7 +457,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     # l2networkresult1[TIME_COLUMN_NAME] = allnetworkpds[REPORT_TIME]
     # l2networkresult1[FAULT_FLAG] = allnetworkpds[FAULT_FLAG]
     # l2networkresult1 = makeL2networkresultMergedByMin(l2networkresult1)
-    l2networkresult1 = detectNetwork_TXHangAbnormal(allpingpds, isExistFlag=inputDict["isExistFaultFlag "])
+    l2networkresult1 = detectNetwork_TXHangAbnormal(allpingpds, isExistFlag=inputDict["isExistFaultFlag"])
 
     print("对网络异常2 pfc进行预测".center(40, "#"))
     l2networkresult2 = pd.DataFrame()
