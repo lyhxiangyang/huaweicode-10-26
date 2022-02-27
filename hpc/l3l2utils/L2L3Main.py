@@ -249,6 +249,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         changeTimePdsToStrFromInt(predictl2pds)
         changeTimePdsToStrFromInt(predictnetworkpds)
         changeTimePdsToStrFromInt(predictpingpds)
+        changeTimePdsToStrFromInt(predicttopdwnpds)
 
     print("将数据的时间进行统一化处理".center(40, "*"))
     predictserverpds = changeTimeToFromPdlists(predictserverpds, isremoveDuplicate=True)
