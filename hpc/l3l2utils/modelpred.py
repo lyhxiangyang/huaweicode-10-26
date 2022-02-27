@@ -219,15 +219,15 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
     FANSFeatures = [
-        'FAN1_F_Speed',
-        'FAN2_F_Speed',
-        'FAN3_F_Speed',
-        'FAN4_F_Speed',
+        "fan1_speed",
+        "fan2_speed",
+        "fan3_speed",
+        "fan4_speed",
     ]
     TEMPERATUREFeatures = [
-        'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
-        'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
-        'PCH_Temp',
+        "cpu1_core_rem", "cpu2_core_rem", "cpu3_core_rem", "cpu4_core_rem",
+        "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp",
+        "pch_temp",
     ]
     # FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
     # TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])
@@ -246,7 +246,7 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
     result = []
     for i, temp in enumerate(TEMPERATUREFeatures):
         for j, fan in enumerate(FANSFeatures):
-            extended_features = get_extended_features(['freq', temp, fan])
+            extended_features = get_extended_features(["freq", temp, fan])
             select_data = data[extended_features]
             model = joblib.load(os.path.join(model_path, model_type + '.pkl'))
             y = model.predict(select_data)

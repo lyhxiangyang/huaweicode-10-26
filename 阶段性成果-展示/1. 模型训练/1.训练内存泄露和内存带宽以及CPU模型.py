@@ -31,11 +31,11 @@ if __name__ == "__main__":
     spath = "tmp/模型训练中间数据/1.训练三种模型"
 
     # 需要对server数据进行处理的指标
-    server_feature = ["used", "pgfree"]
+    server_feature = ["mem_used", "pgfree"]
     server_accumulate_feature = ["pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
-    process_feature = ["user", "system"]
-    process_accumulate_feature = ["user", "system"]
+    process_feature = ["usr_cpu", "kernel_cpu"]
+    process_accumulate_feature = ["usr_cpu", "kernel_cpu"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y/%m/%d %H:%M'
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         "cpu": 60,
     }
     servermeanValue = {
-        "used": 0,
+        "mem_used": 0,
         "pgfree": 0
     }
     isnormalDataFromNormal = True # 判断是否使用来自normal数据中的  必须保证有正常数据

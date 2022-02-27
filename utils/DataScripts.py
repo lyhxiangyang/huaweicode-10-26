@@ -285,7 +285,7 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
         for icore, ipd in corepds:
             tpd = subtractLastLineFromDataFrame(ipd, accumulationFeatures)
             # 添加一个新的元素 cpu
-            tpd['cpu'] = tpd['user'] + tpd['system']
+            tpd['cpu'] = tpd["usr_cpu"] + tpd["kernel_cpu"]
             tpd = PushLabelToEnd(tpd, FAULT_FLAG)
             subcorepds.append((icore, tpd))
         # 提取的指标多加一个'cpu'
@@ -323,7 +323,7 @@ def processOneProcessFile(spath: str, filepd: pd.DataFrame, accumulationFeatures
 
 """
 得到平均
-如果DataFrame中有"user"和"system", 那么就计算一个CPU的平均值
+如果DataFrame中有"usr_cpu"和"kernel_cpu", 那么就计算一个CPU的平均值
 """
 
 
@@ -449,7 +449,7 @@ def processOneServerFile(spath: str, filepd: pd.DataFrame, accumulationFeatures:
         tpd = subtractLastLineFromDataFrame(tpd, accumulationFeatures)
         # 添加了一个平滑窗口
         tpd[accumulationFeatures] = tpd[accumulationFeatures].rolling(window=6, min_periods=1, center=True).median()
-        tpd['cpu'] = tpd['user'] + tpd['system']
+        tpd['cpu'] = tpd["usr_cpu"] + tpd["kernel_cpu"]
         tpd = PushLabelToEnd(tpd, FAULT_FLAG)
         subcorepds.append((i, tpd))
 

@@ -50,7 +50,7 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
     # 进行文件的合并
     mergecpupd, _ = mergeDataFrames(cpudatapd)
     # 使用新特征cpu
-    mergecpupd["cpu"] = mergecpupd["user"] + mergecpupd["system"]
+    mergecpupd["cpu"] = mergecpupd["usr_cpu"] + mergecpupd["kernel_cpu"]
     mergecpupd: pd.DataFrame
     mergecpupd.to_csv(os.path.join(spath, "mergedcpu.csv"), index=False)
     return mergecpupd
@@ -58,5 +58,5 @@ def processAllprocessData(spath: str, datapath: List[str], extractFeature: List[
 
 if __name__ == "__main__":
     spath = "tmp/tData-11-09/测试数据/多机-HPC-process-3KM/10.提取进程文件中的CPU数据"
-    extractFeature = ["user", "system"]
+    extractFeature = ["usr_cpu", "kernel_cpu"]
     processAllprocessData(spath, datapath, extractFeature)

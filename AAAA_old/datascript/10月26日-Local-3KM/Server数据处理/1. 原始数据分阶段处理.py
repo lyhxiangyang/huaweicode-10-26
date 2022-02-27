@@ -7,15 +7,15 @@ from utils.DataScripts import TranslateTimeListStrToStr, processOneServerFile
 from utils.DefineData import TIME_COLUMN_NAME
 from utils.FileSaveRead import saveFaultyDict, saveFilename_Time_pdDict, saveFilename_Time_Faulty_pdDict
 
-accumulationFeatures = ['idle', 'iowait', 'interrupts', 'user', 'system', 'ctx_switches', 'soft_interrupts', 'irq',
+accumulationFeatures = ['idle', 'iowait', 'interrupts', "usr_cpu", "kernel_cpu", 'ctx_switches', 'soft_interrupts', 'irq',
                   'softirq', 'steal', 'syscalls', 'handlesNum', 'pgpgin', 'pgpgout', 'fault', 'majflt', 'pgscank',
-                  'pgsteal', 'pgfree']
+                  'pgsteal', "pgfree"]
 
 server_feature = [
     # "time",
-    "user",
+    "usr_cpu",
     "nice",
-    "system",
+    "kernel_cpu",
     "idle",
     "iowait",
     "irq",
@@ -34,7 +34,7 @@ server_feature = [
     "total",
     "available",
     "percent",
-    "used",
+    "mem_used",
     "free",
     "active",
     "inactive",

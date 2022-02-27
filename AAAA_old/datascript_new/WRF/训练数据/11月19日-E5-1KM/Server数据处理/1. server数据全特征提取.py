@@ -20,7 +20,7 @@ if __name__ == "__main__":
     spath = "tmp/11-19-tData/训练数据-E5-1km/server"
 
     # 需要对server数据进行处理的指标
-    server_feature = ["used", "pgfree"]
+    server_feature = ["mem_used", "pgfree"]
     server_accumulate_feature = ["pgfree"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，

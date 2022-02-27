@@ -120,7 +120,7 @@ def standardLists(pds: List[pd.DataFrame], standardFeatures: List[str], meanValu
 # 对进程的pdlists中的每个pd计算cpu的数值
 def add_cpu_column(pds: List[pd.DataFrame]) -> List[pd.DataFrame]:
     for ipd in pds:
-        ipd['cpu'] = ipd['user'] + ipd['system']
+        ipd['cpu'] = ipd["usr_cpu"] + ipd["kernel_cpu"]
     return pds
 
 
@@ -361,7 +361,7 @@ def getprocess_cputime_abcores(processpds: pd.DataFrame, nowtime: str, isThresho
 将server文件和process结合，根据时间对数据进行分析，最后得到一个Dict，包含如下信息
 time, server_flag(可选), used, used_mean, pgfree, pgfree_mean, pgfree_min, pgfree_max, wrf_cpu, abnormalcore(是一个列表)
 返回值key 
-time    wrf_cpu    abnormalcores    faultyFlag   "used", "used_mean", "pgfree", "pgfree_mean", "pgfree_amin", "pgfree_amax"  coresnums
+time    wrf_cpu    abnormalcores    faultyFlag   "mem_used", "used_mean", "pgfree", "pgfree_mean", "pgfree_amin", "pgfree_amax"  coresnums
 serverinformationDict: 
 abnormalcores 是一个列表的列表，存储的是异常的核心数
 coresnums 是指多少个核心出现了异常
@@ -376,7 +376,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
                                   modeltype=0,
                                   addserverfeatures=None) -> Dict:
     if addserverfeatures is None:
-        addserverfeatures = ["used", "pgfree"]
+        addserverfeatures = ["mem_used", "pgfree"]
     if TIME_COLUMN_NAME in addserverfeatures:
         addserverfeatures.remove(TIME_COLUMN_NAME)
     if FAULT_FLAG in addserverfeatures:
@@ -412,7 +412,7 @@ def deal_serverpds_and_processpds(allserverpds: pd.DataFrame, allprocesspds: pd.
     # 将server_flag加入进来, 假如存在的话
     if FAULT_FLAG in allserverpds.columns.array:
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
-    # add_server_feature = ["time", "used", "used_mean", "used_min", "used_max", "used_percentage50", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max", "pgfree_percentage50"]
+    # add_server_feature = ["time", "mem_used", "used_mean", "used_min", "used_max", "used_percentage50", "pgfree", "pgfree_mean", "pgfree_min", "pgfree_max", "pgfree_percentage50"]
     for ife in add_server_feature:
         serverinformationDict[ife] = list(allserverpds[ife])
 
@@ -582,7 +582,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
                          Memory_leaks_modelpath: str = None, mem_leak_features=None, memory_leaks_modeltype=0) -> tuple[
     Union[list[int], Any], Optional[Any]]:
     if mem_leak_features is None:
-        mem_leak_features = ["used"]
+        mem_leak_features = ["mem_used"]
     if TIME_COLUMN_NAME in mem_leak_features:
         mem_leak_features.remove(TIME_COLUMN_NAME)
     if FAULT_FLAG in mem_leak_features:
@@ -590,7 +590,7 @@ def predict_memory_leaks(serverinformationDict: Dict, isThreshold: bool = False,
 
     prelistflag_probability = None  # 使用阈值的时候预测的概率只能为None
     if isThreshold:
-        memoryleakValue = thresholdValue["used"]
+        memoryleakValue = thresholdValue["mem_used"]
         realmemoryleakValue = serverinformationDict["used_mean"]
         prelistflag = [60 if i > memoryleakValue else 0 for i in realmemoryleakValue]
     else:
@@ -748,7 +748,7 @@ def predictAllAbnormal(serverinformationDict: Dict,
     if mem_bandwidth_features is None:
         mem_bandwidth_features = ["pgfree"]
     if mem_leak_features is None:
-        mem_leak_features = ["used"]
+        mem_leak_features = ["mem_used"]
     predictDict = {}
     predictDict[TIME_COLUMN_NAME] = serverinformationDict[TIME_COLUMN_NAME]
     if FAULT_FLAG in serverinformationDict.keys():

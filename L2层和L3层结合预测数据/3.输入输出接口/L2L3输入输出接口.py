@@ -45,7 +45,7 @@ def ThransferRightLabels(x: List[int]):
 
 def add_cpu_column(pds: List[pd.DataFrame]):
     for ipd in pds:
-        ipd['cpu'] = ipd['user'] + ipd['system']
+        ipd['cpu'] = ipd["usr_cpu"] + ipd["kernel_cpu"]
 """
 将数据进行特征提取
 """

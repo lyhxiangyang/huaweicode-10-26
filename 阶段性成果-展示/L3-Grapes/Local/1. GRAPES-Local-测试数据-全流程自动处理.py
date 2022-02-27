@@ -56,9 +56,9 @@ if __name__ == "__main__":
     # 需要对server数据进行处理的指标
     server_feature = [
         # "time",
-        "user",
+        "usr_cpu",
         "nice",
-        "system",
+        "kernel_cpu",
         "idle",
         "iowait",
         "irq",
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         "total",
         "available",
         "percent",
-        "used",
+        "mem_used",
         "free",
         "active",
         "inactive",
@@ -93,12 +93,12 @@ if __name__ == "__main__":
         "pgfree",
         # "faultFlag",
     ]
-    server_accumulate_feature = ['idle', 'iowait', 'interrupts', 'user', 'system', 'ctx_switches', 'soft_interrupts', 'irq',
+    server_accumulate_feature = ['idle', 'iowait', 'interrupts', "usr_cpu", "kernel_cpu", 'ctx_switches', 'soft_interrupts', 'irq',
                   'softirq', 'steal', 'syscalls', 'handlesNum', 'pgpgin', 'pgpgout', 'fault', 'majflt', 'pgscank',
-                  'pgsteal', 'pgfree']
+                  'pgsteal', "pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
-    process_feature = ["user", "system"]
-    process_accumulate_feature = ["user", "system"]
+    process_feature = ["usr_cpu", "kernel_cpu"]
+    process_accumulate_feature = ["usr_cpu", "kernel_cpu"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y/%m/%d %H:%M'
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     isThreshold = False  # 不使用阈值，使用模型
     thresholdValueDict = {
         "process_cpu_mean": 57,
-        "used": 120,  # 不要改key值
+        "mem_used": 120,  # 不要改key值
         "pgfree": 130
     }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     }
     # 来自E5测试数据自身
     servermeanValue = {
-        "used": 27500000000,  # 56Bilion
+        "mem_used": 27500000000,  # 56Bilion
         "pgfree": 18000000,  # 这个pgfree是不准的
     }
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     else:
         # 不从文件读取，那么server数据将需要从正常数据中读取
         normalserver_meanvalue = getSelfMean(predictserverpds)
-        normalserver_meanvalue["used"] = servermeanValue["used"]
+        normalserver_meanvalue["mem_used"] = servermeanValue["mem_used"]
         normalserver_meanvalue["pgfree"] = servermeanValue["pgfree"]
         # 进程的平均值
         normalprocess_meanvalue = pd.Series(data=processmeanVaule)

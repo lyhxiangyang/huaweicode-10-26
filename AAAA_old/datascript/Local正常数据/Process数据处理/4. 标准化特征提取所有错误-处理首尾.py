@@ -5,7 +5,7 @@ from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_
 
 if __name__ == "__main__":
     spath = "tmp/tData-11-09/Local正常数据/process数据处理"
-    extractedFeaturee = ["cpu", "system", "user"]
+    extractedFeaturee = ["cpu", "kernel_cpu", "usr_cpu"]
     # 将所有的标准化数据读取
     file_time_core_standardPath = os.path.join(spath, "4.filename-time-core-标准化")
     print("读取filename-time-core数据中".center(40, "*"))

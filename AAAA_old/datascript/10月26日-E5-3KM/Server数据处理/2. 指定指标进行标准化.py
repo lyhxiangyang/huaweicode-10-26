@@ -16,13 +16,13 @@ if __name__ == "__main__":
     file_time_faultyPath: str = "tmp/tData-10-26/多机-E5-server-3KM/3.filename-time-faulty"
     # 需要标准化的特征
     # 只标准化这几个特征值
-    # standardfeatur = ["load1", "used"]
+    # standardfeatur = ["load1", "mem_used"]
     # 将所有的特征值都进行标准化
     standardfeatur = [
         # "time",
-        "user",
+        "usr_cpu",
         "nice",
-        "system",
+        "kernel_cpu",
         "idle",
         "iowait",
         "irq",
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         "total",
         "available",
         "percent",
-        "used",
+        "mem_used",
         "free",
         "active",
         "inactive",

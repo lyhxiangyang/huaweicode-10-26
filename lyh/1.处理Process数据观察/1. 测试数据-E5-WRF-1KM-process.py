@@ -59,13 +59,13 @@ if __name__ == "__main__":
     # 将一些需要保存的临时信息进行保存路径
     spath = "tmp/processall_data/测试数据-E5-1km-异常数据"
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
-    process_feature = ["user", "system", "iowait", "memory_percent", "rss", "vms", "shared",
+    process_feature = ["usr_cpu", "kernel_cpu", "iowait", "memory_percent", "rss", "vms", "shared",
                        "text", "lib", "data", "dirty", "read_count", "write_count", "read_bytes", "write_bytes",
                        "read_chars", "write_chars", "num_threads", "voluntary", "involuntary"]
-    process_accumulate_feature = ["user", "system", "read_count", "write_count", "read_bytes", "write_bytes","read_chars", "write_chars", "voluntary", "involuntary"]
+    process_accumulate_feature = ["usr_cpu", "kernel_cpu", "read_count", "write_count", "read_bytes", "write_bytes","read_chars", "write_chars", "voluntary", "involuntary"]
 
-    # "user",
-    # "system",
+    # "usr_cpu",
+    # "kernel_cpu",
     # # "children_user",
     # # "children_system",
     # "iowait",
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         sumpds.append(tpd)
     # =========================================================================================== 将process数据进行深层次处理
     for ipd in sumpds:
-        ipd["cpu"] = ipd["user"] + ipd["system"]
+        ipd["cpu"] = ipd["usr_cpu"] + ipd["kernel_cpu"]
         ipd["involuntart_a"] = ipd["involuntary"] * (1 - ((6240 - ipd["cpu"])) / 6240)
 
     # =========================================================================================== 将读取到的数据进行保存

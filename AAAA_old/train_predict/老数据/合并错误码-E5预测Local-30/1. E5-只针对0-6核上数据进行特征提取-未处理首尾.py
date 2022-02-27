@@ -6,7 +6,7 @@ from utils.FileSaveRead import readFilename_Time_Core_pdDict, saveFilename_Time_
 if __name__ == "__main__":
     filename = 'readcores未处理首尾.txt'
     spath = "tmp/预测30处理数据/多机-E5-process-3KM"
-    extractedFeaturee = ["cpu", "system", "user"]
+    extractedFeaturee = ["cpu", "kernel_cpu", "usr_cpu"]
 
     if not os.path.exists(spath):
         os.makedirs(spath)

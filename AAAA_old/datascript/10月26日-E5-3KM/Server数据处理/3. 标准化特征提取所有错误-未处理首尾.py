@@ -6,12 +6,12 @@ from utils.FileSaveRead import readFilename_Time_pdDict, saveFilename_Time_pdDic
 if __name__ == "__main__":
     spath = "tmp/tData-10-26/多机-E5-server-3KM"
     # 需要特征提取的特征值
-    # extractedFeaturee = ["load1", "used"]
+    # extractedFeaturee = ["load1", "mem_used"]
     extractedFeaturee = [
         # "time",
-        "user",
+        "usr_cpu",
         "nice",
-        "system",
+        "kernel_cpu",
         "idle",
         "iowait",
         "irq",
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "total",
         "available",
         "percent",
-        "used",
+        "mem_used",
         "free",
         "active",
         "inactive",

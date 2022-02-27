@@ -22,8 +22,8 @@ standardized_abnormalflag = [15]
 #     # "pgids_real",
 #     # "pgids_effective",
 #     # "pgids_saved",
-#     "user",
-#     "system",
+#     "usr_cpu",
+#     "kernel_cpu",
 #     # "children_user",
 #     # "children_system",
 #     "iowait",
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     file_time_core_faultyPath: str = "tmp/tData-10-26/多机-E5-process-3KM/3.filename-time-core-faulty"
     spath = "tmp/tData-10-26/多机-E5-process-3KM"
     # 需要标准化的特征
-    standardfeatur = ["user", "system", "cpu"]
+    standardfeatur = ["usr_cpu", "kernel_cpu", "cpu"]
     standardvalue = 60
 
     # 获得所有正常情况下各个特征的平均值

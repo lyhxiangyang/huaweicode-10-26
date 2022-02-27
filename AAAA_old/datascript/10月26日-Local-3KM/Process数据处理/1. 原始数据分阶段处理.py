@@ -6,7 +6,7 @@ from utils.DataScripts import TranslateTimeListStrToStr, mergeTwoDF, processOneP
 from utils.DefineData import TIME_COLUMN_NAME
 from utils.FileSaveRead import saveFaultyDict, saveFilename_Time_Core_pdDict, saveFilename_Time_Core_Faulty_pdDict
 
-accumulationFeatures = ['user', 'system', 'iowait', 'read_count', 'write_count', 'read_bytes', 'write_bytes',
+accumulationFeatures = ["usr_cpu", "kernel_cpu", 'iowait', 'read_count', 'write_count', 'read_bytes', 'write_bytes',
                         'read_chars', 'write_chars', 'voluntary', 'involuntary']
 process_features = [
     # "time",
@@ -19,8 +19,8 @@ process_features = [
     # "pgids_real",
     # "pgids_effective",
     # "pgids_saved",
-    "user",
-    "system",
+    "usr_cpu",
+    "kernel_cpu",
     # "children_user",
     # "children_system",
     "iowait",

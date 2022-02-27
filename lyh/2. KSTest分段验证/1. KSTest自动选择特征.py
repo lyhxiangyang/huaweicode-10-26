@@ -122,9 +122,9 @@ if __name__ == "__main__":
     # 特征值
     server_feature = [
         # "time",
-        "user",
+        "usr_cpu",
         "nice",
-        "system",
+        "kernel_cpu",
         "idle",
         "iowait",
         "irq",
@@ -143,7 +143,7 @@ if __name__ == "__main__":
         "total",
         "available",
         "percent",
-        "used",
+        "mem_used",
         "free",
         "active",
         "inactive",
@@ -159,9 +159,9 @@ if __name__ == "__main__":
         "pgfree",
         # "faultFlag",
     ]
-    server_accumulate_feature = ['idle', 'iowait', 'interrupts', 'user', 'system', 'ctx_switches', 'soft_interrupts', 'irq',
+    server_accumulate_feature = ['idle', 'iowait', 'interrupts', "usr_cpu", "kernel_cpu", 'ctx_switches', 'soft_interrupts', 'irq',
                   'softirq', 'steal', 'syscalls', 'handlesNum', 'pgpgin', 'pgpgout', 'fault', 'majflt', 'pgscank',
-                  'pgsteal', 'pgfree']
+                  'pgsteal', "pgfree"]
 
     # ============================================================================================= 先将正常数据和预测数据的指标从磁盘中加载到内存中
     print("将数据从文件中读取".center(40, "*"))

@@ -78,22 +78,22 @@ if __name__ == "__main__":
     coresSet = set(range(0, 103)) # wrf实际运行在的核心数
 
     # 需要对server数据进行处理的指标
-    server_feature = ["used", "pgfree", "freq"]
+    server_feature = ["mem_used", "pgfree", "freq"]
     server_accumulate_feature = ["pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
-    process_feature = ["user", "system"]
-    process_accumulate_feature = ["user", "system"]
+    process_feature = ["usr_cpu", "kernel_cpu"]
+    process_accumulate_feature = ["usr_cpu", "kernel_cpu"]
     # 需要对l2数据进行处理的指标，
-    l2_feature = ["CPU_Powewr", "Power", "Cabinet_Power",
-                  'FAN1_F_Speed', "FAN1_R_Speed",
-                  'FAN2_F_Speed', "FAN2_R_Speed",
-                  'FAN3_F_Speed', "FAN3_R_Speed",
-                  'FAN4_F_Speed', "FAN4_R_Speed",
+    l2_feature = ["cpu_power", "power", "cabinet_power",
+                  "fan1_speed", "FAN1_R_Speed",
+                  "fan2_speed", "FAN2_R_Speed",
+                  "fan3_speed", "FAN3_R_Speed",
+                  "fan4_speed", "FAN4_R_Speed",
                   'FAN5_F_Speed', "FAN5_R_Speed",
                   'FAN6_F_Speed', "FAN6_R_Speed",
                   'FAN7_F_Speed', "FAN7_R_Speed",
-                  'CPU1_Core_Rem', 'CPU2_Core_Rem', 'CPU3_Core_Rem', 'CPU4_Core_Rem',
-                  'CPU1_MEM_Temp', 'CPU2_MEM_Temp', 'CPU3_MEM_Temp', 'CPU4_MEM_Temp',
+                  "cpu1_core_rem", "cpu2_core_rem", "cpu3_core_rem", "cpu4_core_rem",
+                  "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp",
                   ]
     l2_accumulate_feature = []
     # 需要对网络数据进行处理的指标
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     thresholdValueDict = {
         "process_cpu_mean": 57,
         # server的数值
-        "used": 120,  # 不要改key值
+        "mem_used": 120,  # 不要改key值
         "pgfree": 500,
     }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
@@ -120,16 +120,16 @@ if __name__ == "__main__":
         "cpu": 60,
     }
     servermeanValue = {
-        "used": 0,
+        "mem_used": 0,
         "pgfree": 0,
         "freq": 0,
     }
     l2meanValue = {
         "CPU_Power": -1,
-        "Power": -1,
-        "Cabinet_Power": -1,
-        "CPU1_Core_Rem": -1,
-        "FAN1_F_Speed": -1,
+        "power": -1,
+        "cabinet_power": -1,
+        "cpu1_core_rem": -1,
+        "fan1_speed": -1,
     }
     networkmeanValue = {
         "tx_packets_phy": -1,

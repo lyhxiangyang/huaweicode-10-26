@@ -108,9 +108,9 @@ if __name__ == "__main__":
     # 为wrf运行时使用的核心数量
     server_feature = [
         # "time",
-        "user",
+        "usr_cpu",
         "nice",
-        "system",
+        "kernel_cpu",
         "idle",
         "iowait",
         "irq",
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         "total",
         "available",
         "percent",
-        "used",
+        "mem_used",
         "free",
         "active",
         "inactive",
@@ -145,11 +145,11 @@ if __name__ == "__main__":
         "pgfree",
         # "faultFlag",
     ]
-    server_accumulate_feature = ['idle', 'iowait', 'interrupts', 'user', 'system', 'ctx_switches', 'soft_interrupts',
+    server_accumulate_feature = ['idle', 'iowait', 'interrupts', "usr_cpu", "kernel_cpu", 'ctx_switches', 'soft_interrupts',
                                  'irq',
                                  'softirq', 'steal', 'syscalls', 'handlesNum', 'pgpgin', 'pgpgout', 'fault', 'majflt',
                                  'pgscank',
-                                 'pgsteal', 'pgfree']
+                                 'pgsteal', "pgfree"]
     # 每个特征值的取值返回，如果在这里，就按照这个范围进行使用，否则不在这个范围内的数值，会自动进行推导求出返回。
     # 格式为featurename: (lengthstep) lengthstep代表着多少长度以内视为同一个数字
     defaultPercentstep = 0.1  # 默认使用最大的值的0.05作为一个步

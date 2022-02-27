@@ -52,9 +52,9 @@ if __name__ == "__main__":
     # 需要对server数据进行处理的指标
     server_feature = [
         # "time",
-        "user",
+        "usr_cpu",
         "nice",
-        "system",
+        "kernel_cpu",
         "idle",
         "iowait",
         "irq",
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         "total",
         "available",
         "percent",
-        "used",
+        "mem_used",
         "free",
         "active",
         "inactive",
@@ -89,9 +89,9 @@ if __name__ == "__main__":
         "pgfree",
         # "faultFlag",
     ]
-    server_accumulate_feature = ['idle', 'iowait', 'interrupts', 'user', 'system', 'ctx_switches', 'soft_interrupts', 'irq',
+    server_accumulate_feature = ['idle', 'iowait', 'interrupts', "usr_cpu", "kernel_cpu", 'ctx_switches', 'soft_interrupts', 'irq',
                   'softirq', 'steal', 'syscalls', 'handlesNum', 'pgpgin', 'pgpgout', 'fault', 'majflt', 'pgscank',
-                  'pgsteal', 'pgfree']
+                  'pgsteal', "pgfree"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y/%m/%d %H:%M'
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     normalserver_meanvalue:pd.Series
     normalserver_meanvalue.to_csv(os.path.join(spath, "平均值修改前.csv"))
     # 将used和pgfree修改为指定值
-    normalserver_meanvalue["used"] = 56000000000
+    normalserver_meanvalue["mem_used"] = 56000000000
     normalserver_meanvalue["pgfree"] = 56000000
     normalserver_meanvalue.to_csv(os.path.join(spath, "平均值修改后.csv"))
 

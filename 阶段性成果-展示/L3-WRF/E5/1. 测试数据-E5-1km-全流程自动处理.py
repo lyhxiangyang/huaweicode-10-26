@@ -43,11 +43,11 @@ if __name__ == "__main__":
     coresSet = set(range(0, 103)) # wrf实际运行在的核心数
 
     # 需要对server数据进行处理的指标
-    server_feature = ["used", "pgfree"]
+    server_feature = ["mem_used", "pgfree"]
     server_accumulate_feature = ["pgfree"]
     # 需要对process数据进行处理的指标, cpu数据要在数据部分添加, 在后面，会往这个列表中添加一个cpu数据
-    process_feature = ["user", "system"]
-    process_accumulate_feature = ["user", "system"]
+    process_feature = ["usr_cpu", "kernel_cpu"]
+    process_accumulate_feature = ["usr_cpu", "kernel_cpu"]
 
     # 在处理时间格式的时候使用，都被转化为'%Y-%m-%d %H:%M:00' 在这里默认所有的进程数据是同一种时间格式，
     server_time_format = '%Y/%m/%d %H:%M'
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     isThreshold = False
     thresholdValueDict = {
         "process_cpu_mean": 57,
-        "used": 120,  # 不要改key值
+        "mem_used": 120,  # 不要改key值
         "pgfree": 500
     }
     # 是否使用正常文件中的平均值 True代表这个从正常文件中读取，False代表着直接从字典中读取
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         "cpu": 60,
     }
     servermeanValue = {
-        "used": 0,
+        "mem_used": 0,
         "pgfree": 0
     }
 
