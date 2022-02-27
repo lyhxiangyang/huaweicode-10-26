@@ -104,7 +104,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 continue
             # 4.
             eintlist = list(map(int, list("0002222000")))
-            lenerror = 3
+            lenerror = 4
             iequalpos = 3
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 if (eintlist[0] == 0):
