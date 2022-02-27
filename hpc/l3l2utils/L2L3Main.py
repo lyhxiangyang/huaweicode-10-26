@@ -491,10 +491,11 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
         allresultspd = fixFaultFlag(allresultspd)
     allresultspd = fixIsolatedPointPreFlag(allresultspd)
 
-    print("增加此时间点是否预测正确".center(40, "*"))
     if inputDict["isExistFaultFlag"]:
-        isrightLists = [1 if allresultspd[FAULT_FLAG][i] != 0 and (allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or allresultspd[FAULT_FLAG][i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in range(0, len(allresultspd))]
-        allresultspd["isright"] = isrightLists
+        print("增加此时间点是否预测正确".center(40, "*"))
+        if inputDict["isExistFaultFlag"]:
+            isrightLists = [1 if allresultspd[FAULT_FLAG][i] != 0 and (allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or allresultspd[FAULT_FLAG][i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in range(0, len(allresultspd))]
+            allresultspd["isright"] = isrightLists
 
     print("增加概率".center(40, "*"))
     allresultspd["probability"] = getDetectionProbability(allresultspd["preFlag"].tolist())
@@ -561,9 +562,10 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
     tpath = None
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "5.准确率结果分析")
-    # 对预测结果进行分析
-    print("对预测结果进行准确率及其他分析".center(40, "*"))
-    analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
+    if inputDict["isExistFaultFlag"]:
+        # 对预测结果进行分析
+        print("对预测结果进行准确率及其他分析".center(40, "*"))
+        analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
     print("对预测结果进行时间段分析，输出时间文件".center(40, "*"))
     outputDict = outputJsonFromDetection(l2l3predetectresultpd)
 
