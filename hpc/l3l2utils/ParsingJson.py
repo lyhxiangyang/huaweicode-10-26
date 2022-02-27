@@ -21,7 +21,7 @@ from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 
 
 def convertDataFrameToDict(df: pd.DataFrame) -> Dict:
-    cdfDict = df.to_dict(orient='index')
+    cdfDict = df.to_dict(orient='records')
     return cdfDict
 
 
