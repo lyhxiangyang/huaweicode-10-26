@@ -24,7 +24,7 @@
     "meanNormalDataNumber": 10,
     "resultsavepath": null,
     "outputJsonFilename": "output.json",
-    "isExistFaultFlag": true,
+    "isExistFaultFlag": false,
     "isTimeisStr": false,
     "server_feature": ["mem_used", "pgfree", "freq"],
     "server_accumulate_feature": ["pgfree"],
