@@ -7,7 +7,8 @@ from pandas.core.generic import NDFrame
 from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames, mergeinnerTwoDataFrame, mergeouterPredictResult
 from hpc.l3l2utils.DataFrameSaveRead import saveDFListToFiles, savepdfile
-from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, removeProcessUselessData, getRunHPCTimepdsFromProcess
+from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, removeProcessUselessData, getRunHPCTimepdsFromProcess, \
+    changeTimePdsToStrFromInt
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, MODEL_TYPE
 from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer, standardLists, \
     extractionProcessPdLists, \
@@ -241,6 +242,13 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictpingpds = getPingPdFromJsonDict(sdict=detectionJson)
     predicttopdwnpds = getTopdownPdFromJsonDict(sdict=detectionJson)
 
+    if not inputDict["isTimeisStr"]:
+        print("对时间由数字转化为字符串".format(40, "*"))
+        changeTimePdsToStrFromInt(predictserverpds)
+        changeTimePdsToStrFromInt(predictprocesspds)
+        changeTimePdsToStrFromInt(predictl2pds)
+        changeTimePdsToStrFromInt(predictnetworkpds)
+        changeTimePdsToStrFromInt(predictpingpds)
 
     print("将数据的时间进行统一化处理".center(40, "*"))
     predictserverpds = changeTimeToFromPdlists(predictserverpds, isremoveDuplicate=True)

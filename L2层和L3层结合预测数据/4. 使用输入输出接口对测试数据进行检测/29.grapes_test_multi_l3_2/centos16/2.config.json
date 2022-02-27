@@ -23,6 +23,7 @@
     "resultsavepath": null,
     "outputJsonFilename": "output.json",
     "isExistFaultFlag": true,
+    "isTimeisStr": true,
     "server_feature": ["mem_used", "pgfree", "freq"],
     "server_accumulate_feature": ["pgfree"],
     "process_feature":["usr_cpu", "kernel_cpu"],
