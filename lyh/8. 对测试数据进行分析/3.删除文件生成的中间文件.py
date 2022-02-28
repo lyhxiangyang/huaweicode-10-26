@@ -34,7 +34,8 @@ if __name__ == "__main__":
     for ipath in alldatapath:
         startTime1 = time.perf_counter()
         deletedir = os.path.join(ipath, "jsonfile", "中间结果生成_90和80合并")
-        shutil.rmtree(deletedir)
+        if os.path.exists(deletedir):
+            shutil.rmtree(deletedir)
 
 
     endTime = time.perf_counter()
