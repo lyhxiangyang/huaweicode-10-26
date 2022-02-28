@@ -36,6 +36,7 @@ if __name__ == "__main__":
     if substrrundir is not None:
        alldatapath = [i for i in alldatapath if substrrundir in i]
     for ipath in alldatapath:
+        print(ipath)
         startTime1 = time.perf_counter()
         configJsonDict["predictdirjsonpath"] = os.path.join(ipath, "jsonfile", "alljson.json")
         configJsonDict["spath"] = os.path.join(ipath, "jsonfile", "中间结果生成")
