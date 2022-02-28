@@ -55,7 +55,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 preflagList[i].remove(value)
     # 如果没有CPU异常就删除50，90
     def removeMemoryIfnotCpu(ilist: List):
-        if len(set(ilist) & set([10,20,30,80])) == 0:
+        if len(set(ilist) & {10, 20, 30, 80}) == 0:
             if 50 in ilist:
                 ilist.remove(50)
             if 90 in ilist:
@@ -126,6 +126,19 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 continue
             # 5.
             eintlist = list(map(int, list("01000")))
+            lenerror = 1
+            iequalpos = 1
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
+                i += len(eintlist) - iequalpos
+                continue
+            # 5.
+            eintlist = list(map(int, list("1011")))
             lenerror = 1
             iequalpos = 1
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):

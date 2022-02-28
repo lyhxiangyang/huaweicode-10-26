@@ -261,7 +261,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predicttopdwnpds = changeTimeToFromPdlists(predicttopdwnpds, isremoveDuplicate=True)
 
     print("对读取到的原始数据进行差分".format(40, "*"))
-    # 对异常数据进行差分处理之后，得到cpu特征值
+    # 对异常数据进行差分处理之后，得到cpu特征值 process数据会去掉前三min和后三min的数值
     predictprocesspds = differenceProcess(predictprocesspds, inputDict["process_accumulate_feature"])
     # 对异常server服务数据进行差分处理之后，得到一些指标
     predictserverpds = differenceServer(predictserverpds, inputDict["server_accumulate_feature"])
