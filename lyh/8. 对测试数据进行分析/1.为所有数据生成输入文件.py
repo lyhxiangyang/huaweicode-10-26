@@ -30,6 +30,9 @@ if __name__ == "__main__":
 
     for predictdirpath in alldatapath:
         spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
+        if os.path.exists(spath):
+            continue
+        print(spath)
         jsonfilename = "alljson.json"
         normalMeanDict = {
             "server": {
