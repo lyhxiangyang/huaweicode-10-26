@@ -162,7 +162,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     #             continue
 
     # 如果没有CPU异常就删除50 90
-    # [removeMemoryIfnotCpu(i) for i in preflagList]
+    [removeMemoryIfnotCpu(i) for i in preflagList]
 
 
     for i in range(0, len(preflagList)):
