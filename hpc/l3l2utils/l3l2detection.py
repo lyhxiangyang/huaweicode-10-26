@@ -207,7 +207,9 @@ def fixFaultFlag(l2l3predetectresultpd: pd.DataFrame):
     l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
         lambda x: 131 if x == 133 else x)
     l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
-        lambda x: 132 if x == 134 else x)
+        lambda x: 131 if x == 134 else x)
+    l2l3predetectresultpd.loc[:, FAULT_FLAG] = l2l3predetectresultpd.loc[:, FAULT_FLAG].apply(
+        lambda x: 131 if x == 132 else x)
     l2l3predetectresultpd.reset_index(drop=True, inplace=True)
     return l2l3predetectresultpd
 
