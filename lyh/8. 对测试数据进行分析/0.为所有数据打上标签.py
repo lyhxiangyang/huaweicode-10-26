@@ -94,6 +94,12 @@ if __name__ == "__main__":
     for idirpaths in dirpaths:
         dirs = getDirs(idirpaths)
         for idir in dirs:
+            if "notrun" in idir:
+                continue
+            # 存在就continue 不进行生成
+            if os.path.exists(os.path.join(idir, "server")):
+                continue
+            print(idir)
             iidir = Path(idir).parent.name
             # dirnumber = int(iidir.split(".")[0])
             # if not dirnumber in changedigitrange:
