@@ -38,7 +38,7 @@ if __name__ == "__main__":
     for ipath in alldatapath:
         startTime1 = time.perf_counter()
         configJsonDict["predictdirjsonpath"] = os.path.join(ipath, "jsonfile", "alljson.json")
-        configJsonDict["spath"] = os.path.join(ipath, "jsonfile", "中间结果生成")
+        configJsonDict["spath"] = os.path.join(ipath, "jsonfile", "中间结果生成50_80_90")
         # 存在中间文件就继续
         if os.path.exists(configJsonDict["spath"]):
             continue
