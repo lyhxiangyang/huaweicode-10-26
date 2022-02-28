@@ -33,6 +33,8 @@ if __name__ == "__main__":
     for ipath in alldatapath:
         configJsonDict["predictdirjsonpath"] = os.path.join(ipath, "jsonfile", "alljson.json")
         configJsonDict["spath"] = os.path.join(ipath, "jsonfile", "中间结果生成")
+        if os.path.exists(configJsonDict["spath"]):
+            continue
         # 如果不存在就运行下一个
         if not os.path.exists(configJsonDict["predictdirjsonpath"]):
             continue
