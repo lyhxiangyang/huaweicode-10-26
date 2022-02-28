@@ -111,8 +111,8 @@ def mergeouterPredictResult(pds: List[pd.DataFrame], isExistFlag: bool = True) -
     respd = pd.DataFrame(index=mergepds.index)  # 设置时间
     if isExistFlag:
         respd.loc[:, FAULT_FLAG] = mergepds[FAULT_FLAG].apply(fun_faultFlag, axis=1)
-    respd["time"] = mergepds.index
     respd.loc[:, "preFlag"] = mergepds["preFlag"].apply(fun_preFlag, axis=1)
-    respd.sort_values(by="time", inplace=True)
     respd.reset_index(drop=True, inplace=True)
+    respd["time"] = mergepds.index
+    respd.sort_values(by="time", inplace=True)
     return respd
