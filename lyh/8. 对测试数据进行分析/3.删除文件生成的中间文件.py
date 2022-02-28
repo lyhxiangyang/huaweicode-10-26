@@ -35,6 +35,7 @@ if __name__ == "__main__":
         startTime1 = time.perf_counter()
         deletedir = os.path.join(ipath, "jsonfile", "中间结果生成_90和80合并")
         if os.path.exists(deletedir):
+            print(deletedir)
             shutil.rmtree(deletedir)
 
 
