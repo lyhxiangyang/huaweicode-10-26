@@ -31,7 +31,12 @@ if __name__ == "__main__":
     for i in alldatadirs:
         alldatapath.extend(getDirs(i))
     for ipath in alldatapath:
-        configfilepath["predictdirjsonpath"] = os.path.join(ipath, "json")
+        configJsonDict["predictdirjsonpath"] = os.path.join(ipath, "jsonfile", "alljson.json")
+        # 如果不存在就运行下一个
+        if not os.path.exists(configJsonDict["predictdirjsonpath"]):
+            continue
+        if "notrun" in ipath:
+            continue
         outputDict = detectionFromInputDict(configJsonDict)
     endTime = time.perf_counter()
     print('Running time: %s Seconds' % (endTime - startTime))

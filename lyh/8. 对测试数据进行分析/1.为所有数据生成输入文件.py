@@ -29,11 +29,13 @@ if __name__ == "__main__":
         alldatapath.extend(getDirs(i))
 
     for predictdirpath in alldatapath:
-        spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
-        if os.path.exists(spath):
+        if "notrun" in predictdirpath:
             continue
-        print(spath)
+        spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
         jsonfilename = "alljson.json"
+        if os.path.exists(os.path.join(spath, jsonfilename)):
+            continue
+        print(os.path.join(spath, jsonfilename))
         normalMeanDict = {
             "server": {
                 # "mem_used": 48935662250,
