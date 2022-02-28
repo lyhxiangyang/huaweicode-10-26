@@ -472,8 +472,9 @@ def getDetectionRecallPrecision(realflags: List[int], preflags: List[List[int]],
             if len(set(preflags[i]) & MEMORY_ABNORMAL_TYPE) != 0:
                 abnormal_memory_nums += 1
     infoDict = {"num": real_abnormalnums,
-                "recall": -1 if real_abnormalnums == 0 else abnormal_rightabnormal_nums / real_abnormalnums,
-                "precison": -1 if pre_allabnormalnums == 0 else abnormal_rightabnormal_nums / pre_allabnormalnums,
+                "rightnum": abnormal_rightabnormal_nums,
+                "precison": -1 if real_abnormalnums == 0 else abnormal_rightabnormal_nums / real_abnormalnums,
+                "recall": -1 if pre_allabnormalnums == 0 else abnormal_rightabnormal_nums / pre_allabnormalnums,
                 "per_abnormal": -1 if real_abnormalnums == 0 else abnormal_abnormal_nums / real_abnormalnums,
                 "per_normal": -1 if real_abnormalnums == 0 else abnormal_normal_nums / real_abnormalnums,
                 "cpu_abnormal": -1 if real_abnormalnums == 0 else abnormal_cpu_nums / real_abnormalnums,

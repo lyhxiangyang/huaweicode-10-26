@@ -177,6 +177,7 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
 处理server 但是需要用到topdown的数据topdown的结合数据
 
 会对原始数值进行处理
+并且会对used指标进行中位数处理
 """
 
 
@@ -220,6 +221,9 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
     for iserverpd in predictserverpds:
         spd, tpd = getsametimepd(iserverpd, alltopdownspd)
         ispd = dealServerpdAndTopdownpd(spd,predictprocesspds,tpd, detectionJson=detectionJson)
+        # 中位数处理
+        ispd["mem_used"] = ispd["mem_used"].rolling(window=7, min_periods=7, center=True).median()
+        ispd.dropna(axis=0, how="any", inplace=True)
         resserverpds.append(ispd)
     return resserverpds
 
@@ -274,8 +278,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # 对mflops分析然后是删除掉不够的部分
     predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
     # 将时间与对应位置对齐
-    predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predicttopdwnpds)
-    predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds)
+    predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
+    predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds) # 再让server和process对齐
 
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
