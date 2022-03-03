@@ -71,7 +71,7 @@ def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -
         # 这个会对mflops进行处理，然后
         if "mflops_change" not in itopdownpd.columns.array:
             cname = "mflops"
-            itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+            # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
             itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
             itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
             mflops_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname], datanumber=10)[cname]
