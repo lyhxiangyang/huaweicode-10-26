@@ -356,11 +356,12 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     tpath = None
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "4.CPU异常检测中间文件")
+    alltimepds = allprocesspds[allprocesspds["cpu_affinity"] == 0]
     l3cpuresult = pd.DataFrame()
-    l3cpuresult[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
+    l3cpuresult[TIME_COLUMN_NAME] = alltimepds[TIME_COLUMN_NAME]
     if inputDict["isExistFaultFlag"]:
-        l3cpuresult[FAULT_FLAG] = allserverpds[FAULT_FLAG]
-    l3cpuresult["preFlag"] = detectL3CPUAbnormal(allserverpds=allserverpds, allprocesspds=allprocesspds, spath=tpath,
+        l3cpuresult[FAULT_FLAG] = alltimepds[FAULT_FLAG]
+    l3cpuresult["preFlag"] = detectL3CPUAbnormal(allserverpds=alltimepds, allprocesspds=allprocesspds, spath=tpath,
                                                  modelfilepath=inputDict["processcpu_modelpath"],
                                                  modeltype=inputDict["processcpu_modeltype"])
 
