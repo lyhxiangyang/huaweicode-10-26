@@ -102,41 +102,6 @@ def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
         return itopdownpd
 
-        # 对ddrc_wr进行滑动窗口处理
-
-        # # 对mflops进行分析
-        # itopdownpd["mflops_sliding"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).agg(
-        #     "max").astype("int")
-        # mflops_mean = itopdownpd["mflops_sliding"][0:3].mean() # todo
-        #
-        # print("mflops平均值：{}".format(mflops_mean))
-        # mflops_change = itopdownpd["mflops_sliding"].apply(
-        #     lambda x: (mflops_mean - x) / mflops_mean if x <= mflops_mean else 0)  # 如果是-20% 那么对应的值应该增加20%
-        #
-        # # 对指标进行补偿性分析
-        # cname = "ddrc_rd"
-        # cname_sliding = cname + "_sliding"
-        # itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
-        #     "int")
-        # ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值 todo
-        # print("{}平均值：{}".format(cname, ddrc_rd_mean))
-        # itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
-        # itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5,
-        #                                                                                                 center=True,
-        #                                                                                                 min_periods=1).agg(
-        #     "max").astype("int")
-        #
-        # cname = "ddrc_wr"
-        # cname_sliding = cname + "_sliding"
-        # itopdownpd[cname_sliding] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).agg("max").astype(
-        #     "int")
-        # ddrc_rd_mean = itopdownpd[cname_sliding][0:3].mean()  # 得到一个正常值 todo
-        # print("{}平均值：{}".format(cname, ddrc_rd_mean))
-        # itopdownpd[cname_sliding + "_recover"] = itopdownpd[cname_sliding] + ddrc_rd_mean * mflops_change
-        # itopdownpd[cname_sliding + "_recover_sliding"] = itopdownpd[cname_sliding + "_recover"].rolling(window=5, center=True, min_periods=1).agg("max").astype("int")
-        #
-        # itopdownpd["ddrc_ddwr_sum"] = itopdownpd["ddrc_rd_sliding_recover_sliding"] + itopdownpd[
-        #     "ddrc_wr_sliding_recover_sliding"]
     rlistpds = []
     for ipd in predicttopdwnpds:
         tpd = proceeOneTopdownPd(ipd)
@@ -276,9 +241,10 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 
     print("根据topdown数据对数据进行对齐操作".format(40, "*"))
     # 对mflops分析然后是删除掉不够的部分
-    predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
+    if inputDict["RequestData"]["type"] == "grapes":
+        predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
     # 将时间与对应位置对齐
-    predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
+    # predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
     predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds) # 再让server和process对齐
 
     # ============================================================ 对数据进行修改

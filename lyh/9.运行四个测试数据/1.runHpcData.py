@@ -21,13 +21,15 @@ if __name__ == "__main__":
         for iconfigjson in configjsons:
             filename = os.path.splitext(iconfigjson)[0]
             configpath = os.path.join(irundir, iconfigjson)
+            if not os.path.isfile(configpath):
+                continue
             spath = os.path.join(irundir, filename+"_中间结果文件生成")
+            if os.path.exists(spath):
+                continue
             if not os.path.exists(spath):
                 os.mkdir(spath)
-
             configJsonDict["predictdirjsonpath"] = configpath
             configJsonDict["spath"] = spath
-
             outputDict = detectionFromInputDict(configJsonDict)
     endTime1 = time.perf_counter()
     print('Running time: %s Seconds' % (endTime1 - startTime1))

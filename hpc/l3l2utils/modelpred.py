@@ -29,6 +29,8 @@ def getTrainedFeatures(dfcolumns: List[str], prefixnames: List[str]):
 
 """
 函数功能： 通过server数据和process数据合并之后提取有用信息 包括每时每刻各个核心是否有异常以及server预测需要用到的指标
+
+不以serverpds的为标准，以processpd的时间为标准
 """
 
 
