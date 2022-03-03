@@ -22,6 +22,8 @@ if __name__ == "__main__":
             filename = os.path.splitext(iconfigjson)[0]
             configpath = os.path.join(irundir, iconfigjson)
             spath = os.path.join(irundir, filename+"_中间结果文件生成")
+            if not os.path.exists(spath):
+                os.mkdir(spath)
 
             configJsonDict["predictdirjsonpath"] = configpath
             configJsonDict["spath"] = spath
