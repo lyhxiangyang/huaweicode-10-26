@@ -63,6 +63,11 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     def remove60if50and60exist(ilist: List):
         if 50 in ilist and 60 in ilist:
             ilist.remove(60)
+    # # windows为奇数代表中间，必须为奇数
+    # def smoothPreFlagFault(preLists, ipos, ifault, windows: int = 7):
+    #     beginpos = ipos - windows // 2
+    #     endpos = ipos + windows // 2 + 1
+    #     for i in range(beginpos, endpos):
 
 
 
@@ -140,9 +145,22 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                     assignmentValue(preflagList, i, lenerror, ifault)
                 i += len(eintlist) - iequalpos
                 continue
-            # 5.
+            # 6.
             eintlist = list(map(int, list("1011")))
             lenerror = 1
+            iequalpos = 1
+            if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
+                if (eintlist[0] == 0):
+                    removeValue(preflagList, i , lenerror, ifault)
+                    assignmentValue(preflagList, i, lenerror, 0)
+                elif (eintlist[0] == 1):
+                    removeValue(preflagList, i , lenerror, 0)
+                    assignmentValue(preflagList, i, lenerror, ifault)
+                i += len(eintlist) - iequalpos
+                continue
+            # 7.
+            eintlist = list(map(int, list("10011")))
+            lenerror = 2
             iequalpos = 1
             if isallEqual(preflagList, eintlist, i, iequalpos, ifault):
                 if (eintlist[0] == 0):
@@ -157,30 +175,12 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             i += 1
 
 
-    # for i in range(0, len(preflagList)):
-    #     # 对每个异常进行判断
-    #     for ifault in allPreFlags:  # 对所有出现过的错误进行预判
-    #         # 0 代表不是这个错误， 1代表是这个错误
-    #         if isallEqual(preflagList, list(map(int, list("00100"))), i, ifault):
-    #             preflagList[i].remove(ifault)
-    #             continue  # 不需要这个异常
-    #         if isallEqual(preflagList, list(map(int, list("11011"))), i, ifault):
-    #             preflagList[i].append(ifault)
-    #             continue
-    #         if isallEqual(preflagList, list(map(int, list("1110111"))), i, ifault):
-    #             preflagList[i].append(ifault)
-    #             continue
-    #         if isallEqual(preflagList, list(map(int, list("0001000"))), i, ifault):
-    #             preflagList[i].append(ifault)
-    #             continue
-    #         if isallEqual(preflagList, list(map(int, list("0001000"))), i, ifault):
-    #             preflagList[i].append(ifault)
-    #             continue
-
     # 如果没有CPU异常就删除50 90
     [removeMemoryIfnotCpu(i) for i in preflagList]
     # 如果50和60同时存在就删除60
     [remove60if50and60exist(i) for i in preflagList]
+
+    # 滑动窗口为7 平滑 preFlagList
 
 
     for i in range(0, len(preflagList)):
