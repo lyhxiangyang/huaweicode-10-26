@@ -43,6 +43,7 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
 
     # ======== detectL3CPUAbnormal运行
     # 将allserverpds里面所有的时间搜集起来
+    allserverpds = allprocesspds[allprocesspds["cpu_affinity"] == 0]
     timecolumns = allserverpds[TIME_COLUMN_NAME]
     serverinformationDict = defaultdict(list)
     serverinformationDict[TIME_COLUMN_NAME] = timecolumns  # 加入时间
