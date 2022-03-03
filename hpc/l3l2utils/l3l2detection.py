@@ -71,8 +71,19 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
 
 
+
+
     # run
     preflagList = list(l2l3predetectresultpd["preFlag"])
+
+
+    # 如果没有CPU异常就删除50 90
+    [removeMemoryIfnotCpu(i) for i in preflagList]
+    # 如果50和60同时存在就删除60
+    [remove60if50and60exist(i) for i in preflagList]
+
+    # 滑动窗口为7 平滑 preFlagList
+
     allPreFlags = sorted(list(set(chain.from_iterable(preflagList))))  # 得到所有的错误
     if 0 in allPreFlags:
         allPreFlags.remove(0)
@@ -175,12 +186,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             i += 1
 
 
-    # 如果没有CPU异常就删除50 90
-    [removeMemoryIfnotCpu(i) for i in preflagList]
-    # 如果50和60同时存在就删除60
-    [remove60if50and60exist(i) for i in preflagList]
 
-    # 滑动窗口为7 平滑 preFlagList
 
 
     for i in range(0, len(preflagList)):
