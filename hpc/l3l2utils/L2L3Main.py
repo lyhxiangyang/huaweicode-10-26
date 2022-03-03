@@ -241,7 +241,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 
     print("根据topdown数据对数据进行对齐操作".format(40, "*"))
     # 对mflops分析然后是删除掉不够的部分
-    if inputDict["RequestData"]["type"] == "grapes":
+    if detectionJson["RequestData"]["type"] == "grapes":
         predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
     # 将时间与对应位置对齐
     # predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
