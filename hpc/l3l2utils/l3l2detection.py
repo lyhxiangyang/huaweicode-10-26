@@ -60,6 +60,9 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 ilist.remove(50)
             if 90 in ilist:
                 ilist.remove(90)
+    def remove60if50and60exist(ilist: List):
+        if 50 in ilist and 60 in ilist:
+            ilist.remove(60)
 
 
 
@@ -176,6 +179,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
     # 如果没有CPU异常就删除50 90
     [removeMemoryIfnotCpu(i) for i in preflagList]
+    # 如果50和60同时存在就删除60
+    [remove60if50and60exist(i) for i in preflagList]
 
 
     for i in range(0, len(preflagList)):

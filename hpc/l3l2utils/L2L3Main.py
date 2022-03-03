@@ -246,11 +246,11 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
         # 将时间与对应位置对齐
         # predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
         predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds) # 再让server和process对齐
-        # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
-        predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
-        # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
-        # 补偿之后对pgfree进行减去平均值，使其与2M进行判断
-        predictserverpds = processServerList(predictserverpds, predicttopdwnpds,predictprocesspds, detectionJson)
+    # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
+    predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
+    # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
+    # 补偿之后对pgfree进行减去平均值，使其与2M进行判断
+    predictserverpds = processServerList(predictserverpds, predicttopdwnpds,predictprocesspds, detectionJson)
 
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
