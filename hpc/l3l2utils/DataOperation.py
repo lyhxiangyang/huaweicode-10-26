@@ -101,6 +101,7 @@ def changeTimeToFromPdlists(pds: List[pd.DataFrame], leastTime: str = "%M",
         if isremoveDuplicate:  # 将时间进行去重
             beforelen = len(tpd)
             tpd = tpd[~tpd[timefeaturename].duplicated()]
+            tpd.reset_index(drop=True, inplace=True)
             afterlen = len(tpd)
             print("第{}个pd减少了{}行".format(i, beforelen - afterlen))
         changed_pds.append(tpd)
