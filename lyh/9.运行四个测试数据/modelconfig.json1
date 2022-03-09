@@ -1,0 +1,8 @@
+{
+    # cpu_process类型
+    "cpu_process_type": 0, # 0代表相对方式，1代表绝对方式
+    "cpu_process_feature": {
+    }
+    "memleak_server_memused": 105,
+    "bandwidth_server: "
+}

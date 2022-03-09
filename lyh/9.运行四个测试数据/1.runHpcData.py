@@ -11,6 +11,7 @@ rundirs = [
     R"C:\Users\lWX1084330\Desktop\所有数据整理\四个测试数据单独case\数据\3.9",
     R"C:\Users\lWX1084330\Desktop\所有数据整理\四个测试数据单独case\数据\3.10",
 ]
+
 if __name__ == "__main__":
     configfilepath = os.path.join(sys.path[0], "config.json")
     configJsonDict = readJsonToDict(*(os.path.split(configfilepath)))

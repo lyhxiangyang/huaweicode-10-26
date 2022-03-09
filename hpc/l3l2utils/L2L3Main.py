@@ -239,24 +239,28 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     predictpingpds = differenceServer(predictpingpds, inputDict["ping_accumulate_feature"])
     predicttopdwnpds = differenceServer(predicttopdwnpds, inputDict["topdown_accumulate_feature"])
 
-    print("根据topdown数据对数据进行对齐操作".format(40, "*"))
+    print("时间根据process的时间进行对齐操作".format(40, "*"))
+    predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds)
+
+
+
+
     # 对mflops分析然后是删除掉不够的部分
-    if detectionJson["RequestData"]["type"] == "grapes":
-        predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
-        # 将时间与对应位置对齐
-        # predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
-        predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds) # 再让server和process对齐
-    # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
-    predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
-    # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
-    # 补偿之后对pgfree进行减去平均值，使其与2M进行判断
-    predictserverpds = processServerList(predictserverpds, predicttopdwnpds,predictprocesspds, detectionJson)
+    # if detectionJson["RequestData"]["type"] == "grapes":
+    #     predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)
+    #     # 将时间与对应位置对齐
+    #     # predictprocesspds = getRunHPCTimepdsFromProcess(predictprocesspds, predicttopdwnpds) # process先和topdown对齐
+    #     predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds) # 再让server和process对齐
+    # # 2. 对topdown原始数据数据进行处理 对读写数据进行补偿性操作
+    # predicttopdwnpds = processTopdownList(detectionJson, predicttopdwnpds)
+    # # 4. 对server数据进行处理 需要对server中进行补偿性处理,所以需要topdown数据
+    # # 补偿之后对pgfree进行减去平均值，使其与2M进行判断
+    # predictserverpds = processServerList(predictserverpds, predicttopdwnpds,predictprocesspds, detectionJson)
 
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
     inputDict["topdown_feature"] = [] # 原因是不需要对任何指标进行特征提取额
-
 
     # 3. 对process数据进行处理
     add_cpu_column(predictprocesspds)

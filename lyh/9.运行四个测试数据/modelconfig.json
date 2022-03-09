@@ -1,0 +1,86 @@
+{
+    "cpu_process_features": {
+        "process:cpu": {
+            "type": 0,
+            "threadvalue": 60
+        }
+    },
+    "memleak_features": {
+        "server:mem_used": {
+            "type": 0,
+            "threadvalue": 105
+        }
+    },
+    "bandwidth_features": {
+        "server:pgfree": {
+            "type": 1,
+            "threadvalue": 5000
+        },
+        "topdown:ddrc_ddwr_sum": {
+            "note": "此特征是处理的时候合成的特征",
+            "type": 1,
+            "threadvalue": 3000
+        }
+    },
+    "cachegrab_features": {
+        "server:pgfree": {
+            "type": 1,
+            "threadvalue": 5000
+        },
+        "topdown:ddrc_ddwr_sum": {
+            "note": "此特征是处理的时候合成的特征",
+            "type": 1,
+            "threadvalue": 3000
+        }
+    },
+    "server_power_capping": {
+        "compute:power": {
+            "type": 0,
+            "threadvalue": 100
+        }
+    },
+    "cabinet_power_capping": {
+        "compute:cabinet_power": {
+            "type": 0,
+            "threadvalue": 100
+        }
+    },
+    "over_temp": {
+        "compute:device_temp": {
+            "note": "温度的阈值",
+            "type": 0,
+            "threadvalue": 150.1
+        },
+        "compute:fans_speed": {
+            "note": "风扇的速度的阈值",
+            "type": 0,
+            "threadvalue": 50
+        }
+    },
+    "network_pfc": {
+        "nic:tx_pachkets_phy": {
+            "type:": 0,
+            "threadvalue": 9.25
+        },
+        "nic:rx_pachkets_phy": {
+            "type": 0,
+            "threadvalue": 66.5
+        }
+    },
+    "network_txhang": {
+        "ping:avg_lat": {
+            "type": 1,
+            "threadvalue": 151
+        }
+    },
+    "cpudown": {
+        "compute:cabinet_power": {
+            "type": 0,
+            "threadvalue": 100
+        },
+        "compute:power": {
+            "type": 0,
+            "threadvalue": 100
+        }
+    }
+}
