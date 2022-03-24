@@ -287,7 +287,8 @@ def getsametimepd(servertimepd: pd.DataFrame, alltopdownspd: pd.DataFrame) -> Tu
         return sametimes
     sametimes = getSameTime(servertimepd[TIME_COLUMN_NAME].tolist(), alltopdownspd[TIME_COLUMN_NAME].tolist())
     serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
-    return servertimepd[serverchooseindex].reset_index(drop=True)
+    alltopdownchooseindex = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
+    return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownchooseindex[serverchooseindex].reset_index(drop=True)
 
 
 """
