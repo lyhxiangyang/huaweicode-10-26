@@ -111,7 +111,7 @@ def gettitle(ipath: str):
 
 if __name__ == "__main__":
     dirpathes = [
-        R"csvfiles/hpc_server.csv",
+        R"DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11",
     ]
     for dirpath in dirpathes:
         title=gettitle(dirpath)
