@@ -4,17 +4,17 @@ import pandas as pd
 # 对process文件进行处理 主要是内存数据，然后联合server数据进行合并
 from hpc.l3l2utils.DataOperation import getsametimepd, changeTimeToFromPdlists
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
-from hpc.l3l2utils.FeatureExtraction import differenceServer
-from utils.auto_forecast import differenceProcess
+from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
 
 
 def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
     if sumFeatures is None:
-        sumFeatures = [TIME_COLUMN_NAME, "user", "system", "memory_percent"]
+        sumFeatures = [TIME_COLUMN_NAME, "usr_cpu", "kernel_cpu", "mem_percent"]
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
-    respd = pd.DataFrame()
     tpd = processpd[sumFeatures].groupby("time").sum()
+    tpd.reset_index(drop=False, inplace=True)
+    tpd.reset_index(drop=True, inplace=True)
     return tpd
 
 def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
@@ -43,17 +43,13 @@ def getserverandprocesspds(filepath: str):
     serverpdlists = differenceServer(serverpdlists, ["pgfree"])
     processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
 
-    return serverpdlists[0], processpdlists[0]
+    iprocesspd = mergeProceeDF(processpdlists[0])
+    return serverpdlists[0], iprocesspd
 
 
 
 if __name__ == "__main__":
-    filepaths = [
-
-    ]
-    for ifiledir in filepaths:
-        iserverpd, iprocesspd = getserverandprocesspds(ifiledir)
-        allpd = subtractionMemory(iserverpd, iprocesspd)
+    main.py
 
 
 
