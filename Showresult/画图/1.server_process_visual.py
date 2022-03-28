@@ -120,7 +120,7 @@ if __name__ == "__main__":
         serverpd = subtractionMemory(serverpd, processpd)
 
         # 画出来
-        processpd(serverpd)
+        processingpd(serverpd)
         n_cols_plot(serverpd,serverpd.columns,title)
 
 
