@@ -100,8 +100,7 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
     sametimeserverpd["s_used"] = sametimeserverpd["mem_total"] - sametimeserverpd['mem_avail']
     sametimeserverpd["p_rss"] = sametimeprocesspd["rss"]
-    # sametimeserverpd["p_vms"] = sametimeprocesspd["vms"] - sametimeprocesspd["shared"]
-    # sametimeserverpd["p_data"] = sametimeprocesspd["data"] - sametimeprocesspd["shared"]
+    sametimeserverpd["p_vms"] = sametimeprocesspd["vms"]
     sametimeserverpd["p_used-rss"] = sametimeserverpd["mem_used"] - sametimeprocesspd["rss"]
 
     return sametimeserverpd
