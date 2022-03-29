@@ -56,7 +56,7 @@ def processingpd(df: pd.DataFrame):
 
 def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
     if sumFeatures is None:
-        sumFeatures = [TIME_COLUMN_NAME, "usr_cpu", "kernel_cpu", "mem_percent"]
+        sumFeatures = [TIME_COLUMN_NAME, "usr_cpu", "kernel_cpu", "mem_percent", "rss"]
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
     tpd = processpd[sumFeatures].groupby("time").sum()
@@ -98,11 +98,11 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     allservermemory = serverpd["mem_total"].iloc[0]
 
     sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
-    sametimeserverpd["s_used"] = sametimeserverpd["total"] - sametimeserverpd['available']
+    sametimeserverpd["s_used"] = sametimeserverpd["mem_total"] - sametimeserverpd['mem_avail']
     sametimeserverpd["p_rss"] = sametimeprocesspd["rss"]
     # sametimeserverpd["p_vms"] = sametimeprocesspd["vms"] - sametimeprocesspd["shared"]
     # sametimeserverpd["p_data"] = sametimeprocesspd["data"] - sametimeprocesspd["shared"]
-    sametimeserverpd["p_used-rss"] = sametimeserverpd["used"] - sametimeprocesspd["rss"]
+    sametimeserverpd["p_used-rss"] = sametimeserverpd["mem_used"] - sametimeprocesspd["rss"]
 
     return sametimeserverpd
 
