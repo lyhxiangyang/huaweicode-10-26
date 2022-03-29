@@ -40,8 +40,7 @@ def processing(filepath: str, filename: str = None):
     return df
 
 def processingpd(df: pd.DataFrame):
-    df: pd.DataFrame
-    if "time" in df.column.array:
+    if "time" in df.columns.array:
         df.set_index("time")
     if "faultFlag" not in df.columns:
         df["faultFlag"] = 0
@@ -97,7 +96,9 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     assert len(sametimeserverpd) == len(sametimeprocesspd)
 
     allservermemory = serverpd["mem_total"].iloc[0]
+
     sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
+    sametimeserverpd["processmem_percent"] = sametimeprocesspd["mem_percent"]
     sametimeserverpd["processmemory"] = sametimeprocesspd["mem_percent"] * allservermemory
     sametimeserverpd["othermemory"] = sametimeserverpd["mem_used"] - sametimeserverpd["processmemory"]
     return sametimeserverpd
