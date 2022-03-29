@@ -102,7 +102,8 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     # sametimeserverpd["processmemory"] = sametimeprocesspd["mem_percent"] * allservermemory / 100
     a = sametimeprocesspd["mem_percent"] * allservermemory / 100
     sametimeserverpd["serverall_pro_mempercent_mem"] = sametimeserverpd["mem_used"] - a
-    sametimeserverpd["serverpercent_processpercent_mem"] = allservermemory * (sametimeserverpd["mem_percent"] - sametimeprocesspd["mem_percent"])
+
+    sametimeserverpd["serverpercent_processpercent_mem"] = allservermemory * (sametimeserverpd["mem_percent"] - sametimeprocesspd["mem_percent"]) / 100
 
     return sametimeserverpd
 
