@@ -41,7 +41,7 @@ def processing(filepath: str, filename: str = None):
 
 def processingpd(df: pd.DataFrame):
     if "time" in df.columns.array:
-        df.set_index("time")
+        df.set_index("time", inplace=True)
     if "faultFlag" not in df.columns:
         df["faultFlag"] = 0
     # 修改列名 去掉每个文件中的空格
@@ -97,10 +97,13 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
 
     allservermemory = serverpd["mem_total"].iloc[0]
 
-    sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
-    sametimeserverpd["processmem_percent"] = sametimeprocesspd["mem_percent"]
-    sametimeserverpd["processmemory"] = sametimeprocesspd["mem_percent"] * allservermemory / 100
-    sametimeserverpd["othermemory"] = sametimeserverpd["mem_used"] - sametimeserverpd["processmemory"]
+    # sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
+    # sametimeserverpd["processmem_percent"] = sametimeprocesspd["mem_percent"]
+    # sametimeserverpd["processmemory"] = sametimeprocesspd["mem_percent"] * allservermemory / 100
+    a = sametimeprocesspd["mem_percent"] * allservermemory / 100
+    sametimeserverpd["serverall_pro_mempercent_mem"] = sametimeserverpd["mem_used"] - a
+    sametimeserverpd["serverpercent_processpercent_mem"] = allservermemory * (sametimeserverpd["mem_percent"] - sametimeprocesspd["mem_percent"])
+
     return sametimeserverpd
 
 def gettitle(ipath: str):
