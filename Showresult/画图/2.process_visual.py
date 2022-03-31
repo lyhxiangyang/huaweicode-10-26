@@ -61,6 +61,7 @@ def processingpd(processpd: pd.DataFrame):
 
 def getpidcpuInfo(processpd: pd.DataFrame):
     respd = pd.DataFrame()
+    flags=None
     for icore, icorepd in processpd.groupby("cpu_affinity"):
         icorepd = icorepd.reset_index(drop=True)
         cname = "core{}_cpu".format(icore)
