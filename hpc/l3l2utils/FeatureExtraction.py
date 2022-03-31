@@ -24,8 +24,7 @@ def subtractLastLineFromDataFrame(df: pd.DataFrame, columns: List) -> Union[None
         return df
     df = df.copy()
     if len(df) <= 1:
-        print("subtractLastLineFromDataFrame 长度为1 出错")
-        exit(1)
+        return df
     df.reset_index(drop=True, inplace=True)
     # 先将整个表格往上一隔
     dfcolumns_1 = df.loc[:, columns].shift(periods=-1, axis=0, fill_value=0)
@@ -52,9 +51,6 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
         subtractpdLists = []
         for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
             # 先将一些不可用的数据进行清除,比如一个进程只运行了两分钟
-            ipd = ipd.iloc[3:-3, :] # 去除前三min和后三min
-            if len(ipd) <= 6:
-                continue
             subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
             subtractpdLists.append(subtractpd)
         allsubtractpd = mergeDataFrames(subtractpdLists)

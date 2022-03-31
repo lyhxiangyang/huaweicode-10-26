@@ -61,7 +61,6 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
         sumFeatures.append(TIME_COLUMN_NAME)
     tpd = processpd[sumFeatures].groupby("time").sum()
     tpd.reset_index(drop=False, inplace=True)
-    tpd["faultFlag"] = 1
     return tpd
 
 
@@ -85,24 +84,26 @@ def getserverandprocesspds(filepath: str):
     processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
     iprocesspd = mergeProceeDF(processpdlists[0])
     # 得到相同时间段
-    # a,b = getsametimepd(serverpdlists[0], iprocesspd)
-    pspd=pd.merge(left=serverpdlists[0], right=iprocesspd, left_on="time", right_on="time", how="left", suffixes=("", "_y"))
-    pspd.fillna(-1, inplace=True)
-    return pspd
+    a,b = getsametimepd(serverpdlists[0], iprocesspd)
+    return a,b
 
 # 传入进去的process应该是相同时间的
 # 根据server总内存和process mempercent来得到数据
-def subtractionMemory(pspd: pd.DataFrame) -> pd.DataFrame:
+def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
     # 保证serverpd和processpd的时间变化范围是一致的
     # sametimeserverpd, sametimeprocesspd = getsametimepd(serverpd, processpd)
+    sametimeserverpd, sametimeprocesspd = serverpd, processpd
+    assert len(sametimeserverpd) == len(sametimeprocesspd)
 
-    allservermemory = pspd["mem_total"].iloc[0]
+    allservermemory = serverpd["mem_total"].iloc[0]
 
-    pspd["s_used"] = pspd["mem_total"] - pspd['mem_avail']
-    pspd["p_rss"] = pspd["rss"]
-    pspd["p_vms"] = pspd["vms"]
+    sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
+    sametimeserverpd["s_used"] = sametimeserverpd["mem_total"] - sametimeserverpd['mem_avail']
+    sametimeserverpd["p_rss"] = sametimeprocesspd["rss"]
+    sametimeserverpd["p_vms"] = sametimeprocesspd["vms"]
+    sametimeserverpd["p_used-rss"] = sametimeserverpd["mem_used"] - sametimeprocesspd["rss"]
 
-    return pspd
+    return sametimeserverpd
 
 def gettitle(ipath: str):
     B,C=os.path.split(ipath)
@@ -118,8 +119,8 @@ if __name__ == "__main__":
     for dirpath in dirpathes:
         title=gettitle(dirpath)
 
-        pspd = getserverandprocesspds(dirpath)
-        serverpd = subtractionMemory(pspd)
+        serverpd, processpd = getserverandprocesspds(dirpath)
+        serverpd = subtractionMemory(serverpd, processpd)
 
         # 画出来
         processingpd(serverpd)
