@@ -148,7 +148,7 @@ def getpidcpuInfo(processpd: pd.DataFrame):
 
 def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
     if sumFeatures is None:
-        sumFeatures = ["time", "user", "system", "memory_percent"]
+        sumFeatures = ["time", "usr_cpu", "kernel_cpu", "memory_percent"]
     respd = pd.DataFrame()
     tpd = processpd[sumFeatures].groupby("time").sum()
     return tpd
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         if FAULTFLAG not in df.columns:
             df[FAULTFLAG] = 0
 
-        df = differenceProcess([df], accumulateFeatures=["user", "system"])[0]
+        df = differenceProcess([df], accumulateFeatures=["usr_cpu", "kernel_cpu"])[0]
         dfsum = mergeProceeDF(df)
         dfinfo = getpidcpuInfo(df)
         dfinfo = processingpd(dfinfo)
