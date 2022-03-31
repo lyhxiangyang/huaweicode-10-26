@@ -26,18 +26,6 @@ TIMELABLE = "time"
 FAULTFLAG = "faultFlag"
 PID_FEATURE = "pid"
 
-'''
-## 参数解释
-# nowtime是一个数字，表示当前时间，是一个大数字
-## 返回值解释
-# 返回的是一个字符串形式的数字, 格式为"2021-05-12T18:19:36+00:00"
-'''
-
-
-def ChangeTimeToStr(nowtime: int) -> str:
-    struct_time = time.localtime(nowtime)
-    return time.strftime("%Y-%m-%dT%H:%M:%S+00:00", struct_time)
-
 
 '''
 ## 参数解释
@@ -47,64 +35,8 @@ def ChangeTimeToStr(nowtime: int) -> str:
 '''
 
 
-def ChangeStrToTime(timestamp: str) -> float:
-    struct_time = time.strptime(timestamp, "%Y-%m-%dT%H:%M:%S+00:00")
-    return time.mktime(struct_time)
 
 
-"""
-从time.md中得到开始时间和结束时间
-"""
-
-
-def GetStartEndTimeFromTimeMd(timemdpath: str) -> List[float]:
-    res = ["", ""]
-    with open(timemdpath, "r") as f:
-        readLines = f.readlines()
-    readLines = [i.strip() for i in readLines if i != '\n']
-    if len(readLines) > 0:
-        res[0] = ChangeStrToTime(readLines[0])
-    if len(readLines) > 1:
-        res[1] = ChangeStrToTime(readLines[1])
-    return res
-
-
-"""
-给表格打上标签
-df的index是时间
-"""
-
-
-def setpdFlag(df: pd.DataFrame, flag: int, beginTime: float, endTime: float):
-    def judgetime(nowtime: str) -> bool:
-        nowIntTime = ChangeStrToTime(nowtime)
-        if beginTime <= nowIntTime <= endTime:
-            return True
-        return False
-
-    if FAULTFLAG not in df.columns.array:
-        df[FAULTFLAG] = [-1] * len(df)
-    isConform = df.index.to_series().apply(judgetime)
-    df.loc[isConform, FAULTFLAG] = [flag] * len(df[isConform])
-
-
-def processing(filepath: str, filename: str = None):
-    file = filepath
-    if filename is not None:
-        file = os.path.join(filepath, filename)
-    df = pd.read_csv(file, index_col=TIMELABLE)
-    df: pd.DataFrame
-    if "faultFlag" not in df.columns:
-        df["faultFlag"] = 0
-    df = df.dropna()
-    # 修改列名 去掉每个文件中的空格
-    df.rename(columns=lambda x: x.replace('\g', '').strip(), inplace=True)
-    if "User" in df.columns and "System" in df.columns:
-        df["CPU"] = df["User"] + df["System"]
-    df = df.copy()
-    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
-    df = df.dropna()
-    return df
 
 
 def processingpd(processpd: pd.DataFrame):
@@ -113,9 +45,8 @@ def processingpd(processpd: pd.DataFrame):
         df["faultFlag"] = 0
     df = df.dropna()
     # 修改列名 去掉每个文件中的空格
-    df.rename(columns=lambda x: x.replace('\g', '').strip(), inplace=True)
-    if "User" in df.columns and "System" in df.columns:
-        df["CPU"] = df["User"] + df["System"]
+    if "usr_cpu" in df.columns and "kernel_cpu" in df.columns:
+        df["CPU"] = df["usr_cpu"] + df["kernel_cpu"]
     df = df.copy()
     df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
     df = df.dropna()
@@ -132,7 +63,7 @@ def getpidcpuInfo(processpd: pd.DataFrame):
     for icore, icorepd in processpd.groupby("cpu_affinity"):
         icorepd = icorepd.reset_index(drop=True)
         cname = "core{}_cpu".format(icore)
-        cpuSeries = icorepd["user"] + icorepd["system"]
+        cpuSeries = icorepd["usr_cpu"] + icorepd["kernel_cpu"]
         respd[cname] = cpuSeries
         if FAULTFLAG not in respd.columns:
             respd[FAULTFLAG] = icorepd[FAULTFLAG]
@@ -148,7 +79,7 @@ def getpidcpuInfo(processpd: pd.DataFrame):
 
 def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
     if sumFeatures is None:
-        sumFeatures = ["time", "usr_cpu", "kernel_cpu", "memory_percent"]
+        sumFeatures = ["time", "usr_cpu", "kernel_cpu", "mem_percent"]
     respd = pd.DataFrame()
     tpd = processpd[sumFeatures].groupby("time").sum()
     return tpd
