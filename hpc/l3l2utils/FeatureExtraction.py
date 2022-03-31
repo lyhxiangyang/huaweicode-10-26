@@ -54,6 +54,7 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
             subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
             subtractpdLists.append(subtractpd)
         allsubtractpd = mergeDataFrames(subtractpdLists)
+        allsubtractpd.sort_values(by=TIME_COLUMN_NAME, inplace=True)
         differencepds.append(allsubtractpd)
     return differencepds
 

@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import plotly.graph_objs as go
 
+from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists
 from hpc.l3l2utils.FeatureExtraction import differenceProcess
 
 
@@ -80,7 +81,6 @@ def getpidcpuInfo(processpd: pd.DataFrame):
 def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
     if sumFeatures is None:
         sumFeatures = ["time", "usr_cpu", "kernel_cpu", "mem_percent"]
-    respd = pd.DataFrame()
     tpd = processpd[sumFeatures].groupby("time").sum()
     return tpd
 
@@ -96,9 +96,9 @@ if __name__ == "__main__":
         df = pd.read_csv(normal_file_name)
         if FAULTFLAG not in df.columns:
             df[FAULTFLAG] = 0
-
+        df = changeTimeToFromPdlists([df])[0]
         df = differenceProcess([df], accumulateFeatures=["usr_cpu", "kernel_cpu"])[0]
-        dfsum = mergeProceeDF(df)
+        # dfsum = mergeProceeDF(df)
         dfinfo = getpidcpuInfo(df)
         dfinfo = processingpd(dfinfo)
         n_cols_plot(dfinfo, dfinfo.columns, normal_file_name)
