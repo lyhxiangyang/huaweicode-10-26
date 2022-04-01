@@ -60,19 +60,17 @@ def processingpd(processpd: pd.DataFrame):
 
 
 def getpidcpuInfo(processpd: pd.DataFrame):
-    respd = pd.DataFrame()
-    flags=None
+    respd = pd.DataFrame(index=processpd["time"].drop_duplicates())
+    processpd.set_index("time", inplace=True)
     for icore, icorepd in processpd.groupby("cpu_affinity"):
-        icorepd = icorepd.reset_index(drop=True)
+        # icorepd = icorepd.reset_index(drop=True)
         cname = "core{}_cpu".format(icore)
         cpuSeries = icorepd["usr_cpu"] + icorepd["kernel_cpu"]
         respd[cname] = cpuSeries
-        if FAULTFLAG not in respd.columns:
-            respd[FAULTFLAG] = icorepd[FAULTFLAG]
-        if TIMELABLE not in respd.columns:
-            respd[TIMELABLE] = icorepd[TIMELABLE]
+        respd[FAULTFLAG] = icorepd[FAULTFLAG]
+    respd.fillna(-1, inplace=True)
+    respd.reset_index(drop=False, inplace=True)
     return respd
-
 
 """
 合并所有的process数据信息
