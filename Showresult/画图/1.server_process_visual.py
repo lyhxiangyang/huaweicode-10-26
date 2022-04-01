@@ -102,6 +102,9 @@ def subtractionMemory(pspd: pd.DataFrame) -> pd.DataFrame:
     pspd["p_rss"] = pspd["rss"]
     pspd["p_vms"] = pspd["vms"]
 
+    pspd["p_used-rss"] = pspd["mem_used"] - pspd["rss"]
+    pspd["p_sused-rss"] = pspd["s_used"] - pspd["rss"]
+
     return pspd
 
 def gettitle(ipath: str):
