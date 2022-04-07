@@ -374,7 +374,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3_server_topdownpds = mergeinnerTwoDataFrame(lpd=allserverpds, rpd=alltopdownpds)  # 根据时间得到server和topdown的合并结果
 
     print("对L3层内存泄露进行检测".center(40, "*"))
-    l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allserverpds, inputDict=inputDict)
+    l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allprocesspds, inputDict=inputDict)
 
     print("对L3层内存带宽进行检测".center(40, "*"))
     l3BandWidthResult = pd.DataFrame()
