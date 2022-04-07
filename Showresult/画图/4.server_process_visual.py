@@ -107,6 +107,13 @@ def maxmoothseries(cseries: pd.Series)->pd.Series:
     meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).max()
     return meanmediansmooth
 
+
+
+
+
+
+
+
 # 传入进去的process应该是相同时间的
 # 根据server总内存和process mempercent来得到数据
 def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:

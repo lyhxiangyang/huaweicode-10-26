@@ -287,13 +287,17 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
             "pid": pidseries
         })
         # 直接写个for循环
-        memdiff = []
-        for i, v in enumerate(pidseries.tolist()):
-            if i == 0 or pidseries[i] != pidseries[i - 1]:
-                memdiff.append(0)
-                continue
-            memdiff.append(memseries[i] - memseries[i - 1])
-        return pd.Series(data=memdiff)
+        reslists = []
+        winsize = 5
+        for ipid, idf in df.groupby("pid"):
+            other_mem_smooth = smoothseries(idf["mem"], windows=winsize)
+            other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
+            reslists.extend(other_mem_smooth_diff.tolist())
+
+        return pd.Series(data=reslists)
+
+
+
 
     # 根据server和process中的memory数据得到内存的变化量
     def getMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.DataFrame:
@@ -305,15 +309,14 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         servermem = pspd["mem_used"]
         processmem = pspd["rss"]
         othermem = servermem - processmem
-        other_mem_smooth = smoothseries(othermem, windows=3)
-        # other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
-        other_mem_smooth_diff = diffmemoryseries(other_mem_smooth, pspd["pid"]) # 按照这个进行光滑
-        other_mem_smooth_diff_mean = meansmoothseries(other_mem_smooth_diff, windows=3)
-        other_mem_smooth_diff_mean = (other_mem_smooth_diff_mean / 1000000).astype("int")
+
+        othermemdiff=diffmemoryseries(othermem, pspd["pid"])
+
+
         # 返回将带有时间与内存
         respd = pd.DataFrame()
         respd[TIME_COLUMN_NAME] = pspd[TIME_COLUMN_NAME]
-        respd["mem_used_mean"] = other_mem_smooth_diff_mean
+        respd["mem_used_mean"] = othermemdiff
         if inputDict["isExistFaultFlag"]:
             respd[FAULT_FLAG] = pspd[FAULT_FLAG]
         return respd
