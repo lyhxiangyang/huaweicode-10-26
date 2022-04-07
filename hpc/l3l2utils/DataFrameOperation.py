@@ -121,6 +121,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame], isExistFlag: bool = True) -
 
 """
 对process数据按照时间进行合并
+返回特征总值以及pid号
 """
 
 
@@ -132,8 +133,11 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
     tpd = processpd[sumFeatures].groupby("time").sum()
+    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").first()
     tpd.reset_index(drop=False, inplace=True)
-    return tpd
+    tpd1.reset_index(drop=False, inplace=True)
+    respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)
+    return respd
 
 """
 对一个series进行中位数平滑，然后平均数平滑
