@@ -5,6 +5,7 @@ import json
 import os.path
 from typing import Dict, List, Set
 
+import joblib
 import pandas as pd
 
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
@@ -336,6 +337,11 @@ def getPDMeanFromNormal(datapds: List[pd.DataFrame], featuresnames: List[str]) -
     alldatapds[featuresnames].mean()
 
 
+"""
+给config中所有的路径中都加上一个前缀，保证都能找到
+"""
+
+
 def JoinWorkingDirPathFromConfig(workpath: str, configJsonDict: Dict) -> Dict:
     # predictdirjsonpath
     keynames = [
@@ -354,3 +360,4 @@ def JoinWorkingDirPathFromConfig(workpath: str, configJsonDict: Dict) -> Dict:
     for ikeynames in keynames:
         if ikeynames in configJsonDict and configJsonDict[ikeynames] is not None:
             configJsonDict[ikeynames] = os.path.join(workpath, configJsonDict[ikeynames])
+

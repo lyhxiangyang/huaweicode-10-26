@@ -5,6 +5,7 @@ from typing import List
 
 from hpc.l3l2utils.L2L3Main import detectionFromInputDict
 from hpc.l3l2utils.ParsingJson import readJsonToDict
+from hpc.l3l2utils.PreProcessConfig import preproccessConfigfile
 
 alldatadirs = [
     R"DATA/测试数据/WRF/1KM",
@@ -27,18 +28,20 @@ def getDirs(dirpaths) -> List[str]:
 
 
 # 指定某一个文件夹进行运行
-substrrundir = None
+# substrrundir = None
 
 if __name__ == "__main__":
     startTime = time.perf_counter()
     # configfilepath = R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/2.检测每个测试文件中的数据/2.config.json"
     configfilepath = os.path.join(sys.path[0], "config.json")
     configJsonDict = readJsonToDict(*(os.path.split(configfilepath)))
+    # 对config文件中的数据进行预处理
+    preproccessConfigfile(configJsonDict)
     alldatapath = []
     for i in alldatadirs:
         alldatapath.extend(getDirs(i))
-    if substrrundir is not None:
-        alldatapath = [i for i in alldatapath if substrrundir in i]
+    # if substrrundir is not None:
+    #     alldatapath = [i for i in alldatapath if substrrundir in i]
     for ipath in alldatapath:
         startTime1 = time.perf_counter()
         configJsonDict["predictdirjsonpath"] = os.path.join(ipath, "jsonfile", "alljson.json")

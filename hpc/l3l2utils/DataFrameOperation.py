@@ -117,3 +117,36 @@ def mergeouterPredictResult(pds: List[pd.DataFrame], isExistFlag: bool = True) -
     respd["time"] = mergepds.index
     respd.sort_values(by="time", inplace=True)
     return respd
+
+
+"""
+对process数据按照时间进行合并
+"""
+
+
+def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
+    if sumFeatures is None:
+        return pd.DataFrame()
+    if inplace:
+        processpd = processpd.copy()
+    if TIME_COLUMN_NAME not in sumFeatures:
+        sumFeatures.append(TIME_COLUMN_NAME)
+    tpd = processpd[sumFeatures].groupby("time").sum()
+    tpd.reset_index(drop=False, inplace=True)
+    return tpd
+
+"""
+对一个series进行中位数平滑，然后平均数平滑
+"""
+
+
+def smoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
+    meanmediansmooth = mediansmooth.rolling(window=windows, min_periods=1, center=True).mean()
+    return meanmediansmooth
+def mediansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
+    return mediansmooth
+def meansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).mean()
+    return meanmediansmooth

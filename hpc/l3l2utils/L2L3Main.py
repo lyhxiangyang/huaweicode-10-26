@@ -291,7 +291,9 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # ========================================
 
     print("标准化要预测的process和server数据".center(40, "*"))
-    standardserverfeatures = removeListValues(inputDict["server_feature"], ["pgfree"]) # pgfree的判断不在于标准化
+    standardserverfeatures = removeListValues(inputDict["server_feature"], ["pgfree", "mem_used"]) # pgfree的判断不在于标准化
+
+
     standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=standardserverfeatures, meanValue=normalserver_meanvalue, standardValue=100)
     standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=inputDict["process_feature"],
                                          meanValue=normalprocess_meanvalue, standardValue=60)
@@ -372,13 +374,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     l3_server_topdownpds = mergeinnerTwoDataFrame(lpd=allserverpds, rpd=alltopdownpds)  # 根据时间得到server和topdown的合并结果
 
     print("对L3层内存泄露进行检测".center(40, "*"))
-    l3memleakresult = pd.DataFrame()
-    l3memleakresult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
-    if inputDict["isExistFaultFlag"]:
-        l3memleakresult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
-    l3memleakresult["preFlag"] = detectL3MemLeakAbnormal(allserverpds=l3_server_topdownpds,
-                                                         modelfilepath=inputDict["servermemory_modelpath"],
-                                                         modeltype=inputDict["servermemory_modeltype"])
+    l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allserverpds, inputDict=inputDict)
 
     print("对L3层内存带宽进行检测".center(40, "*"))
     l3BandWidthResult = pd.DataFrame()

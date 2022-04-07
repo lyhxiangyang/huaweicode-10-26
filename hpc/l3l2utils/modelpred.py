@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 
 from hpc.classifiers.ModelPred import select_and_pred
+from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries
 from hpc.l3l2utils.DataOperation import pushLabelToFirst
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
 
@@ -265,13 +266,46 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
 
 """
 使用内存泄露模型进行预测
+传入的参数：server和process
+返回的是带有TIME preFlag 和 FaultFlag的预测结果
 """
 
 
-def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = None, modeltype=0):
+def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFrame, inputDict: Dict = None):
     testPd = allserverpds
-    memleakPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-    return memleakPreFlagList
+
+    modelfilepath = inputDict["servermemory_modelpath"]
+    modeltype = inputDict["servermemory_modeltype"]
+    memleakpermin=inputDict["memleakpermin"]
+    # 根据server和process中的memory数据得到内存的变化量
+    def getMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.DataFrame:
+        mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
+        # 将两者合并
+        pspd = pd.merge(left=serverpd, right=processpd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="left", suffixes=("", "_y"))
+        pspd.fillna(0, inplace=True) # 认为进程不在的时候其数据为0
+
+        servermem = pspd["mem_used"]
+        processmem = pspd["rss"]
+        othermem = servermem - processmem
+        other_mem_smooth = smoothseries(othermem)
+        other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
+        other_mem_smooth_diff_mean = meansmoothseries(other_mem_smooth_diff)
+        # 返回将带有时间与内存
+        respd = pd.DataFrame()
+        respd[TIME_COLUMN_NAME] = pspd[TIME_COLUMN_NAME]
+        respd["mem_used_mean"] = other_mem_smooth_diff_mean
+        if inputDict["isExistFaultFlag"]:
+            respd[FAULT_FLAG] = pspd[FAULT_FLAG]
+        return respd
+    memorypd = getMemory(serverpd=allserverpds, processpd=allprocesspd)
+    memleakPreFlagList = select_and_pred(memorypd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+
+    respd = pd.DataFrame
+    respd[TIME_COLUMN_NAME] = memorypd[TIME_COLUMN_NAME]
+    respd["preFlag"] = memleakPreFlagList
+    if inputDict["isExistFaultFlag"]:
+        respd = memorypd[FAULT_FLAG]
+    return respd
 
 
 """

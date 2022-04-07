@@ -28,7 +28,7 @@
     "isTimeisStr": true,
     "server_feature": ["mem_used", "pgfree", "freq"],
     "server_accumulate_feature": ["pgfree"],
-    "process_feature":["usr_cpu", "kernel_cpu"],
+    "process_feature":["usr_cpu", "kernel_cpu", "rss"],
     "process_accumulate_feature":["usr_cpu", "kernel_cpu"],
     "l2_feature": ["cpu_power", "power", "cabinet_power", "fan1_speed", "fan2_speed", "fan3_speed", "fan4_speed", "cpu1_core_rem", "cpu2_core_rem", "cpu3_core_rem", "cpu4_core_rem", "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp", "pch_temp"],
     "l2_accumulate_feature": [],
@@ -37,5 +37,7 @@
     "ping_feature": ["avg_lat"],
     "ping_accumulate_feature": [],
     "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
-    "topdown_accumulate_feature": []
+    "topdown_accumulate_feature": [],
+
+    "memleakpermin": 700
 }
