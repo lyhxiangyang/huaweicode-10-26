@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import plotly.graph_objs as go
 
+from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getsametimepd
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
@@ -55,15 +56,19 @@ def processingpd(df: pd.DataFrame):
 # ======================================================== 上面是画图函数
 # ======================================================== 下面是处理函数
 
-def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
+def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
     if sumFeatures is None:
-        sumFeatures = [TIME_COLUMN_NAME, "usr_cpu", "kernel_cpu", "mem_percent", "rss", "vms", "data", "shared"]
+        return pd.DataFrame()
+    if inplace:
+        processpd = processpd.copy()
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
     tpd = processpd[sumFeatures].groupby("time").sum()
+    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").first()
     tpd.reset_index(drop=False, inplace=True)
-    tpd["faultFlag"] = 1
-    return tpd
+    tpd1.reset_index(drop=False, inplace=True)
+    respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)
+    return respd
 
 
 # 得到server和process的pd
@@ -92,24 +97,40 @@ def getserverandprocesspds(filepath: str):
     # pspd.fillna(-1, inplace=True)
     # return pspd
 
-def smoothseries(cseries: pd.Series)->pd.Series:
+def smoothseries(cseries: pd.Series, windows=5)->pd.Series:
     mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
-    meanmediansmooth = mediansmooth.rolling(window=5, min_periods=1, center=True).mean()
+    meanmediansmooth = mediansmooth.rolling(window=windows, min_periods=1, center=True).mean()
+    return meanmediansmooth
+def mediansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
+    return mediansmooth
+def meansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).mean()
     return meanmediansmooth
 
-def mediansmoothseries(cseries: pd.Series)->pd.Series:
-    mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
-    return mediansmooth
-def meansmoothseries(cseries: pd.Series)->pd.Series:
-    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).mean()
-    return meanmediansmooth
 def maxmoothseries(cseries: pd.Series)->pd.Series:
     meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).max()
     return meanmediansmooth
 
 
 
+# 对内存的差值处理必须根据进程pid号进行处理
+# 保证内存的指标和pid号的指标长度是一样的
+def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
+    assert len(memseries) == len(pidseries)
+    df = pd.DataFrame(data={
+        "mem": memseries,
+        "pid": pidseries
+    })
+    # 直接写个for循环
+    reslists = []
+    winsize = 5
+    for ipid, idf in df.groupby("pid"):
+        other_mem_smooth = smoothseries(idf["mem"], windows=winsize)
+        other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
+        reslists.extend(other_mem_smooth_diff.tolist())
 
+    return pd.Series(data=reslists)
 
 
 
@@ -117,36 +138,19 @@ def maxmoothseries(cseries: pd.Series)->pd.Series:
 # 传入进去的process应该是相同时间的
 # 根据server总内存和process mempercent来得到数据
 def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
-    # 保证serverpd和processpd的时间变化范围是一致的
-    # sametimeserverpd, sametimeprocesspd = getsametimepd(serverpd, processpd)
-    iprocesspd = mergeProceeDF(processpd)
-    pspd = pd.merge(left=serverpd, right=iprocesspd, left_on="time", right_on="time", how="left", suffixes=("", "_y"))
-    pspd.fillna(-1, inplace=True)
-
-    # 使用的server内存
+    mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
+    # 将两者合并
+    pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME,
+                    how="left", suffixes=("", "_y"))
+    pspd.fillna(0, inplace=True)  # 认为进程不在的时候其数据为0
 
     servermem = pspd["mem_used"]
     processmem = pspd["rss"]
+    othermem = servermem - processmem
+    pspd["s-p-mem"] = othermem
 
-    pspd["other_mem"] = servermem - processmem
-    pspd["other_mem_smooth"] = smoothseries(pspd["other_mem"])
-    # 去差值
-    pspd["other_mem_smooth_diff"] = pspd["other_mem_smooth"].diff(1)
-    pspd["other_mem_smooth_diff1"] = pspd["other_mem_smooth_diff"].apply(lambda x: x if x > 0 else 0)
-    pspd["other_mem_smooth_diff1_mean"] = meansmoothseries(pspd["other_mem_smooth_diff1"])
-    pspd["other_mem_smooth_diff1_max"] = maxmoothseries(pspd["other_mem_smooth_diff1"])
-
-    # pspd["mem_used+share"] = servermem
-    # pspd["mem_used_smooth"] = smoothseries(servermem)
-    # pspd["process_used_smooth"] = smoothseries(processmem)
-    # pspd["other_mem"] = pspd["mem_used_smooth"] - pspd["process_used_smooth"]
-    # pspd["other_mem"] = servermem - processmem
-    # pspd["other_mem_diff"] = pspd["other_mem"].diff(1)
-    # pspd["other_mem_diff_smooth"] = smoothseries(pspd["other_mem_diff"])
-
-
-
-
+    othermemdiff = diffmemoryseries(othermem, pspd["pid"])
+    pspd["s-p-mem-diff"] = othermemdiff
 
     return pspd
 
