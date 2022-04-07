@@ -287,9 +287,9 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         servermem = pspd["mem_used"]
         processmem = pspd["rss"]
         othermem = servermem - processmem
-        other_mem_smooth = smoothseries(othermem)
+        other_mem_smooth = smoothseries(othermem, windows=3)
         other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
-        other_mem_smooth_diff_mean = meansmoothseries(other_mem_smooth_diff)
+        other_mem_smooth_diff_mean = meansmoothseries(other_mem_smooth_diff, windows=3)
         other_mem_smooth_diff_mean = (other_mem_smooth_diff_mean / 1000000).astype("int")
         # 返回将带有时间与内存
         respd = pd.DataFrame()
