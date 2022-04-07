@@ -281,7 +281,7 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
     def getMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.DataFrame:
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
         # 将两者合并
-        pspd = pd.merge(left=serverpd, right=processpd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="left", suffixes=("", "_y"))
+        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="left", suffixes=("", "_y"))
         pspd.fillna(0, inplace=True) # 认为进程不在的时候其数据为0
 
         servermem = pspd["mem_used"]
@@ -290,6 +290,7 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         other_mem_smooth = smoothseries(othermem)
         other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
         other_mem_smooth_diff_mean = meansmoothseries(other_mem_smooth_diff)
+        other_mem_smooth_diff_mean = (other_mem_smooth_diff_mean / 1000000).astype("int")
         # 返回将带有时间与内存
         respd = pd.DataFrame()
         respd[TIME_COLUMN_NAME] = pspd[TIME_COLUMN_NAME]

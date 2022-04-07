@@ -6,11 +6,7 @@ from hpc.l3l2utils.ParsingJson import covertCSVToJsonDict, saveDictToJson
 def getDirs(dirpaths) -> List[str]:
     dirnamess = os.listdir(dirpaths)
     dirpaths = [os.path.join(dirpaths, idir) for idir in dirnamess]
-    dirlists = [os.path.join(dirpaths, idir, "centos11") for idir in dirnamess if os.path.exists(os.path.join(dirpaths, idir, "centos11"))]
-    dirlists.extend([os.path.join(dirpaths, idir, "centos16") for idir in dirnamess if os.path.exists(os.path.join(dirpaths, idir, "centos16"))])
-    dirlists.extend([os.path.join(dirpaths, idir, "centos21") for idir in dirnamess if os.path.exists(os.path.join(dirpaths, idir, "centos21"))])
-    dirlists.extend([os.path.join(dirpaths, idir, "centos26") for idir in dirnamess if os.path.exists(os.path.join(dirpaths, idir, "centos26"))])
-    return dirlists
+    return dirpaths
 
 if __name__ == "__main__":
     # ============================================================================================= 输入数据定义
@@ -31,6 +27,7 @@ if __name__ == "__main__":
             continue
         spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
         jsonfilename = "alljson.json"
+        # 如果存在就不重新生成
         if os.path.exists(os.path.join(spath, jsonfilename)):
             continue
         print(os.path.join(spath, jsonfilename))
