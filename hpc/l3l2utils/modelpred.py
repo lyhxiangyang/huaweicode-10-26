@@ -305,7 +305,7 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
     respd[TIME_COLUMN_NAME] = memorypd[TIME_COLUMN_NAME]
     respd["preFlag"] = memleakPreFlagList
     if inputDict["isExistFaultFlag"]:
-        respd = memorypd[FAULT_FLAG]
+        respd[FAULT_FLAG] = memorypd[FAULT_FLAG]
     return respd
 
 
