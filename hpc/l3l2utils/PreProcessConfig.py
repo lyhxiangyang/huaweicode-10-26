@@ -16,7 +16,7 @@ def preproccessConfigfile(inputDict: Dict) -> Dict:
         joblib.dump(model, modelpath)
 
     # 1. 预处理第一步对内存泄露的模型进行重新设置
-    modelpath=os.path.join(inputDict["servermemory_modelpath"], MODEL_TYPE[inputDict["servermemory_modeltype"]])
+    modelpath=os.path.join(inputDict["servermemory_modelpath"], MODEL_TYPE[inputDict["servermemory_modeltype"]] + ".pkl")
     modelthread=inputDict["memleakpermin"]
     changeMemLeakThread(modelpath, modelthread)
 
