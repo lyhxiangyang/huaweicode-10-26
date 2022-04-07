@@ -68,8 +68,8 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
 
 # 得到server和process的pd
 def getserverandprocesspds(filepath: str):
-    iserverpath = os.path.join(filepath, "server" ,"metric_server.csv")
-    iprocesspath = os.path.join(filepath, "process" ,"hpc_process.csv")
+    iserverpath = os.path.join(filepath, "hpc_server.csv")
+    iprocesspath = os.path.join(filepath, "hpc_process.csv")
 
     # 读取到dataframe中
     iserverpd = pd.read_csv(iserverpath)
@@ -118,7 +118,7 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
 
     # 使用的server内存
 
-    servermem = pspd["mem_used"] + pspd["shared"]
+    servermem = pspd["mem_used"]
     processmem = pspd["rss"]
 
     pspd["other_mem"] = servermem - processmem
