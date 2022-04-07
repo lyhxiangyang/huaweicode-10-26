@@ -68,7 +68,7 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
 
 # 得到server和process的pd
 def getserverandprocesspds(filepath: str):
-    iserverpath = os.path.join(filepath, "server" ,"hpc_server.csv")
+    iserverpath = os.path.join(filepath, "server" ,"metric_server.csv")
     iprocesspath = os.path.join(filepath, "process" ,"hpc_process.csv")
 
     # 读取到dataframe中
