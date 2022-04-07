@@ -97,6 +97,16 @@ def smoothseries(cseries: pd.Series)->pd.Series:
     meanmediansmooth = mediansmooth.rolling(window=5, min_periods=1, center=True).mean()
     return meanmediansmooth
 
+def mediansmoothseries(cseries: pd.Series)->pd.Series:
+    mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
+    return mediansmooth
+def meansmoothseries(cseries: pd.Series)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).mean()
+    return meanmediansmooth
+def maxmoothseries(cseries: pd.Series)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).max()
+    return meanmediansmooth
+
 # 传入进去的process应该是相同时间的
 # 根据server总内存和process mempercent来得到数据
 def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
@@ -106,15 +116,26 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     pspd = pd.merge(left=serverpd, right=iprocesspd, left_on="time", right_on="time", how="left", suffixes=("", "_y"))
     pspd.fillna(-1, inplace=True)
 
-    servermem = pspd["mem_used"]
+    # 使用的server内存
+
+    servermem = pspd["mem_used"] + pspd["shared"]
     processmem = pspd["rss"]
 
-    pspd["mem_used_smooth"] = smoothseries(servermem)
-    pspd["process_used_smooth"] = smoothseries(processmem)
-    pspd["other_mem"] = pspd["mem_used_smooth"] - pspd["process_used_smooth"]
+    pspd["other_mem"] = servermem - processmem
+    pspd["other_mem_smooth"] = smoothseries(pspd["other_mem"])
+    # 去差值
+    pspd["other_mem_smooth_diff"] = pspd["other_mem_smooth"].diff(1)
+    pspd["other_mem_smooth_diff1"] = pspd["other_mem_smooth_diff"].apply(lambda x: x if x > 0 else 0)
+    pspd["other_mem_smooth_diff1_mean"] = meansmoothseries(pspd["other_mem_smooth_diff1"])
+    pspd["other_mem_smooth_diff1_max"] = maxmoothseries(pspd["other_mem_smooth_diff1"])
+
+    # pspd["mem_used+share"] = servermem
+    # pspd["mem_used_smooth"] = smoothseries(servermem)
+    # pspd["process_used_smooth"] = smoothseries(processmem)
+    # pspd["other_mem"] = pspd["mem_used_smooth"] - pspd["process_used_smooth"]
     # pspd["other_mem"] = servermem - processmem
-    pspd["other_mem_diff"] = pspd["other_mem"].diff(1)
-    pspd["other_mem_diff_smooth"] = smoothseries(pspd["other_mem_diff"])
+    # pspd["other_mem_diff"] = pspd["other_mem"].diff(1)
+    # pspd["other_mem_diff_smooth"] = smoothseries(pspd["other_mem_diff"])
 
 
 
