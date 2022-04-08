@@ -132,8 +132,8 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
         processpd = processpd.copy()
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
-    tpd = processpd[sumFeatures].groupby("time").sum()
-    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").min()
+    tpd = processpd[sumFeatures].groupby("time", sort=False).sum()
+    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time", sort=False).min()
     tpd.reset_index(drop=False, inplace=True)
     tpd1.reset_index(drop=False, inplace=True)
     respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)

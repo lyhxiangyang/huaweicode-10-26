@@ -289,7 +289,7 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         # 直接写个for循环
         reslists = []
         winsize = 5
-        for ipid, idf in df.groupby("pid"):
+        for ipid, idf in df.groupby("pid", sort=False):
             other_mem_smooth = smoothseries(idf["mem"], windows=winsize)
             other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
             reslists.extend(other_mem_smooth_diff.tolist())

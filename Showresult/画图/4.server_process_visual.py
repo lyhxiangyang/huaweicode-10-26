@@ -73,8 +73,8 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
 
 # 得到server和process的pd
 def getserverandprocesspds(filepath: str):
-    iserverpath = os.path.join(filepath, "hpc_server.csv")
-    iprocesspath = os.path.join(filepath, "hpc_process.csv")
+    iserverpath = os.path.join(filepath,"server" , "metric_server.csv")
+    iprocesspath = os.path.join(filepath, "process","hpc_process.csv")
 
     # 读取到dataframe中
     iserverpd = pd.read_csv(iserverpath)
@@ -125,7 +125,7 @@ def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
     # 直接写个for循环
     reslists = []
     winsize = 5
-    for ipid, idf in df.groupby("pid"):
+    for ipid, idf in df.groupby("pid", sort=False):
         other_mem_smooth = smoothseries(idf["mem"], windows=winsize)
         other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
         reslists.extend(other_mem_smooth_diff.tolist())
@@ -163,7 +163,7 @@ def gettitle(ipath: str):
 
 if __name__ == "__main__":
     dirpathes = [
-        R"DATA/测试数据/WRF/3.wrf_1km_multi_l3/centos11",
+        R"DATA/测试数据/WRF/1KM/3.wrf_1km_multi_l3/centos11",
         # R"csvfiles/5.3组正常数据-1min/2",
     ]
     for dirpath in dirpathes:
