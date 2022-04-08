@@ -358,6 +358,11 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     # 需要用到的特征值
     resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
 
+    # 默认条件
+    defaultreslt = pd.DataFrame()
+    defaultreslt[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
+    defaultreslt["preFlag"] = 0
+
     print("对L3层CPU异常进行预测".center(40, "*"))
     tpath = None
     if inputDict["spath"] is not None:
@@ -454,7 +459,7 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
 
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult(
-        [l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult,l2machinepowerresult, l2cabinetpowerresult,
+        [defaultreslt, l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult,l2machinepowerresult, l2cabinetpowerresult,
          l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult], isExistFlag=inputDict["isExistFaultFlag"])
 
     print("对结果进行优化".center(40, "*"))

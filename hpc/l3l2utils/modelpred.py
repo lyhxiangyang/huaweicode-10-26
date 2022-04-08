@@ -272,7 +272,8 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
 
 
 def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFrame, inputDict: Dict = None):
-    testPd = allserverpds
+    # 保证allserverpds和processpds按照时间顺序排列
+
 
     modelfilepath = inputDict["servermemory_modelpath"]
     modeltype = inputDict["servermemory_modeltype"]
@@ -304,15 +305,14 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
         # 将两者合并
         pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="left", suffixes=("", "_y"))
+
         pspd.fillna(0, inplace=True) # 认为进程不在的时候其数据为0
 
         servermem = pspd["mem_used"]
         processmem = pspd["rss"]
         othermem = servermem - processmem
 
-        othermemdiff=diffmemoryseries(othermem, pspd["pid"])
-
-
+        othermemdiff=diffmemoryseries(othermem, pspd["pid"]) / 1000000
         # 返回将带有时间与内存
         respd = pd.DataFrame()
         respd[TIME_COLUMN_NAME] = pspd[TIME_COLUMN_NAME]

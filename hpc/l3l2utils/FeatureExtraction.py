@@ -55,6 +55,7 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
             subtractpdLists.append(subtractpd)
         allsubtractpd = mergeDataFrames(subtractpdLists)
         allsubtractpd.sort_values(by=TIME_COLUMN_NAME, inplace=True)
+        allsubtractpd.sort_values(by=TIME_COLUMN_NAME, inplace=True)
         differencepds.append(allsubtractpd)
     return differencepds
 
@@ -174,7 +175,7 @@ def extractionOneProcessPd(processpd: pd.DataFrame, extractFeatures: List[str],
         os.makedirs(spath)
     pidpds = []
     print(PID_FEATURE.center(40, "*"))
-    for ipid, idf in processpd.groupby(PID_FEATURE):
+    for ipid, idf in processpd.groupby(PID_FEATURE, sort=False):
         print("pid: {} ".format(ipid), end="")
         assert len(idf) > 6  # 对每一个进程开始的前两个点和后两个点都去掉
         idf = idf.iloc[3:-3]  # 删除数据了

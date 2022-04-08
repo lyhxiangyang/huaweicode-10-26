@@ -149,7 +149,7 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     othermem = servermem - processmem
     pspd["s-p-mem"] = othermem
 
-    othermemdiff = diffmemoryseries(othermem, pspd["pid"])
+    othermemdiff = diffmemoryseries(othermem, pspd["pid"]) / 1000000
     pspd["s-p-mem-diff"] = othermemdiff
 
     return pspd
