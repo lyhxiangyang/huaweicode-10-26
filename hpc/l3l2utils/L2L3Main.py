@@ -362,6 +362,8 @@ def detectionL2L3Data(inputDict: Dict, allserverpds: pd.DataFrame, allprocesspds
     defaultreslt = pd.DataFrame()
     defaultreslt[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
     defaultreslt["preFlag"] = 0
+    if inputDict["isExistFaultFlag"]:
+        defaultreslt[FAULT_FLAG] = allserverpds[FAULT_FLAG]
 
     print("对L3层CPU异常进行预测".center(40, "*"))
     tpath = None
