@@ -64,7 +64,7 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
     tpd = processpd[sumFeatures].groupby("time").sum()
-    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").first()
+    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").min()
     tpd.reset_index(drop=False, inplace=True)
     tpd1.reset_index(drop=False, inplace=True)
     respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)
@@ -163,8 +163,7 @@ def gettitle(ipath: str):
 
 if __name__ == "__main__":
     dirpathes = [
-        R"csvfiles/abnormals/memleak60/1",
-        R"csvfiles/abnormals/memleak60/2",
+        R"DATA/测试数据/WRF/3.wrf_1km_multi_l3/centos11",
         # R"csvfiles/5.3组正常数据-1min/2",
     ]
     for dirpath in dirpathes:
