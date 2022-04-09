@@ -379,8 +379,6 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
                                                  modelfilepath=inputDict["processcpu_modelpath"],
                                                  modeltype=inputDict["processcpu_modeltype"])
 
-    l3_server_topdownpds = mergeinnerTwoDataFrame(lpd=allserverpds, rpd=alltopdownpds)  # 根据时间得到server和topdown的合并结果
-
     print("对L3层内存泄露进行检测".center(40, "*"))
     l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allprocesspds, inputDict=inputDict)
 

@@ -484,7 +484,7 @@ def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, 
     return resList
 
 # 对数据进行处理
-def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict)->List:
+def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict):
     # 对读写操作进行补偿措施
      # 保证iserverpds和itodownpds时间与时间相互匹配
     def compensateRW(itopdownpd: pd.DataFrame, detectJson: Dict, inplace=True):
@@ -523,34 +523,38 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame
         # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
         return itopdownpd
 
-    restpd = pd.DataFrame()
+    # 先把必要的提取
+    modeltype = inputDict["cachegrab_modeltype"]
+    modelfilepath =  inputDict["cachegrab_modelpath"]
 
-    bandwidthrList = bandwidthResult["preFlag"].tolist()
+
     ttopdownpd = compensateRW(alltopdownpds, detectJsonDict)
-
-    restpd[TIME_COLUMN_NAME] = ttopdownpd[TIME_COLUMN_NAME]
-    if inputDict["isExistFaultFlag"]:
-        restpd[FAULT_FLAG] = ttopdownpd[FAULT_FLAG]
-
-
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cacheGrab")
         savepdfile(ttopdownpd, spath=tpath, filename="topdown.csv")
 
-    modeltype = inputDict["cachegrab_modeltype"]
-    modelfilepath =  inputDict["cachegrab_modelpath"]
     rd_wr_sumList = select_and_pred(ttopdownpd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-    assert len(rd_wr_sumList) == len(bandwidthrList)
+
+    bandwidthResult = bandwidthResult.set_index("time")
+    cacheResult = pd.Series(index=ttopdownpd[TIME_COLUMN_NAME], data=rd_wr_sumList)
 
     resList = []
-    for i in range(0, len(rd_wr_sumList)):
-        if rd_wr_sumList[i] == 0:
+    for itime, ivalue in cacheResult.items():
+        if itime not in bandwidthResult:
             resList.append(0)
             continue
-        # 现在预测为50或90
-        if bandwidthrList[i] == 50:
-            resList.append(0) # 现在是50了，那代表不是90
+        if ivalue == 0:
+            resList.append(0)
+            continue
+        # 那么现在预测不为0，肯定是有异常与50进行区别
+        if bandwidthResult[itime] == 50:
+            resList.append(0)
             continue
         resList.append(90)
+
+    restpd = pd.DataFrame()
+    restpd[TIME_COLUMN_NAME] = ttopdownpd[TIME_COLUMN_NAME]
+    if inputDict["isExistFaultFlag"]:
+        restpd[FAULT_FLAG] = ttopdownpd[FAULT_FLAG]
     restpd["preFlag"] = resList
     return restpd
