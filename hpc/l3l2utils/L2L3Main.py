@@ -23,7 +23,7 @@ from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, g
 from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
     predictTemp, \
     detectNetwork_TXHangAbnormal, predictL2_CPUDown, predictCacheGrab, predictCabinet_PowerCapping, \
-    predictServer_PowerCapping, detectL3BandWidthAbnormal1
+    predictServer_PowerCapping, detectL3BandWidthAbnormal1, predictCacheGrab1
 
 """
 time faultFlag preFlag
@@ -383,14 +383,16 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allprocesspds, inputDict=inputDict)
 
     print("对L3层内存带宽进行检测".center(40, "*"))
-    l3BandWidthResult = detectL3BandWidthAbnormal1(allserverpds=allserverpds, alltopdownpds=alltopdownpds, inputDict=inputDict, detectionJson=detectJsonDict)
+    l3BandWidthResult = detectL3BandWidthAbnormal1(allserverpds=allserverpds, alltopdownpds=alltopdownpds, allprocesspds=allprocesspds,inputDict=inputDict, detectionJson=detectJsonDict)
 
+    # print("对cache抢占进行检测".center(40, "*"))
+    # l3CacheGrabResult = pd.DataFrame()
+    # l3CacheGrabResult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
+    # if inputDict["isExistFaultFlag"]:
+    #     l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
+    # l3CacheGrabResult["preFlag"] = predictCacheGrab(l3_server_topdownpds, l3BandWidthResult, modelfilepath=inputDict["cachegrab_modelpath"], modeltype=inputDict["cachegrab_modeltype"])
     print("对cache抢占进行检测".center(40, "*"))
-    l3CacheGrabResult = pd.DataFrame()
-    l3CacheGrabResult[TIME_COLUMN_NAME] = l3_server_topdownpds[TIME_COLUMN_NAME]
-    if inputDict["isExistFaultFlag"]:
-        l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
-    l3CacheGrabResult["preFlag"] = predictCacheGrab(l3_server_topdownpds, l3BandWidthResult, modelfilepath=inputDict["cachegrab_modelpath"], modeltype=inputDict["cachegrab_modeltype"])
+    l3CacheGrabResult = predictCacheGrab1(alltopdownpds=alltopdownpds, bandwidthResult=l3BandWidthResult, inputDict=inputDict, detectJsonDict=detectJsonDict)
 
 
     print("对L2层数据进行预测".center(40, "*"))
