@@ -177,8 +177,9 @@ def extractionOneProcessPd(processpd: pd.DataFrame, extractFeatures: List[str],
     print(PID_FEATURE.center(40, "*"))
     for ipid, idf in processpd.groupby(PID_FEATURE, sort=False):
         print("pid: {} ".format(ipid), end="")
-        assert len(idf) > 6  # 对每一个进程开始的前两个点和后两个点都去掉
-        idf = idf.iloc[3:-3]  # 删除数据了
+        # 不删数据
+        # assert len(idf) > 6  # 对每一个进程开始的前两个点和后两个点都去掉
+        # idf = idf.iloc[3:-3]  # 删除数据了
         print("size: {}".format(len(idf)))
         # 对对应的特征进行提取
         featureExtractionDf = featureExtractionPd(idf, extraFeature=extractFeatures, windowSize=windowsSize)

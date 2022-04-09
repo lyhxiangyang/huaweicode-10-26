@@ -7,8 +7,10 @@ import pandas as pd
 
 from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries
-from hpc.l3l2utils.DataOperation import pushLabelToFirst
+from hpc.l3l2utils.DataFrameSaveRead import savepdfile
+from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
+from hpc.l3l2utils.ParsingJson import getNormalTopdownMean, getNormalServerMean
 
 """
 得到以prefixnames中元素为前缀的所有值
@@ -298,13 +300,11 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         return pd.Series(data=reslists)
 
 
-
-
     # 根据server和process中的memory数据得到内存的变化量
     def getMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.DataFrame:
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
         # 将两者合并
-        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="left", suffixes=("", "_y"))
+        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, suffixes=("", "_y"))
 
         pspd.fillna(0, inplace=True) # 认为进程不在的时候其数据为0
 
@@ -340,6 +340,52 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
     testPd = allserverpds
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     return bandwidthPreFlagList
+
+## 传入server和topdown数据，对其进行处理，主要处理操作是对pgfree进行补偿性操作
+# process最重要的作用是确定server的起始位置
+def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.DataFrame,allprocesspds: pd.DataFrame, inputDict: Dict = None, detectionJson: Dict = None):
+     # 保证iserverpds和itodownpds时间与时间相互匹配
+    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, detectionJson: Dict, inplace=True):
+        assert len(iserverpd) == len(itopdowndpd)
+        if inplace:
+            iserverpd = iserverpd.copy()
+            itopdowndpd = itopdowndpd.copy()
+        # 对itopdownpd中的mflops进行平滑处理
+        cname = "mflops"
+        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
+        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)[cname]
+        mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+
+        cname = "pgfree"
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
+        iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
+        # pgfree 需要减去平均值
+        iserverpd[cname] = iserverpd[cname] - pgfree_mean
+        return iserverpd
+
+    modelfilepath = inputDict["serverbandwidth_modelpath"]
+    modeltype = inputDict["serverbandwidth_modeltype"]
+    # 将server和process的时间进行对齐，也就是去除HPC之外的时间
+    allserverpds = getRunHPCTimepdsFromProcess([allserverpds], [allprocesspds])[0]
+    alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
+    allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
+    testPd = compensatePgfree(allserverpds, alltopdownpds, detectionJson, False)
+    # 进行预测
+    bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+
+
+    respd = pd.DataFrame()
+    respd[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
+    respd["preFlag"] = bandwidthPreFlagList
+    if inputDict["isExistFaultFlag"]:
+        respd[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+
+    return respd
 
 
 """
@@ -437,3 +483,74 @@ def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, 
         resList.append(90)
     return resList
 
+# 对数据进行处理
+def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict)->List:
+    # 对读写操作进行补偿措施
+     # 保证iserverpds和itodownpds时间与时间相互匹配
+    def compensateRW(itopdownpd: pd.DataFrame, detectJson: Dict, inplace=True):
+        if inplace:
+            itopdownpd = itopdownpd.copy()
+        # 对itopdownpd中的mflops进行平滑处理
+        cname = "mflops"
+        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        mflops_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname], datanumber=10)[cname]
+        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        itopdownpd["mflops_change"] = mflops_change
+        mflops_change = itopdownpd["mflops_change"]
+
+        # 对ddrc_rd进行滑动窗口处理
+        rd_cname = "ddrc_rd"
+        itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).mean()
+        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
+        itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * mflops_change
+
+        # 对ddrc_rd进行滑动窗口处理
+        wr_cname = "ddrc_wr"
+        itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).mean()
+        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
+        itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * mflops_change
+
+        # 对rd_wr_sum进行结合 减去平均值  阈值与6000比较
+        rd_wr_cname = "ddrc_ddwr_sum"
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_cname] + itopdownpd[wr_cname]
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
+        rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
+        itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
+        # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
+        return itopdownpd
+
+    restpd = pd.DataFrame()
+
+    bandwidthrList = bandwidthResult["preFlag"].tolist()
+    ttopdownpd = compensateRW(alltopdownpds, detectJsonDict)
+
+    restpd[TIME_COLUMN_NAME] = ttopdownpd[TIME_COLUMN_NAME]
+    if inputDict["isExistFaultFlag"]:
+        restpd[FAULT_FLAG] = ttopdownpd[FAULT_FLAG]
+
+
+    if inputDict["spath"] is not None:
+        tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cacheGrab")
+        savepdfile(ttopdownpd, spath=tpath, filename="topdown.csv")
+
+    modeltype = inputDict["cachegrab_modeltype"]
+    modelfilepath =  inputDict["cachegrab_modelpath"]
+    rd_wr_sumList = select_and_pred(ttopdownpd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+    assert len(rd_wr_sumList) == len(bandwidthrList)
+
+    resList = []
+    for i in range(0, len(rd_wr_sumList)):
+        if rd_wr_sumList[i] == 0:
+            resList.append(0)
+            continue
+        # 现在预测为50或90
+        if bandwidthrList[i] == 50:
+            resList.append(0) # 现在是50了，那代表不是90
+            continue
+        resList.append(90)
+    restpd["preFlag"] = resList
+    return restpd

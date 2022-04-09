@@ -255,20 +255,8 @@ def getMeanFromNumberDataFrom(datapds: List[pd.DataFrame], classname: str, featu
 """
 
 
-def getNormalServerMean(detectionJson: Dict, serverdatapd: List[pd.DataFrame], processdatapd: List[pd.DataFrame],
-                        features: List[str],
-                        datanumber: int = 10) -> pd.Series:
-    def getServerProcesTimeIntersection(servertimes: Set, processtimes: Set, datanumber: int = 10):
-        intersectionSet = servertimes & processtimes
-        timelists = sorted(list(intersectionSet))
-        return timelists[:datanumber]
-
-    allserverpd = mergeDataFrames(serverdatapd)
-    allprocesspd = mergeDataFrames(processdatapd)
-    intersectionTimes = getServerProcesTimeIntersection(set(allserverpd[TIME_COLUMN_NAME].tolist()),
-                                                        set(allprocesspd[TIME_COLUMN_NAME].tolist()), datanumber)
-    meanSeries = getMeanFromTimeDataFrom(serverdatapd, "server", features, intersectionTimes)
-
+def getNormalServerMean(detectionJson: Dict, serverdatapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
+    meanSeries = getMeanFromNumberDataFrom(serverdatapd, "server", features, datanumber)
     if detectionJson is not None:
         for ifeaturename in features:
             featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
