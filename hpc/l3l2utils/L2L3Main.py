@@ -267,8 +267,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
-    # normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, inputDict["server_feature"],
-    #                                              datanumber=inputDict["meanNormalDataNumber"])
+    normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, ["freq"],
+                                                 datanumber=inputDict["meanNormalDataNumber"])
     # normalprocess_meanvalue = getNormalProcessMean(detectionJson, predictprocesspds, inputDict["process_feature"],
     #                                                datanumber=inputDict["meanNormalDataNumber"])
     normall2_meanvalue = getNormalL2Mean(detectionJson, predictl2pds, inputDict["l2_feature"],
@@ -282,7 +282,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "1.正常数据的平均值")
-    #     savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv", index=True)
+        savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv", index=True)
     #     savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv", index=True)
         savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv", index=True)
         savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv", index=True)
@@ -294,6 +294,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     #
     #
     # standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=standardserverfeatures, meanValue=normalserver_meanvalue, standardValue=100)
+    standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=["freq"], meanValue=normalserver_meanvalue, standardValue=100)
     # standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=inputDict["process_feature"],
     #                                      meanValue=normalprocess_meanvalue, standardValue=60)
     standard_l2_pds = standardLists(pds=predictl2pds, standardFeatures=inputDict["l2_feature"],
@@ -307,7 +308,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "2.标准化数据存储")
-    #     saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
+        saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
     #     saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
         saveDFListToFiles(os.path.join(tpath, "l2_standard"), standard_l2_pds)
         saveDFListToFiles(os.path.join(tpath, "network_standard"), standard_network_pds)
@@ -321,6 +322,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     #                                                   windowsSize=3)
     # extraction_server_pds = extractionServerPdLists(standard_server_pds, extractFeatures=inputDict["server_feature"],
     #                                                 windowsSize=3)
+    extraction_server_pds = extractionServerPdLists(standard_server_pds, extractFeatures=["freq"], windowsSize=3)
     extraction_l2_pds = extractionServerPdLists(standard_l2_pds, extractFeatures=inputDict["l2_feature"], windowsSize=3)
     extraction_network_pds = extractionServerPdLists(standard_network_pds, extractFeatures=inputDict["network_feature"], windowsSize=3)
     extraction_topdown_pds = extractionServerPdLists(standard_topdown_pds, extractFeatures=inputDict["topdown_feature"], windowsSize=3)
@@ -331,13 +333,13 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "3.特征提取")
-    #     saveDFListToFiles(os.path.join(tpath, "server_extraction"), extraction_server_pds)
+        saveDFListToFiles(os.path.join(tpath, "server_extraction"), extraction_server_pds)
     #     saveDFListToFiles(os.path.join(tpath, "process_extraction"), extraction_process_pds)
         saveDFListToFiles(os.path.join(tpath, "l2_extraction"), extraction_l2_pds)
         saveDFListToFiles(os.path.join(tpath, "network_extraction"), extraction_network_pds)
         saveDFListToFiles(os.path.join(tpath, "topdown_extraction"), extraction_topdown_pds)
 
-    extraction_server_pds = predictserverpds
+    # extraction_server_pds = predictserverpds
     extraction_process_pds = predictprocesspds
     # extraction_l2_pds = predictl2pds
     # extraction_network_pds = predictnetworkpds
