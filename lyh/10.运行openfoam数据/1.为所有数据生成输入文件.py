@@ -14,8 +14,7 @@ if __name__ == "__main__":
     # 其中单个server文件我默认是连续的
 
     dirpaths = [
-        R"/Users/liyanghan/OneDrive/mycode/pycharm/runHPC/csvfiles/abnormals/allcpu10",
-        R"/Users/liyanghan/OneDrive/mycode/pycharm/runHPC/csvfiles/abnormals/memleak60",
+        R"/Users/liyanghan/OneDrive/mycode/pycharm/runHPC/csvfiles/normals_tmp",
     ]
 
     alldatapath = []
@@ -82,6 +81,6 @@ if __name__ == "__main__":
 
 
         # ========================================================= 进行读取
-        jsonDict = covertCSVToJsonDict(predictdir=predictdirpath, normalMeanDict=normalMeanDict,requestdataType="grapes")
+        jsonDict = covertCSVToJsonDict(predictdir=predictdirpath, normalMeanDict=normalMeanDict,requestdataType="openfoam")
         saveDictToJson(jsonDict, spath=spath, filename=jsonfilename)
 

@@ -153,6 +153,8 @@ def readJsonToDict(spath: str, filename: str):
 
 def getServerPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     serverDict = sdict["RequestData"]["data"]["server"]
+    if serverDict is None or len(serverDict) == 0:
+        return []
     serpd = pd.DataFrame(data=serverDict)
     return [serpd]
 
@@ -164,6 +166,8 @@ def getServerPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     processDict = sdict["RequestData"]["data"]["process"]
+    if processDict is None or len(processDict) == 0:
+        return []
     processpd = pd.DataFrame(data=processDict)
     return [processpd]
 
@@ -175,6 +179,8 @@ def getProcessPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     networkDict = sdict["RequestData"]["data"]["nic"]
+    if networkDict is None or len(networkDict) == 0:
+        return []
     networkpd = pd.DataFrame(data=networkDict)
     return [networkpd]
 
@@ -186,6 +192,8 @@ def getNetworkPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getPingPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     pingDict = sdict["RequestData"]["data"]["ping"]
+    if pingDict is None or len(pingDict) == 0:
+        return []
     pingpd = pd.DataFrame(data=pingDict)
     return [pingpd]
 
@@ -197,6 +205,8 @@ def getPingPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getTopdownPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     pingDict = sdict["RequestData"]["data"]["topdown"]
+    if pingDict is None or len(pingDict) == 0:
+        return []
     pingpd = pd.DataFrame(data=pingDict)
     return [pingpd]
 
@@ -208,6 +218,8 @@ def getTopdownPdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
 
 def getL2PdFromJsonDict(sdict: Dict) -> List[pd.DataFrame]:
     l2Dict = sdict["RequestData"]["data"]["compute"]
+    if l2Dict is None or len(l2Dict) == 0:
+        return []
     l2pd = pd.DataFrame(data=l2Dict)
     return [l2pd]
 
@@ -246,6 +258,9 @@ def getMeanFromTimeDataFrom(datapds: List[pd.DataFrame], classname: str, feature
 # 直接根据数量来获得时间
 def getMeanFromNumberDataFrom(datapds: List[pd.DataFrame], classname: str, featuresnames: List[str],
                               datanumber: int = 10):
+    # 如果传入捡来的是null的列表那么返回一个空的pd.Series
+    if len(datapds) == 0:
+        return pd.Series()
     datapd = mergeDataFrames(datapds).iloc[:datanumber]
     return datapd[featuresnames].mean()
 

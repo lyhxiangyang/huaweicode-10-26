@@ -112,6 +112,8 @@ def standardDataFrame(df: pd.DataFrame, standardFeatures=None, meanValue=None,
 
 def standardLists(pds: List[pd.DataFrame], standardFeatures: List[str], meanValue, standardValue: int = 100) -> List[
     pd.DataFrame]:
+    if len(pds) == 0:
+        return []
     if len(standardFeatures) == 0: # 如果没有需要提取的特征值，那就直接返回
         return pds
     # ==== 函数开始运行
@@ -216,6 +218,8 @@ def extractionProcessPdLists(processpds: List[pd.DataFrame], extractFeatures: Li
 
 def extractionServerPdLists(serverpds: List[pd.DataFrame], extractFeatures: List[str],
                             windowsSize: int = 3, spath: str = None) -> List[pd.DataFrame]:
+    if len(serverpds) == 0:
+        return []
     if len(extractFeatures) == 0:
         return serverpds
     extraction_dfs = []

@@ -8,23 +8,14 @@ from hpc.l3l2utils.ParsingJson import readJsonToDict
 from hpc.l3l2utils.PreProcessConfig import preproccessConfigfile
 
 alldatadirs = [
-    R"DATA/测试数据/WRF/1KM",
-    R"DATA/测试数据/WRF/3KM",
-    R"DATA/测试数据/WRF/9KM",
-    R"DATA/测试数据/Grapes/test1",
-    R"DATA/测试数据/Grapes/国家超算",
+    R"/Users/liyanghan/OneDrive/mycode/pycharm/runHPC/csvfiles/normals_tmp",
 ]
 
 
 def getDirs(dirpaths) -> List[str]:
     dirnamess = os.listdir(dirpaths)
-    dirlists = [os.path.join(dirpaths, idir, "centos11") for idir in dirnamess if
-                os.path.exists(os.path.join(dirpaths, idir, "centos11"))]
-    dirlists.extend([os.path.join(dirpaths, idir, "centos16") for idir in dirnamess if
-                     os.path.exists(os.path.join(dirpaths, idir, "centos16"))])
-    # dirlists.extend([os.path.join(dirpaths, idir, "centos21") for idir in dirnamess if os.path.exists(os.path.join(dirpaths, idir, "centos21"))])
-    # dirlists.extend([os.path.join(dirpaths, idir, "centos26") for idir in dirnamess if os.path.exists(os.path.join(dirpaths, idir, "centos26"))])
-    return dirlists
+    dirpaths = [os.path.join(dirpaths, idir) for idir in dirnamess]
+    return dirpaths
 
 
 # 指定某一个文件夹进行运行

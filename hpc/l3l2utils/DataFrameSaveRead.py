@@ -18,13 +18,14 @@ def saveDFListToFiles(spath: str, pds: List[pd.DataFrame]):
         pds[i].to_csv(savefilepath, index=False)
 
 
-def getServer_Process_l2_Network_Ping_TopdownList(dirpath: str, server_feature=None, process_feature=None, l2_feature=None,
-                                          ping_feature=None,
+"""
+函数功能：将wrf、grapes的文件按照顺序进行读取
+"""
+def getServer_Process_l2_Network_Ping_TopdownList(dirpath: str, server_feature=None, process_feature=None, l2_feature=None, ping_feature=None,
                                           network_feature=None, topdown_feature=None,isExistFlag: bool = True):
     def getfilespath(filepath: str) -> List[str]:
         if not os.path.exists(filepath):
-            print("{}路径不存在".format(filepath))
-            exit(1)
+            return []
         files = os.listdir(filepath)
         filepaths = [os.path.join(filepath, i) for i in files]
         return filepaths
