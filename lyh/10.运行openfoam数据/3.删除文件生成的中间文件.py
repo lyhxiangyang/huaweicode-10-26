@@ -8,11 +8,7 @@ from hpc.l3l2utils.L2L3Main import detectionFromInputDict
 from hpc.l3l2utils.ParsingJson import readJsonToDict
 
 alldatadirs = [
-        R"DATA/测试数据/WRF/1KM",
-        R"DATA/测试数据/WRF/3KM",
-        R"DATA/测试数据/WRF/9KM",
-        R"DATA/测试数据/Grapes/test1",
-        R"DATA/测试数据/Grapes/国家超算",
+        R"csvfiles/normals_tmp",
 ]
 
 def getDirs(dirpaths) -> List[str]:
@@ -30,7 +26,7 @@ if __name__ == "__main__":
         alldatapath.extend(getDirs(i))
     for ipath in alldatapath:
         startTime1 = time.perf_counter()
-        deletedir = os.path.join(ipath, "jsonfile", "中间结果生成")
+        deletedir = os.path.join(ipath, "jsonfile", "中间结果生成50_80_90_again")
         if os.path.exists(deletedir):
             print(deletedir)
             shutil.rmtree(deletedir)

@@ -400,6 +400,9 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
 
     # 1. 先预测温度 131  2. 预测机柜功率封顶 121 3 接着预测  111 机器功率封顶  4. 161
 
+    if len(l2_serverpds) == 0:
+        l2_serverpds[TIME_COLUMN_NAME] = []
+        l2_serverpds[FAULT_FLAG] = []
     print("1. 对温度进行预测".center(40, "#"))
     l2temperamentresult = pd.DataFrame()
     l2temperamentresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
