@@ -58,6 +58,10 @@ def mergeDataFrames(lpds: List[pd.DataFrame]):
 
 
 def mergeinnerTwoDataFrame(lpd: pd.DataFrame, rpd: pd.DataFrame, onfeaturename: str = TIME_COLUMN_NAME) -> pd.DataFrame:
+    if lpd is None or len(lpd) == 0:
+        return pd.DataFrame()
+    if rpd is None or len(rpd) == 0:
+        return pd.DataFrame()
     rpdcolumns = list(rpd.columns.array)
     if FAULT_FLAG in rpdcolumns:
         rpdcolumns.remove(FAULT_FLAG)

@@ -8,7 +8,7 @@ from hpc.l3l2utils.ParsingJson import readJsonToDict
 from hpc.l3l2utils.PreProcessConfig import preproccessConfigfile
 
 alldatadirs = [
-    R"/Users/liyanghan/OneDrive/mycode/pycharm/runHPC/csvfiles/normals_tmp",
+    R"csvfiles/normals_tmp",
 ]
 
 
