@@ -9,6 +9,14 @@ from hpc.l3l2utils.PreProcessConfig import preproccessConfigfile
 
 alldatadirs = [
     R"csvfiles/normals_tmp",
+    R"csvfiles/abnormals/allcpu10",
+    R"csvfiles/abnormals/bandwidth50_t0",
+    R"csvfiles/abnormals/bandwidth50_t1",
+    R"csvfiles/abnormals/bandwidth50_t2",
+    R"csvfiles/abnormals/cacheGrab90",
+    R"csvfiles/abnormals/cpuGrab80",
+    R"csvfiles/abnormals/memleak60",
+    R"csvfiles/abnormals/singlecpu20",
 ]
 
 

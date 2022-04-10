@@ -449,6 +449,9 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     l2networkresult1 = detectNetwork_TXHangAbnormal(allpingpds, isExistFlag=inputDict["isExistFaultFlag"])
 
     print("对网络异常2 pfc进行预测".center(40, "#"))
+    if len(allnetworkpds) == 0:
+        allnetworkpds[TIME_COLUMN_NAME] = []
+        allnetworkpds[FAULT_FLAG] = []
     l2networkresult2 = pd.DataFrame()
     l2networkresult2[TIME_COLUMN_NAME] = allnetworkpds[TIME_COLUMN_NAME]
     if inputDict["isExistFaultFlag"]:

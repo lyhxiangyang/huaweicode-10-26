@@ -62,6 +62,8 @@ def select_and_pred_probability(df, model_type, saved_model_path=SaveModelPath):
 进行预测
 """
 def select_and_pred(df, model_type, saved_model_path=SaveModelPath):
+    if len(df) == 0:
+        return []
     # 读取头文件信息
     with open("{}".format(os.path.join(saved_model_path, "header.txt")), "r") as f:
         features = f.read().splitlines()

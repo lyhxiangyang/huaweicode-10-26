@@ -14,7 +14,15 @@ if __name__ == "__main__":
     # 其中单个server文件我默认是连续的
 
     dirpaths = [
-        R"/Users/liyanghan/OneDrive/mycode/pycharm/runHPC/csvfiles/normals_tmp",
+        R"csvfiles/normals_tmp",
+        R"csvfiles/abnormals/allcpu10",
+        R"csvfiles/abnormals/bandwidth50_t0",
+        R"csvfiles/abnormals/bandwidth50_t1",
+        R"csvfiles/abnormals/bandwidth50_t2",
+        R"csvfiles/abnormals/cacheGrab90",
+        R"csvfiles/abnormals/cpuGrab80",
+        R"csvfiles/abnormals/memleak60",
+        R"csvfiles/abnormals/singlecpu20",
     ]
 
     alldatapath = []

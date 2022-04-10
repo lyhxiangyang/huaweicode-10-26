@@ -222,6 +222,8 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 
 def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
+    if len(data) == 0:
+        return []
     FANSFeatures = [
         "fan1_speed",
         "fan2_speed",
@@ -395,6 +397,12 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
 
 
 def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool = True):
+    if len(allnetworkpds) == 0:
+        return pd.DataFrame(data={
+            TIME_COLUMN_NAME:[],
+            FAULT_FLAG:[],
+            "preFlag": [],
+        })
     threshold_avg_lat = 100
     data = allnetworkpds.groupby(TIME_COLUMN_NAME, as_index=False).agg("max")
     prenet = []
@@ -414,6 +422,8 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
 预测机柜功率封顶导致的121异常
 """
 def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame):
+    if len(l2_serverdata) == 0:
+        return []
     select_data = l2_serverdata[["cabinet_power"]]
     freq = l2_serverdata["freq"].tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
@@ -430,6 +440,8 @@ def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata:
 """
 
 def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame]):
+    if len(l2_serverdata) == 0:
+        return []
     select_data = l2_serverdata[["power"]]
     freq = l2_serverdata["freq"].tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
@@ -450,6 +462,8 @@ def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: 
 需要传入121 131结果
 """
 def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame])-> List:
+    if len(l2_serverdata) == 0:
+        return []
     select_data = l2_serverdata[["power"]]
     freq = l2_serverdata["freq"].tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
