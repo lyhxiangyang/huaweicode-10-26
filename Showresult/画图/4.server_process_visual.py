@@ -132,7 +132,12 @@ def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
 
     return pd.Series(data=reslists)
 
-
+# 传入的是进程和服务器数据的集合体
+def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
+    pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
+    pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
+    pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
+    return pspd
 
 
 # 传入进去的process应该是相同时间的
@@ -171,6 +176,8 @@ if __name__ == "__main__":
 
         serverpd, processpd = getserverandprocesspds(dirpath)
         serverpd = subtractionMemory(serverpd, processpd)
+        # CPU信息
+        serverpd = getServerCPUTIME(serverpd)
 
         # 画出来
         processingpd(serverpd)
