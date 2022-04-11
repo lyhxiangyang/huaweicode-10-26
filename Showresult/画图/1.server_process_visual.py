@@ -8,6 +8,7 @@ import plotly.graph_objs as go
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getsametimepd
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
+from hpc.l3l2utils.L2L3Main import add_cpu_column
 
 
 def n_cols_plot(df, yy, title):
@@ -60,6 +61,8 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
     if TIME_COLUMN_NAME not in sumFeatures:
         sumFeatures.append(TIME_COLUMN_NAME)
     tpd = processpd[sumFeatures].groupby("time").sum()
+    # 进程的CPU时间
+    tpd["process_cpu"] = tpd["usr_cpu"] + tpd["kernel_cpu"]
     tpd.reset_index(drop=False, inplace=True)
     tpd["faultFlag"] = 1
     return tpd
@@ -83,6 +86,8 @@ def getserverandprocesspds(filepath: str):
     # 对数据进行差分处理
     serverpdlists = differenceServer(serverpdlists, ["pgfree"])
     processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
+    add_cpu_column(processpdlists)
+
     iprocesspd = mergeProceeDF(processpdlists[0])
     # 得到相同时间段
     # a,b = getsametimepd(serverpdlists[0], iprocesspd)
@@ -96,8 +101,6 @@ def subtractionMemory(pspd: pd.DataFrame) -> pd.DataFrame:
     # 保证serverpd和processpd的时间变化范围是一致的
     # sametimeserverpd, sametimeprocesspd = getsametimepd(serverpd, processpd)
 
-    allservermemory = pspd["mem_total"].iloc[0]
-
     pspd["s_used"] = pspd["mem_total"] - pspd['mem_avail']
     pspd["p_rss"] = pspd["rss"]
     pspd["p_vms"] = pspd["vms"]
@@ -107,22 +110,39 @@ def subtractionMemory(pspd: pd.DataFrame) -> pd.DataFrame:
 
     return pspd
 
+
+# 传入的是进程和服务器数据的集合体
+def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
+    pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
+    pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
+    pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
+    return pspd
+
+
 def gettitle(ipath: str):
     B,C=os.path.split(ipath)
     A,B=os.path.split(B)
     return "{}/{}".format(B,C)
 
 
-
+"""
+目的1：得到服务器内存和进程内存信息
+目的2：得到服务器CPU时间和进程CPU时间信息
+"""
 if __name__ == "__main__":
     dirpathes = [
         R"DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11",
     ]
     for dirpath in dirpathes:
         title=gettitle(dirpath)
-
+        #差分得到数据
         pspd = getserverandprocesspds(dirpath)
+
+        # 内存信息
         serverpd = subtractionMemory(pspd)
+
+        # CPU信息
+        serverpd = getServerCPUTIME(serverpd)
 
         # 画出来
         processingpd(serverpd)
