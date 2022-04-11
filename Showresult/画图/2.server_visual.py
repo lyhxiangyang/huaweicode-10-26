@@ -110,8 +110,6 @@ def gettitle(ipath: str):
     A,B=os.path.split(B)
     return "{}/{}".format(B,C)
 
-
-
 if __name__ == "__main__":
     dirpathes = [
         R"DATA/2022-01-14新的测试数据/1.wrf_1km_multi_l3/centos11",
