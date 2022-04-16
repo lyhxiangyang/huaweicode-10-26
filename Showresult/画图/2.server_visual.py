@@ -95,8 +95,6 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     sametimeserverpd, sametimeprocesspd = serverpd, processpd
     assert len(sametimeserverpd) == len(sametimeprocesspd)
 
-    allservermemory = serverpd["mem_total"].iloc[0]
-
     sametimeserverpd["processtime"] = sametimeprocesspd[TIME_COLUMN_NAME]
     sametimeserverpd["s_used"] = sametimeserverpd["mem_total"] - sametimeserverpd['mem_avail']
     sametimeserverpd["p_rss"] = sametimeprocesspd["rss"]

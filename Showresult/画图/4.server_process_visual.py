@@ -84,7 +84,7 @@ def getserverandprocesspds(filepath: str):
     serverpdlists = changeTimeToFromPdlists([iserverpd], isremoveDuplicate=True)
     processpdlists = changeTimeToFromPdlists([iprocesspd])
     # 对数据进行差分处理
-    serverpdlists = differenceServer(serverpdlists, ["pgfree"])
+    serverpdlists = differenceServer(serverpdlists, ["pgfree", "usr_cpu", "kernel_cpu"])
     processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
 
     return serverpdlists[0], processpdlists[0]
@@ -137,13 +137,14 @@ def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
     pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
     pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
     pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
+    pspd["s-pcpu"] = smoothseries(pspd["s-pcpu"], windows=5)
     return pspd
 
 
 # 传入进去的process应该是相同时间的
 # 根据server总内存和process mempercent来得到数据
 def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
-    mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
+    mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss", "usr_cpu", "kernel_cpu"])
     # 将两者合并
     pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME,
                     how="left", suffixes=("", "_y"))
@@ -153,7 +154,6 @@ def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Dat
     processmem = pspd["rss"]
     othermem = servermem - processmem
     pspd["s-p-mem"] = othermem
-
     othermemdiff = diffmemoryseries(othermem, pspd["pid"]) / 1000000
     pspd["s-p-mem-diff"] = othermemdiff
 
@@ -168,7 +168,9 @@ def gettitle(ipath: str):
 
 if __name__ == "__main__":
     dirpathes = [
-        R"DATA/测试数据/WRF/1KM/3.wrf_1km_multi_l3/centos11",
+        # huawei路径
+        R"D:\parent\wrf_grapes_all.zip\post\grapes_testq_multi_normal_2\centos16",
+        # R"DATA/测试数据/WRF/1KM/3.wrf_1km_multi_l3/centos11",
         # R"csvfiles/5.3组正常数据-1min/2",
     ]
     for dirpath in dirpathes:
