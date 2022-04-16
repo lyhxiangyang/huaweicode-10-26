@@ -135,10 +135,14 @@ def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
 # 传入的是进程和服务器数据的集合体
 def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
     pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
+    pspd["server_cpu_smooth"] = smoothseries(pspd["server_cpu"])
     pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
-    pspd["process_cpu_smooth"] = smoothseries(pspd["process_cpu_smooth"])
+    pspd["process_cpu_smooth"] = smoothseries(pspd["process_cpu"])
     pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
     pspd["s-pcpu"] = smoothseries(pspd["s-pcpu"], windows=5)
+    pspd["s-cpu-smooth"] = pspd["server_cpu_smooth"] - pspd["process_cpu_smooth"]
+    pspd["s-cpu-smooth1"] = smoothseries(pspd["s-cpu-smooth"])
+
     return pspd
 
 
@@ -170,7 +174,7 @@ def gettitle(ipath: str):
 if __name__ == "__main__":
     dirpathes = [
         # huawei路径
-        R"D:\parent\wrf_grapes_all.zip\post\grapes_testq_multi_normal_2\centos16",
+        R"D:\patent\wrf_grapes_all.zip\post\grapes_testg_multi_normal_2\centos16",
         # R"DATA/测试数据/WRF/1KM/3.wrf_1km_multi_l3/centos11",
         # R"csvfiles/5.3组正常数据-1min/2",
     ]
