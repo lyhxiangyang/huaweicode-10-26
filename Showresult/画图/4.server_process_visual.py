@@ -136,6 +136,7 @@ def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
 def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
     pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
     pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
+    pspd["process_cpu_smooth"] = smoothseries(pspd["process_cpu_smooth"])
     pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
     pspd["s-pcpu"] = smoothseries(pspd["s-pcpu"], windows=5)
     return pspd
