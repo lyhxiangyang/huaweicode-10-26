@@ -28,16 +28,31 @@ def processing(filepath: str, filename: str = None):
     file = filepath
     if filename is not None:
         file = os.path.join(filepath, filename)
-    df = pd.read_csv(file, index_col=TIME_COLUMN_NAME)
-    if FAULTFLAG not in df.columns:
-        df[FAULTFLAG] = 0
-    df = df.dropna()
+    itopdownpd = pd.read_csv(file, index_col=TIME_COLUMN_NAME)
+    if FAULTFLAG not in itopdownpd.columns:
+        itopdownpd[FAULTFLAG] = 0
+    itopdownpd = itopdownpd.dropna()
     # 修改列名 去掉每个文件中的空格
-    df["mflops_median"] = df["mflops"].rolling(window=5, center=True, min_periods=1).median()
-    df["mflops_median_mean"] = df["mflops"].rolling(window=5, center=True, min_periods=1).mean()
-    df = df.copy()
-    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
-    df = df.dropna()
+    # mflops
+    itopdownpd["mflops_median"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).median()
+    itopdownpd["mflops_median_mean"] = itopdownpd["mflops"].rolling(window=5, center=True, min_periods=1).mean()
+
+    # ddrc_rd
+    rd_cname = "ddrc_rd"
+    itopdownpd[rd_cname + "_median"] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    itopdownpd[rd_cname + "_mean"] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).mean()
+
+    wr_cname = "ddrc_wr"
+    itopdownpd[wr_cname + "_median"] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    itopdownpd[wr_cname + "_mean"] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).mean()
+
+    rd_wr_cname = "ddrc_ddwr_sum"
+    itopdownpd[rd_wr_cname] = itopdownpd[rd_cname] + itopdownpd[wr_cname]
+    itopdownpd[rd_wr_cname + "_median"] = itopdownpd[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
+
+
+    itopdownpd['flag'] = itopdownpd['faultFlag'].apply(lambda x: x % 10)
+    itopdownpd = itopdownpd.dropna()
     return df
 
 
