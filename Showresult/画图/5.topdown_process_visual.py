@@ -135,6 +135,8 @@ def getSUMWR(itopdownpd: pd.DataFrame, iprocesspd: pd.DataFrame, iserverpd: pd.D
     respd["cpu_change_smooth"] = smoothseries(cpu_change)
     respd["ddrc_ddwr_sum"] = itopdownpd["ddrc_ddwr_sum_median"]
     respd["ddrc_ddwr_sum_compensation"] = itopdownpd["ddrc_ddwr_sum_median"] * (1 + cpu_change)
+    respd["mflops"] = itopdownpd["mflops"]
+    respd["mflops_change"] = mflops_change
     respd["mflops_mean"] = mflops_mean
     respd["ddrc_ddwr_sum_compensation_mflops"] = itopdownpd["ddrc_ddwr_sum_median"] * (1 + mflops_change)
     # =======
