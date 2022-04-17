@@ -442,7 +442,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     # alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
     # allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
     allserverpds, alltopdownpds, allprocesspds = getsametimepdList([allserverpds, alltopdownpds, allprocesspds])
-    testPd = compensatePgfree(allserverpds, alltopdownpds, detectionJson, False)
+    testPd = compensatePgfree(allserverpds, alltopdownpds,allprocesspds,detectionJson, False)
     # 进行预测
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
 
@@ -628,7 +628,7 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
     modelfilepath =  inputDict["cachegrab_modelpath"]
 
 
-    ttopdownpd = compensateRW(alltopdownpds, detectJsonDict)
+    ttopdownpd = compensateRW(alltopdownpds,allserverpds, allprocesspds, detectJsonDict)
     if inputDict["isExistFaultFlag"]:
         ttopdownpd[FAULT_FLAG] = alltopdownpds[FAULT_FLAG]
     if inputDict["spath"] is not None:

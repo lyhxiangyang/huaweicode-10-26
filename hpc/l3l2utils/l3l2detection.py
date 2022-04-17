@@ -78,9 +78,9 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
 
     # 如果没有CPU异常就删除50 90
-    [removeMemoryIfnotCpu(i) for i in preflagList]
+    # [removeMemoryIfnotCpu(i) for i in preflagList]
     # 如果50和60同时存在就删除60
-    [remove60if50and60exist(i) for i in preflagList]
+    # [remove60if50and60exist(i) for i in preflagList]
 
     # 滑动窗口为7 平滑 preFlagList
 
