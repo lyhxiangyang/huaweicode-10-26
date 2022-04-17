@@ -46,9 +46,9 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
     # 保证两者的时间是一样的 返回一个cpu时间的差值
     def judgeserver_processcputime(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Series:
         if "cpu" not in serverpd.columns.tolist():
-            add_cpu_column([serverpd])
+            serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
         if "cpu" not in processpd.columns.tolist():
-            add_cpu_column([processpd])
+            processpd["cpu"] = processpd["usr_cpu"] + processpd["kernel_cpu"]
 
         mergeprocesspd = mergeProceeDF(processpd, ["usr_cpu", "kernel_cpu", "cpu"])
         # 两者合并

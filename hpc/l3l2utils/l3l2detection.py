@@ -186,8 +186,6 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
 
 
 
-
-
     for i in range(0, len(preflagList)):
         # preflagList[i] = sorted(list(set(preflagList[i]))) # 可能有多个0
         preflagList[i].sort()
