@@ -102,7 +102,7 @@ def getSUMWR(itopdownpd: pd.DataFrame, iprocesspd: pd.DataFrame, iserverpd: pd.D
     itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
     itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
     mflops_mean = itopdownpd[cname][0:10].mean()
-    mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+    mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean and x > 18000 else 0)
 
     # ddrc_rd
     rd_cname = "ddrc_rd"
@@ -135,10 +135,11 @@ def getSUMWR(itopdownpd: pd.DataFrame, iprocesspd: pd.DataFrame, iserverpd: pd.D
     respd["cpu_change_smooth"] = smoothseries(cpu_change)
     respd["ddrc_ddwr_sum"] = itopdownpd["ddrc_ddwr_sum_median"]
     respd["ddrc_ddwr_sum_compensation"] = itopdownpd["ddrc_ddwr_sum_median"] * (1 + cpu_change)
-    respd["mflops"] = itopdownpd["mflops"]
-    respd["mflops_change"] = mflops_change
-    respd["mflops_mean"] = mflops_mean
+    # respd["mflops"] = itopdownpd["mflops"]
+    # respd["mflops_change"] = mflops_change
+    # respd["mflops_mean"] = mflops_mean
     respd["ddrc_ddwr_sum_compensation_mflops"] = itopdownpd["ddrc_ddwr_sum_median"] * (1 + mflops_change)
+    respd["ddrc_ddwr_sum_compensation_mflops_smooth"] = smoothseries(respd["ddrc_ddwr_sum_compensation_mflops"])
     # =======
     respd[FAULTFLAG] = iserverpd[FAULTFLAG]
     return respd

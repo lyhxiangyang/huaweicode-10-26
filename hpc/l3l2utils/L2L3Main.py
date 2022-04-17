@@ -392,7 +392,7 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     #     l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     # l3CacheGrabResult["preFlag"] = predictCacheGrab(l3_server_topdownpds, l3BandWidthResult, modelfilepath=inputDict["cachegrab_modelpath"], modeltype=inputDict["cachegrab_modeltype"])
     print("对cache抢占进行检测".center(40, "*"))
-    l3CacheGrabResult = predictCacheGrab1(alltopdownpds=alltopdownpds, bandwidthResult=l3BandWidthResult, inputDict=inputDict, detectJsonDict=detectJsonDict)
+    l3CacheGrabResult = predictCacheGrab1(alltopdownpds=alltopdownpds, allserverpds=allserverpds, allprocesspds=allprocesspds, bandwidthResult=l3BandWidthResult, inputDict=inputDict, detectJsonDict=detectJsonDict)
 
 
     print("对L2层数据进行预测".center(40, "*"))

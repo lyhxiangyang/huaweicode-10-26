@@ -8,7 +8,7 @@ import pandas as pd
 from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
-from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd
+from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd, getsametimepdList
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
 from hpc.l3l2utils.ParsingJson import getNormalTopdownMean, getNormalServerMean
 
@@ -387,8 +387,28 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
 ## 传入server和topdown数据，对其进行处理，主要处理操作是对pgfree进行补偿性操作
 # process最重要的作用是确定server的起始位置
 def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.DataFrame,allprocesspds: pd.DataFrame, inputDict: Dict = None, detectionJson: Dict = None):
-     # 保证iserverpds和itodownpds时间与时间相互匹配
-    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, detectionJson: Dict, inplace=True):
+
+    # 保证时间是一样的
+    def getcpuchange(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.Series:
+        mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["usr_cpu", "kernel_cpu"])
+
+        if "cpu" not in serverpd.columns.tolist():
+            serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
+        if "cpu" not in processpd.columns.tolist():
+            processpd["cpu"] = processpd["usr_cpu"] + processpd["kernel_cpu"]
+
+        # iprocesspd cpu的加在一起
+        mergeprocesspd["cpu"] = mergeprocesspd["usr_cpu"] + mergeprocesspd["kernel_cpu"]
+        serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
+        sub_server_process_cpu = serverpd["cpu"] - mergeprocesspd["cpu"]
+        # 如果iserverpd["cpu"]是0， 就当作1
+        serverpd["cpu"] = serverpd["cpu"].apply(lambda x: 1 if x == 0 else x)
+        cpu_change = sub_server_process_cpu / serverpd["cpu"]
+        return cpu_change
+
+
+    # 保证iserverpds和itodownpds时间与时间相互匹配
+    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, iprocesspd: pd.DataFrame, detectionJson: Dict, inplace=True):
         assert len(iserverpd) == len(itopdowndpd)
         if inplace:
             iserverpd = iserverpd.copy()
@@ -400,12 +420,16 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)[cname]
         mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
 
+        # 对iprocess和servercpu中的
+        cpu_change = getcpuchange(iserverpd, iprocesspd)
+
+        changes=cpu_change
         cname = "pgfree"
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
-        iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
+        iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
         # pgfree 需要减去平均值
         iserverpd[cname] = iserverpd[cname] - pgfree_mean
@@ -414,9 +438,10 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     modelfilepath = inputDict["serverbandwidth_modelpath"]
     modeltype = inputDict["serverbandwidth_modeltype"]
     # 将server和process的时间进行对齐，也就是去除HPC之外的时间
-    allserverpds = getRunHPCTimepdsFromProcess([allserverpds], [allprocesspds])[0]
-    alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
-    allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
+    # allserverpds = getRunHPCTimepdsFromProcess([allserverpds], [allprocesspds])[0]
+    # alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
+    # allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
+    allserverpds, alltopdownpds, allprocesspds = getsametimepdList([allserverpds, alltopdownpds, allprocesspds])
     testPd = compensatePgfree(allserverpds, alltopdownpds, detectionJson, False)
     # 进行预测
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
@@ -539,10 +564,28 @@ def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, 
     return resList
 
 # 对数据进行处理
-def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict):
+def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict):
+    # 保证时间是一样的
+    def getcpuchange(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.Series:
+        mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["usr_cpu", "kernel_cpu"])
+
+        if "cpu" not in serverpd.columns.tolist():
+            serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
+        if "cpu" not in processpd.columns.tolist():
+            processpd["cpu"] = processpd["usr_cpu"] + processpd["kernel_cpu"]
+
+        # iprocesspd cpu的加在一起
+        mergeprocesspd["cpu"] = mergeprocesspd["usr_cpu"] + mergeprocesspd["kernel_cpu"]
+        serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
+        sub_server_process_cpu = serverpd["cpu"] - mergeprocesspd["cpu"]
+        # 如果iserverpd["cpu"]是0， 就当作1
+        serverpd["cpu"] = serverpd["cpu"].apply(lambda x: 1 if x == 0 else x)
+        cpu_change = sub_server_process_cpu / serverpd["cpu"]
+        return cpu_change
+
     # 对读写操作进行补偿措施
      # 保证iserverpds和itodownpds时间与时间相互匹配
-    def compensateRW(itopdownpd: pd.DataFrame, detectJson: Dict, inplace=True):
+    def compensateRW(itopdownpd: pd.DataFrame, iserverpd: pd.DataFrame, iprocesspd: pd.DataFrame, detectJson: Dict, inplace=True):
         if inplace:
             itopdownpd = itopdownpd.copy()
         # 对itopdownpd中的mflops进行平滑处理
@@ -555,19 +598,21 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame
         itopdownpd["mflops_change"] = mflops_change
         mflops_change = itopdownpd["mflops_change"]
 
+        cpuchange = getcpuchange(iserverpd, iprocesspd)
+        change = cpuchange
         # 对ddrc_rd进行滑动窗口处理
         rd_cname = "ddrc_rd"
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).mean()
         ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
-        itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * mflops_change
+        itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * change
 
         # 对ddrc_rd进行滑动窗口处理
         wr_cname = "ddrc_wr"
         itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).mean()
         ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
-        itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * mflops_change
+        itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * change
 
         # 对rd_wr_sum进行结合 减去平均值  阈值与6000比较
         rd_wr_cname = "ddrc_ddwr_sum"
