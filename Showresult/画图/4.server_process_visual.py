@@ -111,6 +111,9 @@ def meansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
 def maxmoothseries(cseries: pd.Series)->pd.Series:
     meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).max()
     return meanmediansmooth
+def minmoothseries(cseries: pd.Series)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).min()
+    return meanmediansmooth
 
 
 

@@ -26,7 +26,7 @@
     "outputJsonFilename": "output.json",
     "isExistFaultFlag": true,
     "isTimeisStr": true,
-    "server_feature": ["mem_used", "pgfree", "freq"],
+    "server_feature": ["mem_used", "pgfree", "freq", "usr_cpu", "kernel_cpu"],
     "server_accumulate_feature": ["pgfree"],
     "process_feature":["usr_cpu", "kernel_cpu", "rss"],
     "process_accumulate_feature":["usr_cpu", "kernel_cpu"],
@@ -39,5 +39,6 @@
     "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
     "topdown_accumulate_feature": [],
 
-    "memleakpermin": 700
+    "memleakpermin": 700,
+    "judgeCPUthread": 30
 }

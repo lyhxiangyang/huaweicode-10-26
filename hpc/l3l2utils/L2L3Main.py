@@ -262,9 +262,9 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
     inputDict["topdown_feature"] = [] # 原因是不需要对任何指标进行特征提取额
 
-    # 3. 对process数据进行处理
+    # 3. 对process数据进行处理 对server数据的cpu进行处理
     add_cpu_column(predictprocesspds)
-
+    add_cpu_column(predictserverpds)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
     normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, ["freq"],

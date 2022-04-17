@@ -10,6 +10,7 @@ from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansm
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
 from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
+from hpc.l3l2utils.L2L3Main import add_cpu_column
 from hpc.l3l2utils.ParsingJson import getNormalTopdownMean, getNormalServerMean
 
 """
@@ -35,16 +36,42 @@ def getTrainedFeatures(dfcolumns: List[str], prefixnames: List[str]):
 """
 
 
-def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, spath: str = None,
-                        modelfilepath: str = None, modeltype=0,):
+def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, inputConfig: Dict = None):
+
     def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
         coresSet = set(list(processpd[CPU_FEATURE]))
         coresnum = len(coresSet)
         return coresnum, coresSet
 
+    # 保证两者的时间是一样的 返回一个cpu时间的差值
+    def judgeserver_processcputime(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Series:
+        if "cpu" not in serverpd.columns.tolist():
+            add_cpu_column([serverpd])
+        if "cpu" not in processpd.columns.tolist():
+            add_cpu_column([processpd])
+
+        mergeprocesspd = mergeProceeDF(processpd, ["usr_cpu", "kernel_cpu", "cpu"])
+        # 两者合并
+        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="inner", suffixes=("", "_y"))
+        #
+        server_cpu = pspd["cpu"]
+        process_cpu = pspd["cpu_y"] # 肯定会和server的cpu重复，会自动加上_y后缀名
+
+        server_cpu_smooth = smoothseries(server_cpu)
+        process_cpu_smooth = smoothseries(process_cpu)
+        sub_server_process_cpu = server_cpu_smooth - process_cpu_smooth
+        return sub_server_process_cpu
+
+
+    spath = inputConfig["spath"]
+    modelfilepath = inputConfig["processcpu_modelpath"]
+    modeltype = inputConfig["processcpu_modeltype"]
+
     # ======== detectL3CPUAbnormal运行
     # 将allserverpds里面所有的时间搜集起来
-    allserverpds = allprocesspds[allprocesspds["cpu_affinity"] == 0]
+    # 第一步取两者时间的交集
+    allserverpds, allprocesspds = getsametimepd(allserverpds, allprocesspds)
+    # 获得cpu检测的异常列表
     timecolumns = allserverpds[TIME_COLUMN_NAME]
     serverinformationDict = defaultdict(list)
     serverinformationDict[TIME_COLUMN_NAME] = timecolumns  # 加入时间
@@ -80,6 +107,15 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
             writeinfo = ["核心数量：{}\n".format(wrfruncoresnumber), "核心的位数：{}\n".format(coresSet)]
             f.writelines(writeinfo)
     # ==============================================================================================================
+    # 根据servercpu和processcpu进行调整
+    # 传入的server和allprocess时间是一样的
+    sub_server_processcputime = judgeserver_processcputime(allserverpds, allprocesspds)
+    assert len(sub_server_processcputime) == len(cpuabnormalList)
+
+    cputhreshold = inputConfig["judgeCPUthread"]
+    for i in range(0, len(sub_server_processcputime)):
+        if sub_server_processcputime[i] < cputhreshold:
+            cpuabnormalList[i] = 0
     return cpuabnormalList
 
 
