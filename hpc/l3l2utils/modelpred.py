@@ -10,7 +10,6 @@ from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansm
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
 from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
-from hpc.l3l2utils.L2L3Main import add_cpu_column
 from hpc.l3l2utils.ParsingJson import getNormalTopdownMean, getNormalServerMean
 
 """
@@ -585,6 +584,8 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, bandwidthResult: pd.DataFrame
 
 
     ttopdownpd = compensateRW(alltopdownpds, detectJsonDict)
+    if inputDict["isExistFaultFlag"]:
+        ttopdownpd[FAULT_FLAG] = alltopdownpds[FAULT_FLAG]
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cacheGrab")
         savepdfile(ttopdownpd, spath=tpath, filename="topdown.csv")
