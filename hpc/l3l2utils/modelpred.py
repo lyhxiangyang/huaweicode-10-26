@@ -116,7 +116,13 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
     for i in range(0, len(sub_server_processcputime)):
         if sub_server_processcputime[i] < cputhreshold:
             cpuabnormalList[i] = 0
-    return cpuabnormalList
+
+    respd=pd.DataFrame()
+    respd[TIME_COLUMN_NAME] = timecolumns
+    if inputConfig["isExistFaultFlag"]:
+        respd[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+    respd["preFlag"] = cpuabnormalList
+    return respd
 
 
 """
