@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from Showresult.显示process数据.processmemory import FAULTFLAG
-from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame
+from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame, smoothseries
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getRunHPCTimepdsFromProcess, getsametimepdList
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
@@ -62,7 +62,7 @@ def processing(filepath: str, filename: str = None):
 def getServerTopdownandProcesspds(filepath: str):
     itopdownpath = os.path.join(filepath,"topdown" , "topdown.csv")
     iprocesspath = os.path.join(filepath, "process","hpc_process.csv")
-    iserverpath = os.path.join(filepath, "server", "metric_server")
+    iserverpath = os.path.join(filepath, "server", "metric_server.csv")
 
     # 读取到dataframe中
     itopdownpd = pd.read_csv(itopdownpath)
@@ -98,6 +98,12 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
 def getSUMWR(itopdownpd: pd.DataFrame, iprocesspd: pd.DataFrame, iserverpd: pd.DataFrame):
     mergeprocesspd = mergeProceeDF(iprocesspd, sumFeatures=["rss", "usr_cpu", "kernel_cpu"])
 
+    cname = "mflops"
+    itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+    mflops_mean = itopdownpd[cname][0:10].mean()
+    mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+
     # ddrc_rd
     rd_cname = "ddrc_rd"
     itopdownpd[rd_cname + "_median"] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
@@ -126,8 +132,11 @@ def getSUMWR(itopdownpd: pd.DataFrame, iprocesspd: pd.DataFrame, iserverpd: pd.D
     respd[TIME_COLUMN_NAME] = iserverpd[TIME_COLUMN_NAME]
     # ========
     respd["cpu_change"] = cpu_change
+    respd["cpu_change_smooth"] = smoothseries(cpu_change)
     respd["ddrc_ddwr_sum"] = itopdownpd["ddrc_ddwr_sum_median"]
     respd["ddrc_ddwr_sum_compensation"] = itopdownpd["ddrc_ddwr_sum_median"] * (1 + cpu_change)
+    respd["mflops_mean"] = mflops_mean
+    respd["ddrc_ddwr_sum_compensation_mflops"] = itopdownpd["ddrc_ddwr_sum_median"] * (1 + mflops_change)
     # =======
     respd[FAULTFLAG] = iserverpd[FAULTFLAG]
     return respd
@@ -151,4 +160,5 @@ if __name__ == "__main__":
         iserverpd, itopdownpd, iprocesspd = getsametimepdList([iserverpd, itopdownpd, iprocesspd])
         respd = getSUMWR(itopdownpd, iprocesspd, iserverpd)
 
+        respd.set_index("time", inplace=True)
         n_cols_plot(respd, respd.columns, title)
