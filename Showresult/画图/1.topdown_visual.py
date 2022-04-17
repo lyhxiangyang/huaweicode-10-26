@@ -53,7 +53,7 @@ def processing(filepath: str, filename: str = None):
 
     itopdownpd['flag'] = itopdownpd['faultFlag'].apply(lambda x: x % 10)
     itopdownpd = itopdownpd.dropna()
-    return df
+    return itopdownpd
 
 
 if __name__ == "__main__":
