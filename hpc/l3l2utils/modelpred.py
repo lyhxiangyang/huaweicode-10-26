@@ -6,7 +6,7 @@ import joblib
 import pandas as pd
 
 from hpc.classifiers.ModelPred import select_and_pred
-from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries
+from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries, minsmoothseries
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
 from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd, getsametimepdList
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
@@ -43,6 +43,7 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
         return coresnum, coresSet
 
     # 保证两者的时间是一样的 返回一个cpu时间的差值
+    # 下面这个函数的功能没有使用，主要是用来得到一个servercpu-processcpu的差值
     def judgeserver_processcputime(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.Series:
         if "cpu" not in serverpd.columns.tolist():
             serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
@@ -76,7 +77,7 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
     serverinformationDict[TIME_COLUMN_NAME] = timecolumns  # 加入时间
     for stime in timecolumns:
         # 检测某个时间点下
-        detectresult = detectionCPUInPointTime(allprocesspds, stime, modelfilepath=modelfilepath, modeltype=modeltype)
+        detectresult = detectionCPUInPointTime(allprocesspds, stime, inputConfig)
         wrf_cpu_time = detectresult[0]
         abnormalcores = detectresult[1]
         abnormalcoremaxtime = detectresult[2]
@@ -107,14 +108,15 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
             f.writelines(writeinfo)
     # ==============================================================================================================
     # 根据servercpu和processcpu进行调整
-    # 传入的server和allprocess时间是一样的
-    sub_server_processcputime = judgeserver_processcputime(allserverpds, allprocesspds)
-    assert len(sub_server_processcputime) == len(cpuabnormalList)
 
-    cputhreshold = inputConfig["judgeCPUthread"]
-    for i in range(0, len(sub_server_processcputime)):
-        if sub_server_processcputime[i] < cputhreshold:
-            cpuabnormalList[i] = 0
+    # 传入的server和allprocess时间是一样的
+    # 功能删除，判断servertime和processtime的差异性，如果差距较大进行cpu的判断，如果差异较小，不进行CPU的判断。
+    # sub_server_processcputime = judgeserver_processcputime(allserverpds, allprocesspds)
+    # assert len(sub_server_processcputime) == len(cpuabnormalList)
+    # cputhreshold = inputConfig["judgeCPUthread"]
+    # for i in range(0, len(sub_server_processcputime)):
+    #     if sub_server_processcputime[i] < cputhreshold:
+    #         cpuabnormalList[i] = 0
 
     respd=pd.DataFrame()
     respd[TIME_COLUMN_NAME] = timecolumns
@@ -130,8 +132,13 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
 """
 
 
-def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepath: str = None, modeltype=0,):
+def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, inputDict: Dict):
+    modelfilepath = inputDict["processcpu_modelpath"]
+    modeltype = inputDict["processcpu_modeltype"]
+
     nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime] # 包含了process各个核心的值
+    # 对pid进行去重
+    nowdf = nowdf.drop_duplicates(subset=CPU_FEATURE, keep="first")
     if len(nowdf) == 0:
         return 0, None, None
     # 先得到总的CPUTIME的时间
@@ -142,6 +149,18 @@ def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, modelfilepat
     cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME]) # 每个核的CPU时间
     predictflag = select_and_pred(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     predictflag = [True if i != 0 else False for i in predictflag] # 非0就是异常
+
+    # 在这一部分中对读写数据进行判断，判断这个核心在这个时间下是否处理大量读写中
+    readcharsThread = inputDict["cpuReadCharsMax"]
+    readcharsSeries = nowdf["read_chars"]
+    readcharsSeries = minsmoothseries(readcharsSeries, windows=3)
+    readchars = [False if i < readcharsThread else True for i in nowdf["read_chars"] ]
+
+    assert len(readchars) == len(predictflag)
+
+    # 只有读写较大时的一场不能当作异常
+    predictflag = [ False if readchars[i] else predictflag[i] and True for i in range(0, len(predictflag))]
+
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
     assert len(predictflag) == len(cores_serialnumber)

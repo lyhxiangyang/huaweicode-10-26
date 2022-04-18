@@ -77,6 +77,7 @@ def getpidrwInfo(processpd: pd.DataFrame):
     processpd.set_index("time", inplace=True)
     for icore, icorepd in processpd.groupby("cpu_affinity"):
         # icorepd = icorepd.reset_index(drop=True)
+        icorepd = icorepd.reset_index().drop_duplicates(subset="time", keep="first").set_index("time")
         cname = "core{}_read_chars".format(icore)
         cpuSeries = icorepd["read_chars"]
         respd[cname] = cpuSeries
@@ -112,6 +113,6 @@ if __name__ == "__main__":
         df = changeTimeToFromPdlists([df])[0]
         df = differenceProcess([df], accumulateFeatures=["usr_cpu", "kernel_cpu", "read_chars", "read_bytes"])[0]
         # dfsum = mergeProceeDF(df)
-        dfinfo = getpidcpuInfo(df)
+        dfinfo = getpidrwInfo(df)
         dfinfo = processingpd(dfinfo)
         n_cols_plot(dfinfo, dfinfo.columns, normal_file_name)
