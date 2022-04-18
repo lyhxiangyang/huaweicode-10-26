@@ -352,7 +352,6 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 返回一个L2L3层合并之后的数据
 """
 
-
 def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
                       alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame,
                       alltopdownpds: pd.DataFrame) -> pd.DataFrame:
