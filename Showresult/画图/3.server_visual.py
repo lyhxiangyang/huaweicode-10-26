@@ -81,6 +81,12 @@ def getserverandprocesspds(filepath: str):
     processpdlists = changeTimeToFromPdlists([iprocesspd])
     # 对数据进行差分处理
     serverpdlists = differenceServer(serverpdlists, ["pgfree"])
+
+    # 画出pgfree的平均数
+    for ipd in serverpdlists:
+        ipd["pgfree_mean"] = getSeriesFrequencyMean(ipd["pgfree"])
+
+
     processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
     iprocesspd = mergeProceeDF(processpdlists[0])
     # 得到相同时间段
@@ -107,6 +113,19 @@ def gettitle(ipath: str):
     B,C=os.path.split(ipath)
     A,B=os.path.split(B)
     return "{}/{}".format(B,C)
+
+
+def getSeriesFrequencyMean(dataseries: pd.Series):
+    # 先划分成10分
+    tpd = pd.DataFrame(data={
+        "origindata": dataseries
+    })
+    tpd["cutdata"] = pd.cut(tpd["origindata"], bins=10)
+    # 得到最大值对应的索引，也就是分组
+    maxvaluecut=pd.value_counts(tpd["cutdata"]).idxmax()
+    meanvalues = tpd.groupby("cutdata").get_group(maxvaluecut)["origindata"].mean()
+    return meanvalues
+
 
 if __name__ == "__main__":
     dirpathes = [

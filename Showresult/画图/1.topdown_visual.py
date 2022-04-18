@@ -22,6 +22,17 @@ def n_cols_plot(df, yy, title):
     fig = go.Figure(data=data, layout=layout)
     fig.show()
 
+def getSeriesFrequencyMean(dataseries: pd.Series):
+    # 先划分成10分
+    tpd = pd.DataFrame(data={
+        "origindata": dataseries
+    })
+    tpd["cutdata"] = pd.cut(tpd["origindata"], bins=10)
+    # 得到最大值对应的索引，也就是分组
+    maxvaluecut=pd.value_counts(tpd["cutdata"]).idxmax()
+    meanvalues = tpd.groupby("cutdata").get_group(maxvaluecut)["origindata"].mean()
+    return meanvalues
+
 
 
 def processing(filepath: str, filename: str = None):
