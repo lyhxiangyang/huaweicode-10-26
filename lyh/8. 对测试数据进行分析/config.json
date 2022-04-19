@@ -27,7 +27,7 @@
     "isExistFaultFlag": true,
     "isTimeisStr": true,
     "server_feature": ["mem_used", "pgfree", "freq", "usr_cpu", "kernel_cpu"],
-    "server_accumulate_feature": ["pgfree"],
+    "server_accumulate_feature": ["pgfree", "usr_cpu", "kernel_cpu"],
     "process_feature":["usr_cpu", "kernel_cpu", "rss", "read_chars", "read_bytes"],
     "process_accumulate_feature":["usr_cpu", "kernel_cpu", "read_chars", "read_bytes"],
     "l2_feature": ["cpu_power", "power", "cabinet_power", "fan1_speed", "fan2_speed", "fan3_speed", "fan4_speed", "cpu1_core_rem", "cpu2_core_rem", "cpu3_core_rem", "cpu4_core_rem", "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp", "pch_temp"],
