@@ -242,9 +242,6 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # print("时间根据process的时间进行对齐操作".format(40, "*"))
     # predictserverpds = getRunHPCTimepdsFromProcess(predictserverpds, predictprocesspds)
 
-
-
-
     # # 对mflops分析然后是删除掉不够的部分
     # if detectionJson["RequestData"]["type"] == "grapes":
     #     predicttopdwnpds = removeUselessDataFromTopdownList(predicttopdwnpds)

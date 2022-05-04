@@ -164,3 +164,15 @@ def maxsmoothseries(cseries: pd.Series, windows=5)->pd.Series:
 def minsmoothseries(cseries: pd.Series, windows=5)->pd.Series:
     meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).min()
     return meanmediansmooth
+
+# 函数功能：将Series按照数值大小分为10份，取分布最广泛的那一份，然后取这一份的平均值
+def getSeriesFrequencyMean(dataseries: pd.Series, bins=10):
+    # 先划分成10分
+    tpd = pd.DataFrame(data={
+        "origindata": dataseries
+    })
+    tpd["cutdata"] = pd.cut(tpd["origindata"], bins=bins)
+    # 得到最大值对应的索引，也就是分组
+    maxvaluecut=pd.value_counts(tpd["cutdata"]).idxmax()
+    meanvalues = tpd.groupby("cutdata").get_group(maxvaluecut)["origindata"].mean()
+    return meanvalues

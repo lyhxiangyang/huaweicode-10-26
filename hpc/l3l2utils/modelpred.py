@@ -9,6 +9,7 @@ from hpc.classifiers.ModelPred import select_and_pred
 from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries, minsmoothseries
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
 from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd, getsametimepdList
+from hpc.l3l2utils.DebugInfo import getMemoryBandwidth50Debuginfo
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
 from hpc.l3l2utils.ParsingJson import getNormalTopdownMean, getNormalServerMean
 
@@ -465,10 +466,17 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     # allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
     allserverpds, alltopdownpds, allprocesspds = getsametimepdList([allserverpds, alltopdownpds, allprocesspds])
     testPd = compensatePgfree(allserverpds, alltopdownpds,allprocesspds,detectionJson, False)
+
+
+    # 保存debug信息
+    if inputDict["spath"]:
+        debugpd = getMemoryBandwidth50Debuginfo(allserverpds, allprocesspds, alltopdownpds, inputDict, detectionJson)
+        tpath = os.path.join(inputDict["spath"], "abnormalInfo", "memory_bandwidth50")
+        savepdfile(debugpd, tpath)
+
     # 进行预测
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-
-
+    # 输出结果
     respd = pd.DataFrame()
     respd[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
     respd["preFlag"] = bandwidthPreFlagList
