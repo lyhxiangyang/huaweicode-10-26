@@ -138,10 +138,8 @@ def getfilepd(ipath: str, ifile: str = None, features: List[str] = None) -> pd.D
 """
 
 
-def savepdfile(ds, spath, filename=None, index: bool = False):
+def savepdfile(ds, spath, filename, index: bool = False):
     if not os.path.exists(spath):
         os.makedirs(spath)
-    pathfilename=spath
-    if filename is not None:
-        pathfilename = os.path.join(spath, filename)
+    pathfilename = os.path.join(spath, filename)
     ds.to_csv(pathfilename, index=index)

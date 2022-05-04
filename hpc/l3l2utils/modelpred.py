@@ -472,7 +472,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     if inputDict["spath"]:
         debugpd = getMemoryBandwidth50Debuginfo(allserverpds, allprocesspds, alltopdownpds, inputDict, detectionJson)
         tpath = os.path.join(inputDict["spath"], "abnormalInfo", "memory_bandwidth50")
-        savepdfile(debugpd, tpath)
+        savepdfile(debugpd, tpath, "pgfree.py")
 
     # 进行预测
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
