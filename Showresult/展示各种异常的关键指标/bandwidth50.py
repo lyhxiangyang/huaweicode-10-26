@@ -1,69 +1,193 @@
-
-from typing import Dict
+import os
+import time
+from typing import List
 
 import pandas as pd
+import plotly.graph_objs as go
 
-from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, getSeriesFrequencyMean
-from hpc.l3l2utils.DefineData import FAULT_FLAG
-from hpc.l3l2utils.ParsingJson import getNormalServerMean
+from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame
+from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getsametimepd
+from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
+from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
+
+
+def n_cols_plot(df, yy, title):
+    data = []
+    for y in yy:
+        trace1 = go.Scatter(x=df.index, y=df[y], mode='lines', name=y)
+        data.append(trace1)
+        # abnormal_point = df[(df["faultFlag"] != 0)]
+        abnormal_point = df[df["faultFlag"].apply(lambda x: True if x != 0 and x != -1 else False)]
+        trace = go.Scatter(x=abnormal_point.index, y=abnormal_point[y], mode='markers')
+        data.append(trace)
+    layout = dict(title=title)
+    fig = go.Figure(data=data, layout=layout)
+    fig.show()
+
+
+def processing(filepath: str, filename: str = None):
+    file = filepath
+    if filename is not None:
+        file = os.path.join(filepath, filename)
+    df = pd.read_csv(file, index_col="time")
+    df: pd.DataFrame
+    if "faultFlag" not in df.columns:
+        df["faultFlag"] = 0
+    df = df.dropna()
+    # 修改列名 去掉每个文件中的空格
+    df = df.copy()
+    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
+    df = df.dropna()
+    return df
+
+
+def processingpd(df: pd.DataFrame):
+    if "time" in df.columns.array:
+        df.set_index("time", inplace=True)
+    if "faultFlag" not in df.columns:
+        df["faultFlag"] = 0
+    # 修改列名 去掉每个文件中的空格
+    df = df.copy()
+    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
+    df = df.dropna()
+    return df
+
+
+# ======================================================== 上面是画图函数
+# ======================================================== 下面是处理函数
+
+def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
+    if sumFeatures is None:
+        return pd.DataFrame()
+    if inplace:
+        processpd = processpd.copy()
+    if TIME_COLUMN_NAME not in sumFeatures:
+        sumFeatures.append(TIME_COLUMN_NAME)
+    tpd = processpd[sumFeatures].groupby("time").sum()
+    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").min()
+    tpd.reset_index(drop=False, inplace=True)
+    tpd1.reset_index(drop=False, inplace=True)
+    respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)
+    return respd
+
+
+# 得到server和process的pd
+def getserverandprocesspds(filepath: str):
+    iserverpath = os.path.join(filepath,"server" , "metric_server.csv")
+    iprocesspath = os.path.join(filepath, "process","hpc_process.csv")
+
+    # 读取到dataframe中
+    iserverpd = pd.read_csv(iserverpath)
+    iprocesspd = pd.read_csv(iprocesspath)
+
+    # 对iserver进行时间处理
+    serverpdlists = changeTimeToFromPdlists([iserverpd], isremoveDuplicate=True)
+    processpdlists = changeTimeToFromPdlists([iprocesspd])
+    # 对数据进行差分处理
+    serverpdlists = differenceServer(serverpdlists, ["pgfree", "usr_cpu", "kernel_cpu"])
+    processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
+
+    return serverpdlists[0], processpdlists[0]
+
+    # iprocesspd = mergeProceeDF(processpdlists[0])
+    # # 得到相同时间段
+    # # a,b = getsametimepd(serverpdlists[0], iprocesspd)
+    # pspd = pd.merge(left=serverpdlists[0], right=iprocesspd, left_on="time", right_on="time", how="left",
+    #                 suffixes=("", "_y"))
+    # pspd.fillna(-1, inplace=True)
+    # return pspd
+
+def smoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
+    meanmediansmooth = mediansmooth.rolling(window=windows, min_periods=1, center=True).mean()
+    return meanmediansmooth
+def mediansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
+    return mediansmooth
+def meansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).mean()
+    return meanmediansmooth
+
+def maxmoothseries(cseries: pd.Series)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).max()
+    return meanmediansmooth
+def minmoothseries(cseries: pd.Series)->pd.Series:
+    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).min()
+    return meanmediansmooth
 
 
 
-"""
-函数功能：
-1.存储cpu_change
-2.原始pgfree
-3.补偿之后的pgfree
-4.自动分析得到的pgfree的平均值
-5.如果有正常数据，显示正常数据的平均值
-"""
-def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdownpd: pd.DataFrame) -> pd.DataFrame:
-    debugpd = pd.DataFrame()
-    def getcpuchange(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.Series:
-        mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["usr_cpu", "kernel_cpu"])
+# 对内存的差值处理必须根据进程pid号进行处理
+# 保证内存的指标和pid号的指标长度是一样的
+def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
+    assert len(memseries) == len(pidseries)
+    df = pd.DataFrame(data={
+        "mem": memseries,
+        "pid": pidseries
+    })
+    # 直接写个for循环
+    reslists = []
+    winsize = 5
+    for ipid, idf in df.groupby("pid", sort=False):
+        other_mem_smooth = smoothseries(idf["mem"], windows=winsize)
+        other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
+        reslists.extend(other_mem_smooth_diff.tolist())
 
-        if "cpu" not in serverpd.columns.tolist():
-            serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
-        if "cpu" not in processpd.columns.tolist():
-            processpd["cpu"] = processpd["usr_cpu"] + processpd["kernel_cpu"]
+    return pd.Series(data=reslists)
 
-        # iprocesspd cpu的加在一起
-        mergeprocesspd["cpu"] = mergeprocesspd["usr_cpu"] + mergeprocesspd["kernel_cpu"]
-        serverpd["cpu"] = serverpd["usr_cpu"] + serverpd["kernel_cpu"]
-        sub_server_process_cpu = serverpd["cpu"] - mergeprocesspd["cpu"]
-        # 如果iserverpd["cpu"]是0， 就当作1
-        serverpd["cpu"] = serverpd["cpu"].apply(lambda x: 1 if x == 0 else x)
-        cpu_change = sub_server_process_cpu / serverpd["cpu"]
-        return cpu_change
-    # 保证iserverpds和itodownpds时间与时间相互匹配
-    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, iprocesspd: pd.DataFrame, detectionJson: Dict, inplace=True):
-        assert len(iserverpd) == len(itopdowndpd)
-        if inplace:
-            iserverpd = iserverpd.copy()
-        # 对iprocess和servercpu中的
-        cpu_change = getcpuchange(iserverpd, iprocesspd)
-        debugpd["cpu_change"] = cpu_change #debugpd
-        changes=cpu_change
-        cname = "pgfree"
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        debugpd["pgfree_smooth"] = iserverpd["pgfree"] #debugpd
-        # 对来自的应用进行判断
-        pgfree_mean = iserverpd["pgfree"].iloc[0:10].mean()["pgfree"]
-        # if detectionJson["RequestData"]["type"] == "grapes":
-        #     pgfree_mean = iserverpd["pgfree"].iloc[15:17]
-        debugpd["pgfree_mean"] = pgfree_mean#debugpd
-        debugpd["pgfree_mean_fre"] = getSeriesFrequencyMean(iserverpd["pgfree"])
-        iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
-        # pgfree 需要减去平均值
-        iserverpd[cname] = iserverpd[cname] - pgfree_mean
-        return iserverpd
-    # ==========================
-    compensatePgfree(serverpd, topdownpd, processpd)
-    debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]
-    return debugpd
+# 传入的是进程和服务器数据的集合体
+def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
+    pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
+    pspd["server_cpu_smooth"] = smoothseries(pspd["server_cpu"])
+    pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
+    pspd["process_cpu_smooth"] = smoothseries(pspd["process_cpu"])
+    pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
+    pspd["s-pcpu"] = smoothseries(pspd["s-pcpu"], windows=5)
+    pspd["s-cpu-smooth"] = pspd["server_cpu_smooth"] - pspd["process_cpu_smooth"]
+    pspd["s-cpu-smooth1"] = smoothseries(pspd["s-cpu-smooth"])
+
+    return pspd
+
+
+# 传入进去的process应该是相同时间的
+# 根据server总内存和process mempercent来得到数据
+def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
+    mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss", "usr_cpu", "kernel_cpu"])
+    # 将两者合并
+    pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME,
+                    how="left", suffixes=("", "_y"))
+    pspd.fillna(0, inplace=True)  # 认为进程不在的时候其数据为0
+
+    servermem = pspd["mem_used"]
+    processmem = pspd["rss"]
+    othermem = servermem - processmem
+    pspd["s-p-mem"] = othermem
+    othermemdiff = diffmemoryseries(othermem, pspd["pid"]) / 1000000
+    pspd["s-p-mem-diff"] = othermemdiff
+
+    return pspd
+
+
+def gettitle(ipath: str):
+    B, C = os.path.split(ipath)
+    A, B = os.path.split(B)
+    return "{}/{}".format(B, C)
 
 
 if __name__ == "__main__":
+    dirpathes = [
+        # huawei路径
+        R"D:\patent\wrf_grapes_all.zip\post\grapes_testg_multi_normal_2\centos16",
+    ]
+    for dirpath in dirpathes:
+        title = gettitle(dirpath)
+
+        serverpd, processpd = getserverandprocesspds(dirpath)
+        serverpd = subtractionMemory(serverpd, processpd)
+        # CPU信息
+        serverpd = getServerCPUTIME(serverpd)
+
+        # 画出来
+        processingpd(serverpd)
+        n_cols_plot(serverpd, serverpd.columns, title)
+

@@ -62,6 +62,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         return iserverpd
     # ==========================
     compensatePgfree(serverpd, topdownpd, processpd, detectionJson)
+    debugpd["time"]=serverpd["time"]
     if inputDict["isExistFaultFlag"]:
         debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]
     return debugpd

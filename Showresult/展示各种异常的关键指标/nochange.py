@@ -135,7 +135,6 @@ if __name__ == "__main__":
     ]
     for dirpath in dirpathes:
         title=gettitle(dirpath)
-
         ipd = getfilepd(dirpath)
         # 画出来
         ipd = processingpd(ipd)
