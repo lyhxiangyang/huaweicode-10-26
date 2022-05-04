@@ -50,7 +50,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         debugpd["pgfree_smooth"] = iserverpd["pgfree"] #debugpd
         # 对来自的应用进行判断
-        pgfree_mean =
+        pgfree_mean = iserverpd["pgfree"].iloc[0:10].mean()["pgfree"]
         # if detectionJson["RequestData"]["type"] == "grapes":
         #     pgfree_mean = iserverpd["pgfree"].iloc[15:17]
         debugpd["pgfree_mean"] = pgfree_mean#debugpd
@@ -62,8 +62,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         return iserverpd
     # ==========================
     compensatePgfree(serverpd, topdownpd, processpd)
-    if inputDict["isExistFaultFlag"]:
-        debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]
+    debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]
     return debugpd
 
 
