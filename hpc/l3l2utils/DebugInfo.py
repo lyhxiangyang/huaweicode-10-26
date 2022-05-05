@@ -31,6 +31,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
 
         mflops_normal_iomax = inputDict["maxflopsinio"]
         itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         #1
         debugpd["mflops_delete"] = itopdownpd[cname]
         #2

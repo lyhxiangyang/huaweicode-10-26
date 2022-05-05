@@ -419,6 +419,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         mflops_normal_iomax = inputDict["maxflopsinio"]
         # 将小于iomax的mflops设置为平均值
         itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
         # 将较高的mflpos_change抹为0
         # mflops_change.apply(lambda x: if x > )
