@@ -43,5 +43,8 @@
     "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
 
-    "normalpath": null
+    "normalpath": null,
+
+    "maxflopsinio": 15000,
+    "pgfree_thread": 2000000
 }

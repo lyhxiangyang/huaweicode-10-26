@@ -8,7 +8,7 @@ from hpc.l3l2utils.DefineData import MODEL_TYPE
 
 def preproccessConfigfile(inputDict: Dict) -> Dict:
     # 对阈值重新进行设置，必须为决策树
-    def changeMemLeakThread(modelpath: str, threads):
+    def changeFirstThread(modelpath: str, threads):
         f = open(modelpath, 'rb')
         model = joblib.load(f)
         f.close()
@@ -18,5 +18,10 @@ def preproccessConfigfile(inputDict: Dict) -> Dict:
     # 1. 预处理第一步对内存泄露的模型进行重新设置
     modelpath=os.path.join(inputDict["servermemory_modelpath"], MODEL_TYPE[inputDict["servermemory_modeltype"]] + ".pkl")
     modelthread=inputDict["memleakpermin"]
-    changeMemLeakThread(modelpath, modelthread)
+    changeFirstThread(modelpath, modelthread)
+    # 2. 对内存带宽模型的阈值进行设置
+    modelpath=os.path.join(inputDict["serverbandwidth_modelpath"], MODEL_TYPE[inputDict["serverbandwidth_modeltype"]] + ".pkl")
+    modelthread=inputDict["pgfree_thread"]
+    changeFirstThread(modelpath, modelthread)
+
 
