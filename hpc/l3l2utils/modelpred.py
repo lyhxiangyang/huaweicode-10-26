@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 from collections import defaultdict
 from typing import List, Dict, Tuple, Set
@@ -450,7 +451,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         # 对来自的应用进行判断
         pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
         if detectionJson["RequestData"]["type"] == "grapes":
-            pgfree_mean = iserverpd["pgfree"].iloc[15:17]
+            pgfree_mean = iserverpd["pgfree"].iloc[0:10].mean()
 
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
@@ -465,7 +466,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     # alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
     # allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
     allserverpds, alltopdownpds, allprocesspds = getsametimepdList([allserverpds, alltopdownpds, allprocesspds])
-    testPd = compensatePgfree(allserverpds, alltopdownpds,allprocesspds,detectionJson, False)
+    testPd = compensatePgfree(allserverpds, alltopdownpds,allprocesspds,detectionJson)
 
 
     # 保存debug信息

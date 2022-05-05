@@ -5,9 +5,7 @@ import pandas as pd
 
 from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, getSeriesFrequencyMean
 from hpc.l3l2utils.DefineData import FAULT_FLAG
-from hpc.l3l2utils.ParsingJson import getNormalServerMean
-
-
+from hpc.l3l2utils.ParsingJson import getNormalServerMean, getNormalTopdownMean
 
 """
 函数功能：
@@ -19,6 +17,25 @@ from hpc.l3l2utils.ParsingJson import getNormalServerMean
 """
 def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdownpd: pd.DataFrame, inputDict: Dict = None, detectionJson: Dict = None) -> pd.DataFrame:
     debugpd = pd.DataFrame()
+
+    def getMflopschange(itopdownpd: pd.DataFrame) -> pd.Series:
+        cname = "mflops"
+        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        debugpd["mflops"] = itopdownpd[cname]
+
+        mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname], datanumber=10)[cname]
+        debugpd["mflops_mean"] = mflops_mean
+        debugpd["mflops_mean_fre"] = getSeriesFrequencyMean(topdownpd[cname])
+
+        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        itopdownpd["mflops_change"] = mflops_change
+        debugpd["mflops_change"] = mflops_change
+        return mflops_change
+
+
+
     def getcpuchange(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.Series:
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["usr_cpu", "kernel_cpu"])
 
@@ -55,8 +72,13 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         #     pgfree_mean = iserverpd["pgfree"].iloc[15:17]
         debugpd["pgfree_mean"] = pgfree_mean#debugpd
         debugpd["pgfree_mean_fre"] = getSeriesFrequencyMean(iserverpd["pgfree"])
+
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
-        debugpd["pgfree_change"] = iserverpd[cname]
+
+        mflopschanges=getMflopschange(itopdowndpd)
+        debugpd["pgfree_change_cpu"] = iserverpd[cname]
+        debugpd["pgfree_change_mflops"] = iserverpd[cname] + pgfree_mean * mflopschanges
+
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
         # pgfree 需要减去平均值
         iserverpd[cname] = iserverpd[cname] - pgfree_mean
