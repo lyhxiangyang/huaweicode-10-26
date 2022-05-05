@@ -456,8 +456,8 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         # 对来自的应用进行判断
         pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
-        if detectionJson["RequestData"]["type"] == "grapes":
-            pgfree_mean = iserverpd["pgfree"].iloc[0:10].mean()
+        # if detectionJson["RequestData"]["type"] == "grapes":
+        #     pgfree_mean = iserverpd["pgfree"].iloc[0:10].mean()
 
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
