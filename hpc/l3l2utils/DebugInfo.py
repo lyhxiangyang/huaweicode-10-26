@@ -25,11 +25,13 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         debugpd["mflops"] = itopdownpd[cname]
 
-        mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname], datanumber=10)[cname]
-        debugpd["mflops_mean"] = mflops_mean
-        debugpd["mflops_mean_fre"] = getSeriesFrequencyMean(topdownpd[cname])
+        mflops_mean = getSeriesFrequencyMean(itopdownpd[cname])
+        debugpd["mflops_mean"] = getNormalTopdownMean(detectionJson, [itopdownpd], [cname], datanumber=10)[cname]
+        debugpd["mflops_mean_fre"] = getSeriesFrequencyMean(itopdownpd[cname])
 
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        # 将较高的mflpos_change抹为0
+        # mflops_change.apply(lambda x: if x > )
         itopdownpd["mflops_change"] = mflops_change
         debugpd["mflops_change"] = mflops_change
         return mflops_change
@@ -67,10 +69,12 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         debugpd["pgfree_smooth"] = iserverpd["pgfree"] #debugpd
         # 对来自的应用进行判断
-        pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
+        # pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
+        # pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
+        pgfree_mean = getSeriesFrequencyMean(iserverpd["pgfree"])
         # if detectionJson["RequestData"]["type"] == "grapes":
         #     pgfree_mean = iserverpd["pgfree"].iloc[15:17]
-        debugpd["pgfree_mean"] = pgfree_mean#debugpd
+        debugpd["pgfree_mean"] = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]#debugpd
         debugpd["pgfree_mean_fre"] = getSeriesFrequencyMean(iserverpd["pgfree"])
 
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes

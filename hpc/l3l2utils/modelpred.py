@@ -7,7 +7,8 @@ import joblib
 import pandas as pd
 
 from hpc.classifiers.ModelPred import select_and_pred
-from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries, minsmoothseries
+from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansmoothseries, minsmoothseries, \
+    getSeriesFrequencyMean
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
 from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd, getsametimepdList
 from hpc.l3l2utils.DebugInfo import getMemoryBandwidth50Debuginfo
@@ -408,6 +409,24 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
 # process最重要的作用是确定server的起始位置
 def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.DataFrame,allprocesspds: pd.DataFrame, inputDict: Dict = None, detectionJson: Dict = None):
 
+    def getMflopschange(itopdownpd: pd.DataFrame) -> pd.Series:
+        cname = "mflops"
+        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        debugpd["mflops"] = itopdownpd[cname]
+
+        mflops_mean = getSeriesFrequencyMean(itopdownpd[cname])
+        debugpd["mflops_mean"] = getNormalTopdownMean(detectionJson, [itopdownpd], [cname], datanumber=10)[cname]
+        debugpd["mflops_mean_fre"] = getSeriesFrequencyMean(itopdownpd[cname])
+
+        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        # 将较高的mflpos_change抹为0
+        # mflops_change.apply(lambda x: if x > )
+        itopdownpd["mflops_change"] = mflops_change
+        debugpd["mflops_change"] = mflops_change
+        return mflops_change
+
     # 保证时间是一样的
     def getcpuchange(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.Series:
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["usr_cpu", "kernel_cpu"])
@@ -433,17 +452,10 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         if inplace:
             iserverpd = iserverpd.copy()
             itopdowndpd = itopdowndpd.copy()
-        # 对itopdownpd中的mflops进行平滑处理
-        cname = "mflops"
-        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
-        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)[cname]
-        mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
-
         # 对iprocess和servercpu中的
-        cpu_change = getcpuchange(iserverpd, iprocesspd)
-
-        changes=cpu_change
+        # cpu_change = getcpuchange(iserverpd, iprocesspd)
+        mflops_change = getMflopschange(itopdownpd=itopdowndpd)
+        changes=mflops_change
         cname = "pgfree"
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次

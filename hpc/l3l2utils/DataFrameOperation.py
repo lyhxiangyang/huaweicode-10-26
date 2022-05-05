@@ -176,3 +176,8 @@ def getSeriesFrequencyMean(dataseries: pd.Series, bins=10):
     maxvaluecut=pd.value_counts(tpd["cutdata"]).idxmax()
     meanvalues = tpd.groupby("cutdata").get_group(maxvaluecut)["origindata"].mean()
     return meanvalues
+def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=10):
+    tseries = pd.Series()
+    for ifeature in features:
+        tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature])
+    return tseries

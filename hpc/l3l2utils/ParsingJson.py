@@ -8,7 +8,7 @@ from typing import Dict, List, Set
 import joblib
 import pandas as pd
 
-from hpc.l3l2utils.DataFrameOperation import mergeDataFrames
+from hpc.l3l2utils.DataFrameOperation import mergeDataFrames, getSeriesFrequencyMeanLists
 from hpc.l3l2utils.DataFrameSaveRead import getServer_Process_l2_Network_Ping_TopdownList
 from hpc.l3l2utils.DataOperation import renamePds, remove_AllAbnormalAndHeadTail
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
@@ -271,7 +271,9 @@ def getMeanFromNumberDataFrom(datapds: List[pd.DataFrame], classname: str, featu
 
 
 def getNormalServerMean(detectionJson: Dict, serverdatapd: List[pd.DataFrame], features: List[str], datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromNumberDataFrom(serverdatapd, "server", features, datanumber)
+    # meanSeries = getMeanFromNumberDataFrom(serverdatapd, "server", features, datanumber)
+    alldatapd = mergeDataFrames(serverdatapd)
+    meanSeries = getSeriesFrequencyMeanLists(alldatapd, features, bins=10)
     if detectionJson is not None:
         for ifeaturename in features:
             featureVaule = getMeanFromExistMean(detectionJson, "server", ifeaturename)
@@ -305,6 +307,8 @@ def getNormalL2Mean(detectionJson: Dict, datapd: List[pd.DataFrame], features: L
 def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
     meanSeries = getMeanFromNumberDataFrom(datapd, "nic", features, datanumber)
+    # alldatapd = mergeDataFrames(datapd)
+    # meanSeries = getSeriesFrequencyMeanLists(alldatapd, features, bins=10)
     if detectionJson is not None:
         for ifeaturename in features:
             featureVaule = getMeanFromExistMean(detectionJson, "nic", ifeaturename)
@@ -315,7 +319,9 @@ def getNormalNetworkMean(detectionJson: Dict, datapd: List[pd.DataFrame], featur
 
 def getNormalTopdownMean(detectionJson: Dict, datapd: List[pd.DataFrame], features: List[str],
                          datanumber: int = 10) -> pd.Series:
-    meanSeries = getMeanFromNumberDataFrom(datapd, "topdown", features, datanumber)
+    # meanSeries = getMeanFromNumberDataFrom(datapd, "topdown", features, datanumber)
+    alldatapd = mergeDataFrames(datapd)
+    meanSeries = getSeriesFrequencyMeanLists(alldatapd, features, bins=10)
     if detectionJson is not None:
         for ifeaturename in features:
             featureVaule = getMeanFromExistMean(detectionJson, "topdown", ifeaturename)
