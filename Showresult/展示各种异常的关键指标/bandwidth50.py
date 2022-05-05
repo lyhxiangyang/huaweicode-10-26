@@ -5,8 +5,9 @@ from typing import List
 import pandas as pd
 import plotly.graph_objs as go
 
-from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame
-from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getsametimepd
+from Showresult.显示process数据.processmemory import FAULTFLAG
+from hpc.l3l2utils.DataFrameOperation import mergeinnerTwoDataFrame, smoothseries
+from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getRunHPCTimepdsFromProcess, getsametimepdList
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
 
@@ -29,143 +30,36 @@ def processing(filepath: str, filename: str = None):
     file = filepath
     if filename is not None:
         file = os.path.join(filepath, filename)
-    df = pd.read_csv(file, index_col="time")
-    df: pd.DataFrame
-    if "faultFlag" not in df.columns:
-        df["faultFlag"] = 0
-    df = df.dropna()
-    # 修改列名 去掉每个文件中的空格
-    df = df.copy()
-    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
-    df = df.dropna()
-    return df
-
-
-def processingpd(df: pd.DataFrame):
-    if "time" in df.columns.array:
-        df.set_index("time", inplace=True)
-    if "faultFlag" not in df.columns:
-        df["faultFlag"] = 0
-    # 修改列名 去掉每个文件中的空格
-    df = df.copy()
-    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
-    df = df.dropna()
-    return df
-
-
-# ======================================================== 上面是画图函数
-# ======================================================== 下面是处理函数
-
-def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
-    if sumFeatures is None:
-        return pd.DataFrame()
-    if inplace:
-        processpd = processpd.copy()
-    if TIME_COLUMN_NAME not in sumFeatures:
-        sumFeatures.append(TIME_COLUMN_NAME)
-    tpd = processpd[sumFeatures].groupby("time").sum()
-    tpd1 = processpd[[TIME_COLUMN_NAME, "pid"]].groupby("time").min()
-    tpd.reset_index(drop=False, inplace=True)
-    tpd1.reset_index(drop=False, inplace=True)
-    respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)
-    return respd
+    itopdownpd = pd.read_csv(file, index_col=TIME_COLUMN_NAME)
+    if FAULTFLAG not in itopdownpd.columns:
+        itopdownpd[FAULTFLAG] = 0
+    itopdownpd = itopdownpd.dropna()
+    itopdownpd['flag'] = itopdownpd['faultFlag'].apply(lambda x: x % 10)
+    itopdownpd = itopdownpd.dropna()
+    return itopdownpd
 
 
 # 得到server和process的pd
-def getserverandprocesspds(filepath: str):
-    iserverpath = os.path.join(filepath,"server" , "metric_server.csv")
-    iprocesspath = os.path.join(filepath, "process","hpc_process.csv")
+def getServerTopdownandProcesspds(filepath: str):
+    itopdownpath = os.path.join(filepath, "topdown", "topdown.csv")
+    iprocesspath = os.path.join(filepath, "process", "hpc_process.csv")
+    iserverpath = os.path.join(filepath, "server", "metric_server.csv")
 
     # 读取到dataframe中
-    iserverpd = pd.read_csv(iserverpath)
+    itopdownpd = pd.read_csv(itopdownpath)
     iprocesspd = pd.read_csv(iprocesspath)
+    iserverpd = pd.read_csv(iserverpath)
 
     # 对iserver进行时间处理
-    serverpdlists = changeTimeToFromPdlists([iserverpd], isremoveDuplicate=True)
+    serverlists = changeTimeToFromPdlists([iserverpd], isremoveDuplicate=True)
+    topdownlists = changeTimeToFromPdlists([itopdownpd], isremoveDuplicate=True)
     processpdlists = changeTimeToFromPdlists([iprocesspd])
     # 对数据进行差分处理
-    serverpdlists = differenceServer(serverpdlists, ["pgfree", "usr_cpu", "kernel_cpu"])
+    serverlists = differenceServer(serverlists, ["pgfree", "usr_cpu", "kernel_cpu"])
+    # topdownlists = differenceServer(topdownlists, ["pgfree", "usr_cpu", "kernel_cpu"])
     processpdlists = differenceProcess(processpdlists, ["usr_cpu", "kernel_cpu"])
+    return serverlists[0], topdownlists[0], processpdlists[0]
 
-    return serverpdlists[0], processpdlists[0]
-
-    # iprocesspd = mergeProceeDF(processpdlists[0])
-    # # 得到相同时间段
-    # # a,b = getsametimepd(serverpdlists[0], iprocesspd)
-    # pspd = pd.merge(left=serverpdlists[0], right=iprocesspd, left_on="time", right_on="time", how="left",
-    #                 suffixes=("", "_y"))
-    # pspd.fillna(-1, inplace=True)
-    # return pspd
-
-def smoothseries(cseries: pd.Series, windows=5)->pd.Series:
-    mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
-    meanmediansmooth = mediansmooth.rolling(window=windows, min_periods=1, center=True).mean()
-    return meanmediansmooth
-def mediansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
-    mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
-    return mediansmooth
-def meansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
-    meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).mean()
-    return meanmediansmooth
-
-def maxmoothseries(cseries: pd.Series)->pd.Series:
-    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).max()
-    return meanmediansmooth
-def minmoothseries(cseries: pd.Series)->pd.Series:
-    meanmediansmooth = cseries.rolling(window=5, min_periods=1, center=True).min()
-    return meanmediansmooth
-
-
-
-# 对内存的差值处理必须根据进程pid号进行处理
-# 保证内存的指标和pid号的指标长度是一样的
-def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
-    assert len(memseries) == len(pidseries)
-    df = pd.DataFrame(data={
-        "mem": memseries,
-        "pid": pidseries
-    })
-    # 直接写个for循环
-    reslists = []
-    winsize = 5
-    for ipid, idf in df.groupby("pid", sort=False):
-        other_mem_smooth = smoothseries(idf["mem"], windows=winsize)
-        other_mem_smooth_diff = other_mem_smooth.diff(1).fillna(0)
-        reslists.extend(other_mem_smooth_diff.tolist())
-
-    return pd.Series(data=reslists)
-
-# 传入的是进程和服务器数据的集合体
-def getServerCPUTIME(pspd: pd.DataFrame) -> pd.DataFrame:
-    pspd["server_cpu"] = pspd["usr_cpu"] + pspd["kernel_cpu"]
-    pspd["server_cpu_smooth"] = smoothseries(pspd["server_cpu"])
-    pspd["process_cpu"] = pspd["usr_cpu_y"] + pspd["kernel_cpu_y"]
-    pspd["process_cpu_smooth"] = smoothseries(pspd["process_cpu"])
-    pspd["s-pcpu"] = pspd["server_cpu"] - pspd["process_cpu"]
-    pspd["s-pcpu"] = smoothseries(pspd["s-pcpu"], windows=5)
-    pspd["s-cpu-smooth"] = pspd["server_cpu_smooth"] - pspd["process_cpu_smooth"]
-    pspd["s-cpu-smooth1"] = smoothseries(pspd["s-cpu-smooth"])
-
-    return pspd
-
-
-# 传入进去的process应该是相同时间的
-# 根据server总内存和process mempercent来得到数据
-def subtractionMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
-    mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss", "usr_cpu", "kernel_cpu"])
-    # 将两者合并
-    pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME,
-                    how="left", suffixes=("", "_y"))
-    pspd.fillna(0, inplace=True)  # 认为进程不在的时候其数据为0
-
-    servermem = pspd["mem_used"]
-    processmem = pspd["rss"]
-    othermem = servermem - processmem
-    pspd["s-p-mem"] = othermem
-    othermemdiff = diffmemoryseries(othermem, pspd["pid"]) / 1000000
-    pspd["s-p-mem-diff"] = othermemdiff
-
-    return pspd
 
 
 def gettitle(ipath: str):
@@ -174,20 +68,18 @@ def gettitle(ipath: str):
     return "{}/{}".format(B, C)
 
 
+# 查看processcpu时间进行补偿的数据
 if __name__ == "__main__":
     dirpathes = [
-        # huawei路径
-        R"D:\patent\wrf_grapes_all.zip\post\grapes_testg_multi_normal_2\centos16",
+        R"csvfiles/abnormals/allcpu10/centos11",
     ]
     for dirpath in dirpathes:
         title = gettitle(dirpath)
 
-        serverpd, processpd = getserverandprocesspds(dirpath)
-        serverpd = subtractionMemory(serverpd, processpd)
-        # CPU信息
-        serverpd = getServerCPUTIME(serverpd)
+        iserverpd, itopdownpd, iprocesspd = getServerTopdownandProcesspds(dirpath)
+        iserverpd, itopdownpd, iprocesspd = getsametimepdList([iserverpd, itopdownpd, iprocesspd])
 
-        # 画出来
-        processingpd(serverpd)
-        n_cols_plot(serverpd, serverpd.columns, title)
+        respd = pass
 
+        respd.set_index("time", inplace=True)
+        n_cols_plot(respd, respd.columns, title)

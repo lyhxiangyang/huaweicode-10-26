@@ -56,6 +56,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         debugpd["pgfree_mean"] = pgfree_mean#debugpd
         debugpd["pgfree_mean_fre"] = getSeriesFrequencyMean(iserverpd["pgfree"])
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
+        debugpd["pgfree_change"] = iserverpd[cname]
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
         # pgfree 需要减去平均值
         iserverpd[cname] = iserverpd[cname] - pgfree_mean
