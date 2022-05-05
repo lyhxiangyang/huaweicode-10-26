@@ -414,17 +414,11 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
         itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        debugpd["mflops"] = itopdownpd[cname]
-
         mflops_mean = getSeriesFrequencyMean(itopdownpd[cname])
-        debugpd["mflops_mean"] = getNormalTopdownMean(detectionJson, [itopdownpd], [cname], datanumber=10)[cname]
-        debugpd["mflops_mean_fre"] = getSeriesFrequencyMean(itopdownpd[cname])
-
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
         # 将较高的mflpos_change抹为0
         # mflops_change.apply(lambda x: if x > )
         itopdownpd["mflops_change"] = mflops_change
-        debugpd["mflops_change"] = mflops_change
         return mflops_change
 
     # 保证时间是一样的
