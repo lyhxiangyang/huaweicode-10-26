@@ -11,7 +11,7 @@ from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, smoothseries, meansm
     getSeriesFrequencyMean
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
 from hpc.l3l2utils.DataOperation import pushLabelToFirst, getRunHPCTimepdsFromProcess, getsametimepd, getsametimepdList
-from hpc.l3l2utils.DebugInfo import getMemoryBandwidth50Debuginfo
+from hpc.l3l2utils.DebugInfo import getMemoryBandwidth50Debuginfo, getCache90Debuginfo
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME, FAULT_FLAG, CPU_FEATURE, MODEL_TYPE, PROCESS_CPUNAME
 from hpc.l3l2utils.ParsingJson import getNormalTopdownMean, getNormalServerMean
 
@@ -607,6 +607,25 @@ def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, 
 
 # 对数据进行处理
 def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict):
+
+    def getMflopschange(itopdownpd: pd.DataFrame) -> pd.Series:
+        cname = "mflops"
+        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        # mflops_mean = getSeriesFrequencyMean(itopdownpd[cname])
+        mflops_mean = getNormalTopdownMean(detectJsonDict, [itopdownpd], [cname])[cname]
+        mflops_normal_iomax = inputDict["maxflopsinio"]
+        # 将小于iomax的mflops设置为平均值
+        itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        # 将较高的mflpos_change抹为0
+        # mflops_change.apply(lambda x: if x > )
+        itopdownpd["mflops_change"] = mflops_change
+        return mflops_change
+
+
     # 保证时间是一样的
     def getcpuchange(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.Series:
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["usr_cpu", "kernel_cpu"])
@@ -631,38 +650,28 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
         if inplace:
             itopdownpd = itopdownpd.copy()
         # 对itopdownpd中的mflops进行平滑处理
-        cname = "mflops"
-        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
-        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
-        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
-        mflops_mean = getNormalTopdownMean(detectJson, [itopdownpd], [cname], datanumber=10)[cname]
-        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
-        itopdownpd["mflops_change"] = mflops_change
-        mflops_change = itopdownpd["mflops_change"]
-
-        cpuchange = getcpuchange(iserverpd, iprocesspd)
-        change = smoothseries(cpuchange)
+        mflops_change = getMflopschange(itopdownpd)
+        # cpuchange = getcpuchange(iserverpd, iprocesspd)
+        change = smoothseries(mflops_change)
         # 对ddrc_rd进行滑动窗口处理
         rd_cname = "ddrc_rd"
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).mean()
-        # ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
-        # itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * change
+        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
+        itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * change
 
         # 对ddrc_rd进行滑动窗口处理
         wr_cname = "ddrc_wr"
         itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).mean()
-        # ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
-        # itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * change
+        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
+        itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * change
 
         # 对rd_wr_sum进行结合 减去平均值  阈值与6000比较
         rd_wr_cname = "ddrc_ddwr_sum"
         itopdownpd[rd_wr_cname] = itopdownpd[rd_cname] + itopdownpd[wr_cname]
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
         rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
-        if detectJsonDict["RequestData"]["type"] == "grapes":
-            rd_wr_sum_mean = itopdownpd[rd_wr_cname].iloc[15:17].mean()
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
         # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
         return itopdownpd
@@ -670,14 +679,13 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
     # 先把必要的提取
     modeltype = inputDict["cachegrab_modeltype"]
     modelfilepath =  inputDict["cachegrab_modelpath"]
-
-
     ttopdownpd = compensateRW(alltopdownpds,allserverpds, allprocesspds, detectJsonDict)
     if inputDict["isExistFaultFlag"]:
         ttopdownpd[FAULT_FLAG] = alltopdownpds[FAULT_FLAG]
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cacheGrab")
-        savepdfile(ttopdownpd, spath=tpath, filename="topdown.csv")
+        tdebug = getCache90Debuginfo(serverpd=allserverpds, processpd=allprocesspds, topdownpd=alltopdownpds, inputDict=inputDict, detectionJson=detectJsonDict)
+        savepdfile(tdebug, spath=tpath, filename="debug90.csv")
 
     rd_wr_sumList = select_and_pred(ttopdownpd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
 

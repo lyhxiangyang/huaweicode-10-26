@@ -39,12 +39,13 @@
     "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
     "topdown_accumulate_feature": [],
 
-    "memleakpermin": 700,
+    "memleakpermin": 700, # 内存泄露 每分钟泄漏的分钟数
     "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
 
     "normalpath": null,
 
-    "maxflopsinio": 1000,
-    "pgfree_thread": 2000000
+    # 理论上给训练数据，这个值是可以自动设置的
+    "maxflopsinio": 1000, # 设置这个参数，可以将低于这个值的mflops区域不进行补偿操作
+    "pgfree_thread": 2000000 # pgfree的阈值，高于平均值的大小，wrf 可以设置为2000000 grapes设置4000000
 }
