@@ -682,26 +682,25 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
     ttopdownpd = compensateRW(alltopdownpds,allserverpds, allprocesspds, detectJsonDict)
     if inputDict["isExistFaultFlag"]:
         ttopdownpd[FAULT_FLAG] = alltopdownpds[FAULT_FLAG]
+
+    rd_wr_sumList = select_and_pred(ttopdownpd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
+    bandwidthResult = bandwidthResult.set_index("time")
+    cacheResult = pd.Series(index=ttopdownpd[TIME_COLUMN_NAME], data=rd_wr_sumList)
+
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cacheGrab")
         tdebug = getCache90Debuginfo(serverpd=allserverpds, processpd=allprocesspds, topdownpd=alltopdownpds, inputDict=inputDict, detectionJson=detectJsonDict)
         savepdfile(tdebug, spath=tpath, filename="debug90.csv")
-
-    rd_wr_sumList = select_and_pred(ttopdownpd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-
-    bandwidthResult = bandwidthResult.set_index("time")
-    cacheResult = pd.Series(index=ttopdownpd[TIME_COLUMN_NAME], data=rd_wr_sumList)
-
     resList = []
     for itime, ivalue in cacheResult.items():
-        if itime not in bandwidthResult:
+        if itime not in bandwidthResult.index:
             resList.append(0)
             continue
         if ivalue == 0:
             resList.append(0)
             continue
         # 那么现在预测不为0，肯定是有异常与50进行区别
-        if bandwidthResult[itime] == 50:
+        if bandwidthResult["preFlag"][itime] == 50:
             resList.append(0)
             continue
         resList.append(90)

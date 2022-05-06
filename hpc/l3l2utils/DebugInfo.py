@@ -205,7 +205,7 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
         return itopdownpd
     # ==========================
-    compensateRW(serverpd, topdownpd, processpd, detectionJson)
+    compensateRW(topdownpd, serverpd, processpd, detectionJson)
     debugpd["time"]=serverpd["time"]
     if inputDict["isExistFaultFlag"]:
         debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]

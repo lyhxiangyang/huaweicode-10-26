@@ -1,0 +1,58 @@
+{
+    # 需要检测的输入文件路径
+    "predictdirjsonpath": "DATA/alljson.json",
+    # 是否生成中间结果，如果生成，则是存储中间结果文件的路径，便于调试，否则为null
+    "spath": null,
+    "processcpu_modelpath":"hpc/models/l3/process_cpu_model",
+    "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
+    "serverbandwidth_modelpath":"hpc/models/l3/memory_bandwidth_model",
+    "cachegrab_modelpath":"hpc/models/l3/cachegrab_model",
+    "power_machine_modelpath":"hpc/models/l2/server_power_capping",
+    "power_cabinet_modelpath":"hpc/models/l2/cabinet_power_capping",
+    "temperature_modelpath":"hpc/models/l2/over_temp",
+    "cpudown_modelpath": "hpc/models/l2/cpudown",
+    "network_pfcpath":"hpc/models/l2/network_pfc",
+    "network_tx_hangpath":"hpc/models/l2/network_tx_hang",
+    "processcpu_modeltype":0,
+    "cachegrab_modeltype":0,
+    "servermemory_modeltype":0,
+    "serverbandwidth_modeltype":0,
+    "power_machine_modeltype":0,
+    "power_cabinet_modeltype":0,
+    "tempertature_modeltype":0,
+    "cpudown_modeltype": 0,
+    "network_pfctype":0,
+    "network_txhang_type":0,
+    "meanNormalDataNumber": 10,
+    # 将结果是否保存，结果保存的路径 默认为null
+    "resultsavepath": null,
+    # 保存的结果名字
+    "outputJsonFilename": "output.json",
+    # 要测试的文件中是否包含标签，如果不包含，一定设置为false，那么将不会输出任何准确性相关的信息。
+    "isExistFaultFlag": true,
+    # 输入的文件中时间的格式是字符串还是时间戳，true代表是字符串
+    "isTimeisStr": true,
+    "server_feature": ["mem_used", "pgfree", "freq", "usr_cpu", "kernel_cpu"],
+    "server_accumulate_feature": ["pgfree", "usr_cpu", "kernel_cpu"],
+    "process_feature":["usr_cpu", "kernel_cpu", "rss", "read_chars", "read_bytes"],
+    "process_accumulate_feature":["usr_cpu", "kernel_cpu", "read_chars", "read_bytes"],
+    "l2_feature": ["cpu_power", "power", "cabinet_power", "fan1_speed", "fan2_speed", "fan3_speed", "fan4_speed", "cpu1_core_rem", "cpu2_core_rem", "cpu3_core_rem", "cpu4_core_rem", "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp", "pch_temp"],
+    "l2_accumulate_feature": [],
+    "network_feature":["tx_packets_phy", "rx_packets_phy"],
+    "network_accumulate_feature": ["tx_packets_phy", "rx_packets_phy"],
+    "ping_feature": ["avg_lat"],
+    "ping_accumulate_feature": [],
+    "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
+    "topdown_accumulate_feature": [],
+    # 设置我们要检测的内存泄露的强度，默认是每分钟700M以上的泄露是可以检测出来的
+    "memleakpermin": 700, # 内存泄露 每分钟泄漏的分钟数
+    # 该参数废弃
+    "judgeCPUthread": 30,
+    # 主要是针对由于IO阶段，CPU处于读写阶段，导致CPU时间降低而被预测为CPU异常，对CPU的读写设置一个参数大于该值认为CPU读写阶段
+    "cpuReadCharsMax": 10000,
+    # 设置正常数据的路径，目前还没有加入程序中，待补充，主要是获得指标的正常值，默认是从检测文件中自己获得。
+    "normalpath": null,
+    # 理论上从训练数据获取，可以自动化实现，待补充，目前是在效果不好的时候，从数据中手动设置
+    "maxflopsinio": 1000, # 设置这个参数，可以将低于这个值的mflops区域不进行补偿操作，我们需要补偿的是内存带宽
+    "pgfree_thread": 2000000 # pgfree的阈值，高于平均值的大小，wrf 可以设置为2000000 grapes设置4000000
+}
