@@ -568,7 +568,7 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
     # ===================================== 将信息进行保存
     if spath is not None:
         tpd = pd.DataFrame(data=analyseDict).T
-        savepdfile(tpd, spath, "统计数据.csv", index=True)
+        savepdfile(tpd, spath, "每个异常统计数据.csv", index=True)
         # 写入准确率信息
         wrfteinfo = [
             "1. 包含正常准确率: {:.2%}\n".format(accuracy_normal),

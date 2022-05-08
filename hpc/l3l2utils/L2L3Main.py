@@ -16,7 +16,7 @@ from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer,
 from hpc.l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, getProcessPdFromJsonDict, \
     getL2PdFromJsonDict, getNetworkPdFromJsonDict, getNormalServerMean, getNormalProcessMean, getNormalL2Mean, \
     getNormalNetworkMean, saveDictToJson, getPingPdFromJsonDict, getTopdownPdFromJsonDict, getNormalTopdownMean, \
-    getMeanFromNumberDataFrom
+    getMeanFromNumberDataFrom, getNormalDataMean
 from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, \
     getTimePeriodInfo, \
     analysePredictResult
@@ -264,16 +264,18 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     add_cpu_column(predictserverpds)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))
-    normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, ["freq"],
-                                                 datanumber=inputDict["meanNormalDataNumber"])
-    # normalprocess_meanvalue = getNormalProcessMean(detectionJson, predictprocesspds, inputDict["process_feature"],
-    #                                                datanumber=inputDict["meanNormalDataNumber"])
-    normall2_meanvalue = getNormalL2Mean(detectionJson, predictl2pds, inputDict["l2_feature"],
-                                         datanumber=inputDict["meanNormalDataNumber"])
-    normalnetwork_meanvalue = getNormalNetworkMean(detectionJson, predictnetworkpds, inputDict["network_feature"],
-                                                   datanumber=inputDict["meanNormalDataNumber"])
-    normaltopdown_meanvalue = getNormalTopdownMean(detectionJson, predicttopdwnpds, inputDict["topdown_feature"],
-                                                   datanumber=inputDict["meanNormalDataNumber"])
+    normalserver_meanvalue = getNormalDataMean(inputDict, predictserverpds, ["freq"], "server")
+    normall2_meanvalue = getNormalDataMean(inputDict, predictl2pds, inputDict["l2_feature"], "compute")
+    normalnetwork_meanvalue = getNormalDataMean(inputDict,predictnetworkpds, inputDict["network_feature"], "nic")
+    normaltopdown_meanvalue = getNormalDataMean(inputDict, predicttopdwnpds, inputDict["topdown_feature"], "topdown")
+
+
+
+    # normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, ["freq"], datanumber=inputDict["meanNormalDataNumber"])
+    ## normalprocess_meanvalue = getNormalProcessMean(detectionJson, predictprocesspds, inputDict["process_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    # normall2_meanvalue = getNormalL2Mean(detectionJson, predictl2pds, inputDict["l2_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    # normalnetwork_meanvalue = getNormalNetworkMean(detectionJson, predictnetworkpds, inputDict["network_feature"], datanumber=inputDict["meanNormalDataNumber"])
+    # normaltopdown_meanvalue = getNormalTopdownMean(detectionJson, predicttopdwnpds, inputDict["topdown_feature"], datanumber=inputDict["meanNormalDataNumber"])
     # ---- 不对ping求平均值
 
     # 将数据进行保存
@@ -537,12 +539,16 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
     l2l3predetectresultpd = detectionL2L3Data(inputDict, detectionJson, allserverpds, allprocesspds, alll2pds, allnetworkpds,
                                               allpingpds, alltopdownpds)
     tpath = None
-    if inputDict["spath"] is not None:
-        tpath = os.path.join(inputDict["spath"], "5.准确率结果分析")
-    if inputDict["isExistFaultFlag"]:
+    if inputDict["spath"] is not None and inputDict["isExistFaultFlag"] is not None:
         # 对预测结果进行分析
         print("对预测结果进行准确率及其他分析".center(40, "*"))
+        tpath = os.path.join(inputDict["spath"], "5.准确率结果分析")
         analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
+    if inputDict["debugpath"] is not None and inputDict["isExistFaultFlag"] is not None:
+        print("对预测结果进行准确率及其他分析".center(40, "*"))
+        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result")
+        analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
+
     print("对预测结果进行时间段分析，输出时间文件".center(40, "*"))
     outputDict = outputJsonFromDetection(l2l3predetectresultpd)
 
@@ -551,6 +557,11 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
         tpath = os.path.join(inputDict["spath"], "6.L2L3总的预测结果")
         savepdfile(l2l3predetectresultpd, tpath, "总预测结果.csv")
         saveDictToJson(outputDict, tpath, "output.json")
+    if inputDict["debugpath"] is not None:
+        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result")
+        savepdfile(l2l3predetectresultpd, tpath, "eachTimePointTestResults.csv")
+        # saveDictToJson(outputDict, tpath, "output.json")
+
 
     # ============================生成outputjson
     saveoutputJsonFilename(inputDict, outputDict)
