@@ -51,7 +51,7 @@ usefulFeatures={
                "cpu3_mem_temp", "cpu4_mem_temp", "pch_temp"],
     "compute_diff": [],
     "network": ["tx_packets_phy", "rx_packets_phy"],
-    "network_dff": ["tx_packets_phy", "rx_packets_phy"],
+    "network_diff": ["tx_packets_phy", "rx_packets_phy"],
     "ping": ["avg_lat"],
     "ping_diff":[],
     "topdown": ["ddrc_rd", "ddrc_wr", "mflops"],
