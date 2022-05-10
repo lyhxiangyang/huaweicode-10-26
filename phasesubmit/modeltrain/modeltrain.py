@@ -181,7 +181,7 @@ def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
         debugpd["normal_mflops_mean"] = normalmflopsmean
         debugpd["abnormal_mflops_mean"] = abnormaltopdowndfmean
         debugpd["abnormal_mflops_mean_5090"] = abnormaltopdowndf5090mean
-        debugpd.fillna(0, inplace=True)
+        debugpd.fillna(-1, inplace=True)
         tpath = os.path.join(modelconfigJson["debugpath"], "mflopsdebug")
         savepdfile(debugpd, tpath, "mflopsdebug.csv")
 
