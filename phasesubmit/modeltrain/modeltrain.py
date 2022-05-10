@@ -195,6 +195,6 @@ if __name__ == "__main__":
     abnormalDataDict = getAllDataFramesFromDectionJson(abnormalInputDict)
     getMemLeakPermin(normalDataDict, abnormalDataDict, configJsonDict)
     getMflopsChange(normalDataDict, abnormalDataDict, configJsonDict)
-
+#
     endTime1 = time.perf_counter()
     print('Running time: %s Seconds' % (endTime1 - startTime))
