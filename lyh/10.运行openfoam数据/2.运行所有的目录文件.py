@@ -31,7 +31,7 @@ def getDirs(dirpaths) -> List[str]:
 
 if __name__ == "__main__":
     startTime = time.perf_counter()
-    # configfilepath = R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/2.检测每个测试文件中的数据/2.config.json"
+    # modelconfigfilepath = R"L2层和L3层结合预测数据/4. 使用输入输出接口对测试数据进行检测/2.检测每个测试文件中的数据/2.config.json"
     configfilepath = os.path.join(sys.path[0], "config.json")
     configJsonDict = readJsonToDict(*(os.path.split(configfilepath)))
     # 对config文件中的数据进行预处理

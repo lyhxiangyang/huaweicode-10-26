@@ -39,3 +39,22 @@ errorFeatureDict = {
     50: ["server_pgfree"],
     60: ["server_used"],
 }
+
+# 定义一些数据的差分数据
+usefulFeatures={
+    "server": ["mem_used", "pgfree", "freq", "usr_cpu", "kernel_cpu"],
+    "server_diff":  ["pgfree", "usr_cpu", "kernel_cpu"],
+    "process": ["usr_cpu", "kernel_cpu", "rss", "read_chars", "read_bytes"],
+    "process_diff": ["usr_cpu", "kernel_cpu", "read_chars", "read_bytes"],
+    "compute": ["cpu_power", "power", "cabinet_power", "fan1_speed", "fan2_speed", "fan3_speed", "fan4_speed",
+               "cpu1_core_rem", "cpu2_core_rem", "cpu3_core_rem", "cpu4_core_rem", "cpu1_mem_temp", "cpu2_mem_temp",
+               "cpu3_mem_temp", "cpu4_mem_temp", "pch_temp"],
+    "compute_diff": [],
+    "network": ["tx_packets_phy", "rx_packets_phy"],
+    "network_dff": ["tx_packets_phy", "rx_packets_phy"],
+    "ping": ["avg_lat"],
+    "ping_diff":[],
+    "topdown": ["ddrc_rd", "ddrc_wr", "mflops"],
+    "topdown_diff": []
+
+}

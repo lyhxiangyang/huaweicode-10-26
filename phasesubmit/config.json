@@ -51,7 +51,7 @@
     "ddrc_ddwr_sum_max": 6000,
     "normalDataMean": {
         "server": {
-
+            "pgfree": 2000000
         },
         "compute": {
 
@@ -66,7 +66,9 @@
 
         },
         "topdown": {
-
+            "mflops": 27000,
+            "ddrc_wr": 20000,
+            "ddrc_rd": 58000
         }
     }
 }

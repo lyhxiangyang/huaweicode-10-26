@@ -79,7 +79,6 @@ def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -
             itopdownpd["mflops_change"] = mflops_change
         mflops_change = itopdownpd["mflops_change"]
 
-
         # 对ddrc_rd进行滑动窗口处理
         rd_cname = "ddrc_rd"
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
@@ -108,11 +107,14 @@ def processTopdownList(detectJson: Dict, predicttopdwnpds: List[pd.DataFrame]) -
         rlistpds.append(tpd)
     return rlistpds
 
+
 """
 根据mflops的数值，将较低强度的mflops的数值删除点
 原始数据不会修改
 并且将 连续删除的数据再多删除2个点
 """
+
+
 def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> List[pd.DataFrame]:
     # 传进来的为5个，如果不为5个，那么默认不舍弃 以中间为标准
     def addOtherPoint(x: pd.Series):
@@ -129,6 +131,7 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
         isflags = mflopsdelete.apply(lambda x: x > 2000)
         isflags = isflags.rolling(window=5, min_periods=1, center=True).apply(lambda x: addOtherPoint(x)).astype("bool")
         return itopdownpd[isflags].reset_index(drop=True, inplace=False)
+
     respds = []
     for ipd in predicttopdownpds:
         len1 = len(ipd)
@@ -146,7 +149,8 @@ def removeUselessDataFromTopdownList(predicttopdownpds: List[pd.DataFrame]) -> L
 """
 
 
-def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame], predictprocesspds ,detectionJson: Dict) -> List[
+def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: List[pd.DataFrame], predictprocesspds,
+                      detectionJson: Dict) -> List[
     pd.DataFrame]:
     alltopdownspd = mergeDataFrames(predicttopdownpds)
 
@@ -159,33 +163,35 @@ def processServerList(predictserverpds: List[pd.DataFrame], predicttopdownpds: L
         serverchooseindex = servertimepd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         topdownchooseindex = alltopdownspd[TIME_COLUMN_NAME].apply(lambda x: x in sametimes)
         # return datapd[chooseindex][featuresnames].mean()
-        return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(drop=True)
+        return servertimepd[serverchooseindex].reset_index(drop=True), alltopdownspd[topdownchooseindex].reset_index(
+            drop=True)
 
-    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame,predictprocesspds: List[pd.DataFrame], itopdowndpd: pd.DataFrame, detectionJson: Dict) -> pd.DataFrame:
+    def dealServerpdAndTopdownpd(iserverpd: pd.DataFrame, predictprocesspds: List[pd.DataFrame],
+                                 itopdowndpd: pd.DataFrame, detectionJson: Dict) -> pd.DataFrame:
         assert len(iserverpd) == len(itopdowndpd)
         # 对itopdownpd中的mflops进行平滑处理
         cname = "mflops"
-        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
+        itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdowndpd[cname] = itopdowndpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         mflops_mean = getNormalTopdownMean(detectionJson, [itopdowndpd], [cname], datanumber=10)[cname]
         mflops_change = itopdowndpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
 
         cname = "pgfree"
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 多去一次
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], predictprocesspds, [cname], datanumber=10)[cname]
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * mflops_change
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True,
+                                                    min_periods=1).median()  # 对pgfree得到的结果重新去掉最大值最小值
         # pgfree 需要减去平均值
         iserverpd[cname] = iserverpd[cname] - pgfree_mean
         return iserverpd
 
-
     resserverpds = []
     for iserverpd in predictserverpds:
         spd, tpd = getsametimepd(iserverpd, alltopdownspd)
-        ispd = dealServerpdAndTopdownpd(spd,predictprocesspds,tpd, detectionJson=detectionJson)
+        ispd = dealServerpdAndTopdownpd(spd, predictprocesspds, tpd, detectionJson=detectionJson)
         # 中位数处理
         ispd["mem_used"] = ispd["mem_used"].rolling(window=7, min_periods=7, center=True).median()
         ispd.dropna(axis=0, how="any", inplace=True)
@@ -257,7 +263,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     # ============================================================ 对数据进行修改
     # 1. 对inputDict中的特征进行修改  保证下面对其进行标准化
     inputDict["process_feature"] = ["cpu"]  # cpu使用的特征值变为cpu
-    inputDict["topdown_feature"] = [] # 原因是不需要对任何指标进行特征提取额
+    inputDict["topdown_feature"] = []  # 原因是不需要对任何指标进行特征提取额
 
     # 3. 对process数据进行处理 对server数据的cpu进行处理
     add_cpu_column(predictprocesspds)
@@ -266,10 +272,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     print("对正常数据的各个指标求平均值".center(40, "*"))
     normalserver_meanvalue = getNormalDataMean(inputDict, predictserverpds, ["freq"], "server")
     normall2_meanvalue = getNormalDataMean(inputDict, predictl2pds, inputDict["l2_feature"], "compute")
-    normalnetwork_meanvalue = getNormalDataMean(inputDict,predictnetworkpds, inputDict["network_feature"], "nic")
+    normalnetwork_meanvalue = getNormalDataMean(inputDict, predictnetworkpds, inputDict["network_feature"], "nic")
     normaltopdown_meanvalue = getNormalDataMean(inputDict, predicttopdwnpds, inputDict["topdown_feature"], "topdown")
-
-
 
     # normalserver_meanvalue = getNormalServerMean(detectionJson, predictserverpds, ["freq"], datanumber=inputDict["meanNormalDataNumber"])
     ## normalprocess_meanvalue = getNormalProcessMean(detectionJson, predictprocesspds, inputDict["process_feature"], datanumber=inputDict["meanNormalDataNumber"])
@@ -282,7 +286,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "1.正常数据的平均值")
         savepdfile(normalserver_meanvalue, tpath, "meanvalue_server.csv", index=True)
-    #     savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv", index=True)
+        #     savepdfile(normalprocess_meanvalue, tpath, "meanvalue_process.csv", index=True)
         savepdfile(normall2_meanvalue, tpath, "meanvalue_l2.csv", index=True)
         savepdfile(normalnetwork_meanvalue, tpath, "meanvalue_network.csv", index=True)
         savepdfile(normaltopdown_meanvalue, tpath, "meanvalue_topdown.csv", index=True)
@@ -293,7 +297,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     #
     #
     # standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=standardserverfeatures, meanValue=normalserver_meanvalue, standardValue=100)
-    standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=["freq"], meanValue=normalserver_meanvalue, standardValue=100)
+    standard_server_pds = standardLists(pds=predictserverpds, standardFeatures=["freq"],
+                                        meanValue=normalserver_meanvalue, standardValue=100)
     # standard_process_pds = standardLists(pds=predictprocesspds, standardFeatures=inputDict["process_feature"],
     #                                      meanValue=normalprocess_meanvalue, standardValue=60)
     standard_l2_pds = standardLists(pds=predictl2pds, standardFeatures=inputDict["l2_feature"],
@@ -308,12 +313,11 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "2.标准化数据存储")
         saveDFListToFiles(os.path.join(tpath, "server_standard"), standard_server_pds)
-    #     saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
+        #     saveDFListToFiles(os.path.join(tpath, "process_standard"), standard_process_pds)
         saveDFListToFiles(os.path.join(tpath, "l2_standard"), standard_l2_pds)
         saveDFListToFiles(os.path.join(tpath, "network_standard"), standard_network_pds)
         saveDFListToFiles(os.path.join(tpath, "ping_standard"), standard_ping_pds)
         # saveDFListToFiles(os.path.join(tpath, "topdown_standard"), standard_topdown_pds)
-
 
     print("process、server、l2、network特征处理".center(40, "*"))
     # extraction_process_pds = extractionProcessPdLists(standard_process_pds,
@@ -323,17 +327,18 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     #                                                 windowsSize=3)
     extraction_server_pds = extractionServerPdLists(standard_server_pds, extractFeatures=["freq"], windowsSize=3)
     extraction_l2_pds = extractionServerPdLists(standard_l2_pds, extractFeatures=inputDict["l2_feature"], windowsSize=3)
-    extraction_network_pds = extractionServerPdLists(standard_network_pds, extractFeatures=inputDict["network_feature"], windowsSize=3)
-    extraction_topdown_pds = extractionServerPdLists(standard_topdown_pds, extractFeatures=inputDict["topdown_feature"], windowsSize=3)
+    extraction_network_pds = extractionServerPdLists(standard_network_pds, extractFeatures=inputDict["network_feature"],
+                                                     windowsSize=3)
+    extraction_topdown_pds = extractionServerPdLists(standard_topdown_pds, extractFeatures=inputDict["topdown_feature"],
+                                                     windowsSize=3)
     # # ----- 不对ping数据进行特征处理
     extraction_ping_pds = standard_ping_pds
-
 
     # # 将数据进行保存
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "3.特征提取")
         saveDFListToFiles(os.path.join(tpath, "server_extraction"), extraction_server_pds)
-    #     saveDFListToFiles(os.path.join(tpath, "process_extraction"), extraction_process_pds)
+        #     saveDFListToFiles(os.path.join(tpath, "process_extraction"), extraction_process_pds)
         saveDFListToFiles(os.path.join(tpath, "l2_extraction"), extraction_l2_pds)
         saveDFListToFiles(os.path.join(tpath, "network_extraction"), extraction_network_pds)
         saveDFListToFiles(os.path.join(tpath, "topdown_extraction"), extraction_topdown_pds)
@@ -351,7 +356,8 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 返回一个L2L3层合并之后的数据
 """
 
-def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
+
+def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
                       alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame,
                       alltopdownpds: pd.DataFrame) -> pd.DataFrame:
     # 需要用到的特征值
@@ -378,10 +384,13 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     #                                              modeltype=inputDict["processcpu_modeltype"])
 
     print("对L3层内存泄露进行检测".center(40, "*"))
-    l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allprocesspds, inputDict=inputDict)
+    l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allprocesspds,
+                                              inputDict=inputDict)
 
     print("对L3层内存带宽进行检测".center(40, "*"))
-    l3BandWidthResult = detectL3BandWidthAbnormal1(allserverpds=allserverpds, alltopdownpds=alltopdownpds, allprocesspds=allprocesspds,inputDict=inputDict, detectionJson=detectJsonDict)
+    l3BandWidthResult = detectL3BandWidthAbnormal1(allserverpds=allserverpds, alltopdownpds=alltopdownpds,
+                                                   allprocesspds=allprocesspds, inputDict=inputDict,
+                                                   detectionJson=detectJsonDict)
 
     # print("对cache抢占进行检测".center(40, "*"))
     # l3CacheGrabResult = pd.DataFrame()
@@ -390,8 +399,9 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     #     l3CacheGrabResult[FAULT_FLAG] = l3_server_topdownpds[FAULT_FLAG]
     # l3CacheGrabResult["preFlag"] = predictCacheGrab(l3_server_topdownpds, l3BandWidthResult, modelfilepath=inputDict["cachegrab_modelpath"], modeltype=inputDict["cachegrab_modeltype"])
     print("对cache抢占进行检测".center(40, "*"))
-    l3CacheGrabResult = predictCacheGrab1(alltopdownpds=alltopdownpds, allserverpds=allserverpds, allprocesspds=allprocesspds, bandwidthResult=l3BandWidthResult, inputDict=inputDict, detectJsonDict=detectJsonDict)
-
+    l3CacheGrabResult = predictCacheGrab1(alltopdownpds=alltopdownpds, allserverpds=allserverpds,
+                                          allprocesspds=allprocesspds, bandwidthResult=l3BandWidthResult,
+                                          inputDict=inputDict, detectJsonDict=detectJsonDict)
 
     print("对L2层数据进行预测".center(40, "*"))
     l2_serverpds = mergeinnerTwoDataFrame(lpd=alll2pds, rpd=allserverpds)  # 根据时间得到l2的合并结果
@@ -417,8 +427,10 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     if inputDict["isExistFaultFlag"]:
         l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     # l2cabinetpowerresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_cabinet_modeltype"]], saved_model_path=inputDict["power_cabinet_modelpath"]))
-    l2cabinetpowerresult["preFlag"] = predictCabinet_PowerCapping(model_path=inputDict["power_cabinet_modelpath"], model_type=MODEL_TYPE[inputDict["power_cabinet_modeltype"]], l2_serverdata=l2_serverpds)
-
+    l2cabinetpowerresult["preFlag"] = predictCabinet_PowerCapping(model_path=inputDict["power_cabinet_modelpath"],
+                                                                  model_type=MODEL_TYPE[
+                                                                      inputDict["power_cabinet_modeltype"]],
+                                                                  l2_serverdata=l2_serverpds)
 
     print("3. 对L2机器封顶进行预测".center(40, "#"))
     l2machinepowerresult = pd.DataFrame()
@@ -426,8 +438,11 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     if inputDict["isExistFaultFlag"]:
         l2machinepowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     # l2machinepowerresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_machine_modeltype"]], saved_model_path=inputDict["power_machine_modelpath"]))
-    l2machinepowerresult["preFlag"] = predictServer_PowerCapping(model_path=inputDict["power_machine_modelpath"], model_type=MODEL_TYPE[inputDict["power_machine_modeltype"]], l2_serverdata=l2_serverpds, resultPds=[l2temperamentresult, l2cabinetpowerresult])
-
+    l2machinepowerresult["preFlag"] = predictServer_PowerCapping(model_path=inputDict["power_machine_modelpath"],
+                                                                 model_type=MODEL_TYPE[
+                                                                     inputDict["power_machine_modeltype"]],
+                                                                 l2_serverdata=l2_serverpds,
+                                                                 resultPds=[l2temperamentresult, l2cabinetpowerresult])
 
     print("4. 对CPU主频下降进行预测".center(40, "#"))
     l2cpudownresult = pd.DataFrame()
@@ -435,8 +450,10 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     if inputDict["isExistFaultFlag"]:
         l2cpudownresult[FAULT_FLAG] = l2_serverpds[TIME_COLUMN_NAME]
     # l2cpudownresult["preFlag"] = predictL2_CPUDown(l2_serverdata=l2_serverpds, freqDownResultPds=[l2machinepowerresult, l2cabinetpowerresult, l2temperamentresult])
-    l2cpudownresult["preFlag"] = predictL2_CPUDown(model_path=inputDict["cpudown_modelpath"], model_type=MODEL_TYPE[inputDict["cpudown_modeltype"]], l2_serverdata=l2_serverpds, resultPds=[l2temperamentresult, l2cabinetpowerresult])
-
+    l2cpudownresult["preFlag"] = predictL2_CPUDown(model_path=inputDict["cpudown_modelpath"],
+                                                   model_type=MODEL_TYPE[inputDict["cpudown_modeltype"]],
+                                                   l2_serverdata=l2_serverpds,
+                                                   resultPds=[l2temperamentresult, l2cabinetpowerresult])
 
     print("对网络异常1进行预测 TX_Hang".center(40, "#"))
     # REPORT_TIME = "time"
@@ -461,8 +478,10 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
 
     print("将L2 L3 Network数据合并分析".center(40, "*"))
     allresultspd = mergeouterPredictResult(
-        [defaultreslt, l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult,l2machinepowerresult, l2cabinetpowerresult,
-         l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult], isExistFlag=inputDict["isExistFaultFlag"])
+        [defaultreslt, l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult, l2machinepowerresult,
+         l2cabinetpowerresult,
+         l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult],
+        isExistFlag=inputDict["isExistFaultFlag"])
 
     print("对结果进行优化".center(40, "*"))
     if inputDict["isExistFaultFlag"]:
@@ -472,7 +491,9 @@ def detectionL2L3Data(inputDict: Dict,detectJsonDict: Dict, allserverpds: pd.Dat
     if inputDict["isExistFaultFlag"]:
         print("增加此时间点是否预测正确".center(40, "*"))
         if inputDict["isExistFaultFlag"]:
-            isrightLists = [1 if allresultspd[FAULT_FLAG][i] != 0 and (allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or allresultspd[FAULT_FLAG][i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in range(0, len(allresultspd))]
+            isrightLists = [1 if allresultspd[FAULT_FLAG][i] != 0 and (
+                        allresultspd[FAULT_FLAG][i] in allresultspd["preFlag"][i] or allresultspd[FAULT_FLAG][
+                    i] // 10 * 10 in allresultspd["preFlag"][i]) else 0 for i in range(0, len(allresultspd))]
             allresultspd["isright"] = isrightLists
 
     print("增加概率".center(40, "*"))
@@ -530,7 +551,8 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
     alltopdownpds = mergeDataFrames(extractionpds[6])
 
     print("对L3 L2层的数据进行预测".center(40, "*"))
-    l2l3predetectresultpd = detectionL2L3Data(inputDict, detectionJson, allserverpds, allprocesspds, alll2pds, allnetworkpds,
+    l2l3predetectresultpd = detectionL2L3Data(inputDict, detectionJson, allserverpds, allprocesspds, alll2pds,
+                                              allnetworkpds,
                                               allpingpds, alltopdownpds)
     tpath = None
     if inputDict["spath"] is not None and inputDict["isExistFaultFlag"] is not None:
@@ -556,7 +578,6 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
         savepdfile(l2l3predetectresultpd, tpath, "eachTimePointTestResults.csv")
         # saveDictToJson(outputDict, tpath, "output.json")
 
-
     # ============================生成outputjson
     saveoutputJsonFilename(inputDict, outputDict)
 
@@ -566,13 +587,16 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
 """
 对输入的配置文件进行修改
 """
-def getDetectionJsonFrominputconfig(inputDict: Dict, requestData = None, isChangeInfo = True) -> Dict:
+
+
+def getDetectionJsonFrominputconfig(inputDict: Dict, requestData=None, isChangeInfo=True) -> Dict:
     if requestData is None:
         requestData = readJsonToDict(*(os.path.split(inputDict["predictdirjsonpath"])))
     # 修改内存带宽中的模型路径
     if not isChangeInfo:
         return requestData
     return requestData
+
 
 def removeListValues(rlist: List, rvalue: List) -> List:
     resList = []
@@ -581,5 +605,3 @@ def removeListValues(rlist: List, rvalue: List) -> List:
             continue
         resList.append(i)
     return resList
-
-

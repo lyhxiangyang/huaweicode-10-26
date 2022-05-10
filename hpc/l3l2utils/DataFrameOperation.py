@@ -30,14 +30,14 @@ def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
 """
 
 
-def mergeDataFrames(lpds: List[pd.DataFrame]):
+def mergeDataFrames(lpds: List[pd.DataFrame], nullpd=pd.DataFrame()):
     """
     函数功能： 判断多个DataFrame是否含有相同的列表
     函数参数：预期是一个含有DataFrame的列表
     函数参数：True 含有相同的列名     False 不含有相同的列名
     """
     if len(lpds) == 0:
-        return pd.DataFrame()
+        return nullpd
     if len(lpds) == 1:
         return lpds[0]
 
