@@ -166,7 +166,8 @@ def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
     abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
     abnormaltopdowndfmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
-    abnormaltopdowndf5090mean = abstractAbnormalData(abnormaltopdowndf, [50,53,54,55,90,93,94,95])
+    abnormaltopdowndf5090 = min(abstractAbnormalData(abnormaltopdowndf, [50,55]), abstractAbnormalData(abnormaltopdowndf, [90,95]))
+    abnormaltopdowndf5090mean = getSeriesFrequencyMean(abnormaltopdowndf5090[cname])
 
     if modelconfigJson["debugpath"] is not None:
         # 保存为debugpd
@@ -180,6 +181,7 @@ def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
         debugpd["normal_mflops_mean"] = normalmflopsmean
         debugpd["abnormal_mflops_mean"] = abnormaltopdowndfmean
         debugpd["abnormal_mflops_mean_5090"] = abnormaltopdowndf5090mean
+        debugpd.fillna(0, inplace=True)
         tpath = os.path.join(modelconfigJson["debugpath"], "mflopsdebug")
         savepdfile(debugpd, tpath, "mflopsdebug.csv")
 
