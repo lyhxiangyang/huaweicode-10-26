@@ -166,8 +166,9 @@ def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
     abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
     abnormaltopdowndfmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
-    abnormaltopdowndf5090 = min(abstractAbnormalData(abnormaltopdowndf, [50,55]), abstractAbnormalData(abnormaltopdowndf, [90,95]))
-    abnormaltopdowndf5090mean = getSeriesFrequencyMean(abnormaltopdowndf5090[cname])
+    abnormaltopdowndf50 = abstractAbnormalData(abnormaltopdowndf, [50,55])
+    abnormaltopdowndf90 = abstractAbnormalData(abnormaltopdowndf, [90,95])
+    abnormaltopdowndf5090mean = min(getSeriesFrequencyMean(abnormaltopdowndf50[cname]),getSeriesFrequencyMean(abnormaltopdowndf90[cname]) )
 
     if modelconfigJson["debugpath"] is not None:
         # 保存为debugpd
