@@ -388,7 +388,7 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
 
 def changeModel(configJsonDict: Dict, outputJsonDict: Dict):
     # 修改内存泄漏模型
-    memleakmin = configJsonDict["memleakpermin"]
+    memleakmin = outputJsonDict["memleakpermin"]
     memleakpath = os.path.join(configJsonDict["servermemory_modelpath"], MODEL_TYPE[0] + ".pkl")
     change_threshold(memleakpath, 0, memleakmin)
 
@@ -397,6 +397,6 @@ def changeModel(configJsonDict: Dict, outputJsonDict: Dict):
     memorybandwidthpath = os.path.join(configJsonDict["serverbandwidth_modelpath"], MODEL_TYPE[0] + ".pkl")
     change_threshold(memorybandwidthpath, 0, pgfree_thread)
     # 修改cache抢占模型
-    ddrc_ddwr_sum_max = configJsonDict["ddrc_ddwr_sum_max"]
+    ddrc_ddwr_sum_max = outputJsonDict["ddrc_ddwr_sum_max"]
     cachegrab_modelpath = os.path.join(configJsonDict["cachegrab_modelpath"], MODEL_TYPE[0] + ".pkl")
     change_threshold(cachegrab_modelpath, 0, ddrc_ddwr_sum_max)
