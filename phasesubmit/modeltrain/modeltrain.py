@@ -91,7 +91,7 @@ def abstractAbnormalData(datadf: pd.DataFrame, abnormalType: List[int], labelFla
 def abstractMinMean(datadf: pd.DataFrame,featurename: str, abnormalType: List[int], labelFlag: str=FAULT_FLAG):
     minValue = -1
     for iabtype in abnormalType:
-        if iabtype not in datadf[FAULT_FLAG]:
+        if iabtype not in datadf[FAULT_FLAG].tolist():
             continue
         tdf = abstractAbnormalData(datadf, [iabtype], labelFlag=labelFlag)
         tminvalues = getSeriesFrequencyMean(tdf[featurename])
@@ -405,6 +405,6 @@ if __name__ == "__main__":
     # 得到mlops的变化幅度
     maxflopsinio = getMaxflopsinio(normalDataDict, abnormalDataDict, configJsonDict)
     getPgfreeThread(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict)
-#
+    getddrc_ddwr_sumscope(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict)
     endTime1 = time.perf_counter()
     print('Running time: %s Seconds' % (endTime1 - startTime))
