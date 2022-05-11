@@ -8,7 +8,7 @@ import pandas as pd
 from hpc.l3l2utils.DataFrameOperation import mergeDataFrames, mergeProceeDF, smoothseries, getSeriesFrequencyMeanLists, \
     getSeriesFrequencyMean
 from hpc.l3l2utils.DataFrameSaveRead import savepdfile
-from hpc.l3l2utils.DataOperation import changeTimePdsToStrFromInt, changeTimeToFromPdlists
+from hpc.l3l2utils.DataOperation import changeTimePdsToStrFromInt, changeTimeToFromPdlists, getsametimepdList
 from hpc.l3l2utils.DefineData import usefulFeatures, TIME_COLUMN_NAME, FAULT_FLAG
 from hpc.l3l2utils.FeatureExtraction import differenceProcess, differenceServer
 from hpc.l3l2utils.L2L3Main import detectionFromInputDict
@@ -88,6 +88,18 @@ def getAllDataFramesFromDectionJson(dataDectionJson: Dict, isTimeisStr: bool=Tru
 """
 def abstractAbnormalData(datadf: pd.DataFrame, abnormalType: List[int], labelFlag: str=FAULT_FLAG):
     return datadf[datadf[labelFlag].isin(abnormalType)]
+def abstractMinMean(datadf: pd.DataFrame,featurename: str, abnormalType: List[int], labelFlag: str=FAULT_FLAG):
+    minValue = -1
+    for iabtype in abnormalType:
+        if iabtype not in datadf[FAULT_FLAG]:
+            continue
+        tdf = abstractAbnormalData(datadf, [iabtype], labelFlag=labelFlag)
+        tminvalues = getSeriesFrequencyMean(datadf[featurename])
+        if minValue == -1:
+            minValue = tminvalues
+            continue
+        minValue = min(minValue, tminvalues)
+    return minValue
 
 """
 得到内存泄露是内存的变化大小
@@ -185,6 +197,145 @@ def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
         debugpd.fillna(-1, inplace=True)
         tpath = os.path.join(modelconfigJson["debugpath"], "mflopsdebug")
         savepdfile(debugpd, tpath, "mflopsdebug.csv")
+    return (normalmflopsmean - abnormaltopdowndf5090mean) * 1.2
+
+
+"""
+得到pgfree变化幅度的大小
+"""
+def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, )->int:
+    normaltopdowndf = normalfilepdDict["topdown"]
+    abnormaltopdowndf = abnormalfilepdDict["topdown"]
+    # time normalmflops abnormalmflops normalmean abnormalmean abnormal50mean
+    timeseries = normaltopdowndf[TIME_COLUMN_NAME]
+    if len(abnormaltopdowndf) > len(normaltopdowndf):
+        timeseries = abnormaltopdowndf[TIME_COLUMN_NAME]
+
+    # 先进行mflops的平滑操作
+    cname = "mflops"
+    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
+    abnormaltopdowndfmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
+    abnormaltopdowndf50 = abstractAbnormalData(abnormaltopdowndf, [50,55])
+    abnormaltopdowndf90 = abstractAbnormalData(abnormaltopdowndf, [90,95])
+    abnormaltopdowndf5090mean = min(getSeriesFrequencyMean(abnormaltopdowndf50[cname]),getSeriesFrequencyMean(abnormaltopdowndf90[cname]) )
+
+    if modelconfigJson["debugpath"] is not None:
+        # 保存为debugpd
+        serieslist = [
+            timeseries,
+            pd.Series(name="normal_mflops", data=normaltopdowndf[cname]),
+            pd.Series(name="abnormal_mflops", data=abnormaltopdowndf[cname]),
+            pd.Series(name=FAULT_FLAG, data=abnormaltopdowndf[FAULT_FLAG]),
+        ]
+        debugpd = pd.concat(serieslist, axis=1)
+        debugpd["normal_mflops_mean"] = normalmflopsmean
+        debugpd["abnormal_mflops_mean"] = abnormaltopdowndfmean
+        debugpd["abnormal_mflops_mean_5090"] = abnormaltopdowndf5090mean
+        debugpd.fillna(-1, inplace=True)
+        tpath = os.path.join(modelconfigJson["debugpath"], "mflopsdebug")
+        savepdfile(debugpd, tpath, "mflopsdebug.csv")
+    return (normalmflopsmean - abnormaltopdowndf5090mean) * 1.2
+
+"""
+函数功能：补偿pgfree之后
+"""
+def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsinio: float ,modelconfigJson: Dict=None, )->int:
+    # mflops_change normal_mflops_mean
+    debugpd = pd.DataFrame()
+    def getMflopschange(itopdownpd: pd.DataFrame, mflops_mean: float, maxflopsinio: float) -> pd.Series:
+        cname = "mflops"
+        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        mflops_normal_iomax = mflops_mean - maxflopsinio
+        # 将小于iomax的mflops设置为平均值
+        itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        # 将较高的mflpos_change抹为0
+        # mflops_change.apply(lambda x: if x > )
+        itopdownpd["mflops_change"] = mflops_change
+        return mflops_change
+        # 保证iserverpds和itodownpds时间与时间相互匹配
+
+    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame,pgfree_mean: float ,mflops_mean: float, maxflopsinio: float, inplace=True):
+        assert len(iserverpd) == len(itopdowndpd)
+        if inplace:
+            iserverpd = iserverpd.copy()
+            itopdowndpd = itopdowndpd.copy()
+        # 对iprocess和servercpu中的
+        # cpu_change = getcpuchange(iserverpd, iprocesspd)
+        mflops_change = getMflopschange(itopdownpd=itopdowndpd, mflops_mean=mflops_mean, maxflopsinio=maxflopsinio)
+        changes = mflops_change
+        debugpd["mflops_change"] = changes
+        cname = "pgfree"
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 多去一次
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+
+        iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True,
+                                                    min_periods=1).median()  # 对pgfree得到的结果重新去掉最大值最小值
+        # pgfree 需要减去平均值
+        return iserverpd
+    # 读入需要的数据
+    normaltopdowndf = normalfilepdDict["topdown"]
+    normalserverdf = normalfilepdDict["server"]
+    abnormaltopdowndf = abnormalfilepdDict["topdown"]
+    abnormalserverdf = abnormalfilepdDict["server"]
+    # 将异常中的server和topdown时间取交集
+    abnormaltopdowndf, abnormalserverdf = getsametimepdList([abnormaltopdowndf, abnormalserverdf])
+    normaltopdowndf, normalserverdf = getsametimepdList([normaltopdowndf, normalserverdf])
+    debugpd[TIME_COLUMN_NAME] = abnormaltopdowndf[TIME_COLUMN_NAME]
+    debugpd[FAULT_FLAG] = abnormaltopdowndf[FAULT_FLAG]
+    #
+    # 得到normal中的mflops正常指标
+    cname = "mflops"
+    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
+    debugpd["mflops_normal_mean"] = normalmflopsmean
+    cname = "pgfree"
+    normalserverdf[cname] = normalserverdf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normalserverdf[cname] = normalserverdf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normalserverdf[cname] = normalserverdf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    normalpgfreemean = getSeriesFrequencyMean(normalserverdf[cname])
+    debugpd["pgfree_normal_pgfree"] = normalpgfreemean
+    cname = "mflops"
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    abnormalmflopsmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
+    debugpd["mflop_abnormal_mean"] = abnormalmflopsmean
+    cname = "pgfree"
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    debugpd["abnoraml_pgfree_origin"] = abnormaltopdowndf[cname]
+    abnormalpgfreemean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
+    debugpd["pgfree_abnoraml_mean"] = abnormalpgfreemean
+    # 得到补偿得到pgfree
+    abnormalcpgfreedf = compensatePgfree(abnormalserverdf,abnormaltopdowndf,normalpgfreemean, normalmflopsmean)
+    debugpd["abnoraml_pgfree_compensation"] = abnormalcpgfreedf[cname]
+    # 提取52 53 54 55的最小值
+    pgfree_abnorma50_mean = abstractMinMean(abnormalcpgfreedf, "pgfree", [52, 53, 54, 55])
+    debugpd["pgfree_abnoraml50_mean"] = pgfree_abnorma50_mean
+    pgfreescope = pgfree_abnorma50_mean - normalpgfreemean
+
+    if modelconfigJson["debugpath"] is not None:
+        debugpd = pd.concat([debugpd, pd.Series(name="normal_pgfree", data=normalserverdf["pgfree"])], axis=1)
+        debugpd.fillna(-1, inplace=True)
+        tpath = os.path.join(modelconfigJson["debugpath"], "pgfree_thread")
+        savepdfile(debugpd, tpath, "pgfree_thread.csv")
+
+    return pgfreescope
+
+
+
+
 
 
 if __name__ == "__main__":
