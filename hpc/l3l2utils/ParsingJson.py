@@ -136,7 +136,7 @@ def saveDictToJson(sdict: Dict, spath: str, filename: str):
         os.makedirs(spath)
     pathfilename = os.path.join(spath, filename)
     with open(pathfilename, "w") as f:
-        json.dump(sdict, f)
+        json.dump(sdict, f, indent=4)
 
 
 def readJsonToDict(spath: str, filename: str):

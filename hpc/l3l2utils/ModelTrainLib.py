@@ -146,7 +146,7 @@ def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
     serverpd = abnormalfilepdDict["server"].copy()
     memorypd = getMemory(serverpd=serverpd, processpd=processpd)
     memorypd60 = abstractAbnormalData(memorypd, [60,63,64,65])
-    memory60_mean = getSeriesFrequencyMeanLists(memorypd60, ["mem_sub"])
+    memory60_mean = getSeriesFrequencyMeanLists(memorypd60, ["mem_sub"])["mem_sub"]
     memory60_meanp60 = memory60_mean * 0.6
     memorypd["memsub60_mean"] = memory60_mean
     memorypd["memsub60_mean_p60"] = memory60_meanp60
