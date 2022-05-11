@@ -311,11 +311,11 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     abnormalmflopsmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
     debugpd["mflop_abnormal_mean"] = abnormalmflopsmean
     cname = "pgfree"
-    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
-    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
-    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
-    debugpd["abnoraml_pgfree_origin"] = abnormaltopdowndf[cname]
-    abnormalpgfreemean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
+    abnormalserverdf[cname] = abnormalserverdf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormalserverdf[cname] = abnormalserverdf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormalserverdf[cname] = abnormalserverdf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    debugpd["abnoraml_pgfree_origin"] = abnormalserverdf[cname]
+    abnormalpgfreemean = getSeriesFrequencyMean(abnormalserverdf[cname])
     debugpd["pgfree_abnoraml_mean"] = abnormalpgfreemean
     # 得到补偿得到pgfree
     abnormalcpgfreedf = compensatePgfree(abnormalserverdf,abnormaltopdowndf,normalpgfreemean, normalmflopsmean, maxflopsinio)
