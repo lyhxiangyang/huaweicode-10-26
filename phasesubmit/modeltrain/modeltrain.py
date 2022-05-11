@@ -318,7 +318,7 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     abnormalpgfreemean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
     debugpd["pgfree_abnoraml_mean"] = abnormalpgfreemean
     # 得到补偿得到pgfree
-    abnormalcpgfreedf = compensatePgfree(abnormalserverdf,abnormaltopdowndf,normalpgfreemean, normalmflopsmean)
+    abnormalcpgfreedf = compensatePgfree(abnormalserverdf,abnormaltopdowndf,normalpgfreemean, normalmflopsmean, maxflopsinio)
     debugpd["abnoraml_pgfree_compensation"] = abnormalcpgfreedf[cname]
     # 提取52 53 54 55的最小值
     pgfree_abnorma50_mean = abstractMinMean(abnormalcpgfreedf, "pgfree", [52, 53, 54, 55])
@@ -348,7 +348,8 @@ if __name__ == "__main__":
     normalDataDict = getAllDataFramesFromDectionJson(normalInputDict)
     abnormalDataDict = getAllDataFramesFromDectionJson(abnormalInputDict)
     getMemLeakPermin(normalDataDict, abnormalDataDict, configJsonDict)
-    getMflopsChange(normalDataDict, abnormalDataDict, configJsonDict)
+    maxflopsinio = getMflopsChange(normalDataDict, abnormalDataDict, configJsonDict)
+    getPgfreeThread(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict)
 #
     endTime1 = time.perf_counter()
     print('Running time: %s Seconds' % (endTime1 - startTime))
