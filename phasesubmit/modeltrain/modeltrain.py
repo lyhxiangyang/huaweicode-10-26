@@ -94,7 +94,7 @@ def abstractMinMean(datadf: pd.DataFrame,featurename: str, abnormalType: List[in
         if iabtype not in datadf[FAULT_FLAG]:
             continue
         tdf = abstractAbnormalData(datadf, [iabtype], labelFlag=labelFlag)
-        tminvalues = getSeriesFrequencyMean(datadf[featurename])
+        tminvalues = getSeriesFrequencyMean(tdf[featurename])
         if minValue == -1:
             minValue = tminvalues
             continue
