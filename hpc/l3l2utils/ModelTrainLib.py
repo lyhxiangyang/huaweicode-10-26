@@ -386,7 +386,7 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
         savepdfile(debugpd, tpath, "ddrc_ddwr_sum.csv")
     return abnoraml_rd_wr_mean5090 - normal_rd_wr_mean
 
-def changeModel(outputJsonDict: Dict, configJsonDict: Dict):
+def changeModel(configJsonDict: Dict, outputJsonDict: Dict):
     # 修改内存泄漏模型
     memleakmin = configJsonDict["memleakpermin"]
     memleakpath = os.path.join(configJsonDict["servermemory_modelpath"], MODEL_TYPE[0] + ".pkl")

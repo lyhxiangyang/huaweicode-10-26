@@ -34,7 +34,7 @@ if __name__ == "__main__":
         "ddrc_ddwr_sum_max": ddrc_ddwr_sum_max,
     }
     if configJsonDict["isChangeModel"]:
-        changeModel(outputJsonDict, configJsonDict)
+        changeModel(configJsonDict, outputJsonDict)
     if configJsonDict["debugpath"] is not None:
         tpath = os.path.join(configJsonDict["debugpath"], "result")
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
