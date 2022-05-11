@@ -22,8 +22,8 @@ def change_threshold(filepath, node, value):
     f.close()
     model.tree_.threshold[node] = value
     joblib.dump(model, filepath)
-    print('features and thresholds after modification:')
-    show_threshold(filepath)
+    # print('features and thresholds after modification:')
+    # show_threshold(filepath)
 
 # if __name__ == '__main__':
 #     file = r'hjx\decision_tree.pkl'

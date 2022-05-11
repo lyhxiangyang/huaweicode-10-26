@@ -5,7 +5,7 @@
     "debugpath": "tmp/traindebugpath",
 
     "isTimeisStr": true,
-
+    "isChangeModel": true,
     "processcpu_modelpath":"hpc/models/l3/process_cpu_model",
     "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
     "serverbandwidth_modelpath":"hpc/models/l3/memory_bandwidth_model",
