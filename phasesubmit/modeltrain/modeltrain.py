@@ -162,9 +162,9 @@ def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
 """
 得到mflops变化幅度的大小
 """
-def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, )->int:
-    normaltopdowndf = normalfilepdDict["topdown"]
-    abnormaltopdowndf = abnormalfilepdDict["topdown"]
+def getMaxflopsinio(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, )->int:
+    normaltopdowndf = normalfilepdDict["topdown"].copy()
+    abnormaltopdowndf = abnormalfilepdDict["topdown"].copy()
     # time normalmflops abnormalmflops normalmean abnormalmean abnormal50mean
     timeseries = normaltopdowndf[TIME_COLUMN_NAME]
     if len(abnormaltopdowndf) > len(normaltopdowndf):
@@ -199,46 +199,6 @@ def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
         savepdfile(debugpd, tpath, "mflopsdebug.csv")
     return (normalmflopsmean - abnormaltopdowndf5090mean) * 1.2
 
-
-"""
-得到pgfree变化幅度的大小
-"""
-def getMflopsChange(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, )->int:
-    normaltopdowndf = normalfilepdDict["topdown"]
-    abnormaltopdowndf = abnormalfilepdDict["topdown"]
-    # time normalmflops abnormalmflops normalmean abnormalmean abnormal50mean
-    timeseries = normaltopdowndf[TIME_COLUMN_NAME]
-    if len(abnormaltopdowndf) > len(normaltopdowndf):
-        timeseries = abnormaltopdowndf[TIME_COLUMN_NAME]
-
-    # 先进行mflops的平滑操作
-    cname = "mflops"
-    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
-    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
-    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
-    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
-    normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
-    abnormaltopdowndfmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
-    abnormaltopdowndf50 = abstractAbnormalData(abnormaltopdowndf, [50,55])
-    abnormaltopdowndf90 = abstractAbnormalData(abnormaltopdowndf, [90,95])
-    abnormaltopdowndf5090mean = min(getSeriesFrequencyMean(abnormaltopdowndf50[cname]),getSeriesFrequencyMean(abnormaltopdowndf90[cname]) )
-
-    if modelconfigJson["debugpath"] is not None:
-        # 保存为debugpd
-        serieslist = [
-            timeseries,
-            pd.Series(name="normal_mflops", data=normaltopdowndf[cname]),
-            pd.Series(name="abnormal_mflops", data=abnormaltopdowndf[cname]),
-            pd.Series(name=FAULT_FLAG, data=abnormaltopdowndf[FAULT_FLAG]),
-        ]
-        debugpd = pd.concat(serieslist, axis=1)
-        debugpd["normal_mflops_mean"] = normalmflopsmean
-        debugpd["abnormal_mflops_mean"] = abnormaltopdowndfmean
-        debugpd["abnormal_mflops_mean_5090"] = abnormaltopdowndf5090mean
-        debugpd.fillna(-1, inplace=True)
-        tpath = os.path.join(modelconfigJson["debugpath"], "mflopsdebug")
-        savepdfile(debugpd, tpath, "mflopsdebug.csv")
-    return (normalmflopsmean - abnormaltopdowndf5090mean) * 1.2
 
 """
 函数功能：补偿pgfree之后
@@ -283,10 +243,10 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
         # pgfree 需要减去平均值
         return iserverpd
     # 读入需要的数据
-    normaltopdowndf = normalfilepdDict["topdown"]
-    normalserverdf = normalfilepdDict["server"]
-    abnormaltopdowndf = abnormalfilepdDict["topdown"]
-    abnormalserverdf = abnormalfilepdDict["server"]
+    normaltopdowndf = normalfilepdDict["topdown"].copy()
+    normalserverdf = normalfilepdDict["server"].copy()
+    abnormaltopdowndf = abnormalfilepdDict["topdown"].copy()
+    abnormalserverdf = abnormalfilepdDict["server"].copy()
     # 将异常中的server和topdown时间取交集
     abnormaltopdowndf, abnormalserverdf = getsametimepdList([abnormaltopdowndf, abnormalserverdf])
     normaltopdowndf, normalserverdf = getsametimepdList([normaltopdowndf, normalserverdf])
@@ -330,11 +290,104 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
         debugpd.fillna(-1, inplace=True)
         tpath = os.path.join(modelconfigJson["debugpath"], "pgfree_thread")
         savepdfile(debugpd, tpath, "pgfree_thread.csv")
-
     return pgfreescope
 
+"""
+得到ddrc_ddwr_sum变化的幅度
+"""
+def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsinio: float ,modelconfigJson: Dict=None, )->int:
+    debugpd = pd.DataFrame()
+    def getMflopschange(itopdownpd: pd.DataFrame, mflops_mean: float, maxflopsinio: float) -> pd.Series:
+        cname = "mflops"
+        # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).mean()
+        mflops_normal_iomax = mflops_mean - maxflopsinio
+        # 将小于iomax的mflops设置为平均值
+        itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
+        itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
+        # 将较高的mflpos_change抹为0
+        # mflops_change.apply(lambda x: if x > )
+        itopdownpd["mflops_change"] = mflops_change
+        return mflops_change
+        # 保证iserverpds和itodownpds时间与时间相互匹配
+    # 读入需要的topdown数据
+    normaltopdowndf = normalfilepdDict["topdown"].copy()
+    abnormaltopdowndf = abnormalfilepdDict["topdown"].copy()
+
+    # 存储时间
+    debugpd[TIME_COLUMN_NAME] = abnormaltopdowndf[TIME_COLUMN_NAME]
+    debugpd[FAULT_FLAG] = abnormaltopdowndf[FAULT_FLAG]
 
 
+    # 得到mflops的正常稳定值
+    cname = "mflops"
+    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
+    normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
+    abnormalmflopsmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
+    debugpd["normalmlopsmean"] = normalmflopsmean
+    debugpd["abnormalmflopsmean"] = abnormalmflopsmean
+    rd_name = "ddrc_rd"
+    normaltopdowndf[rd_name] = normaltopdowndf[rd_name].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normaltopdowndf[rd_name] = normaltopdowndf[rd_name].rolling(window=5, center=True, min_periods=1).mean()
+    abnormaltopdowndf[rd_name] = abnormaltopdowndf[rd_name].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[rd_name] = abnormaltopdowndf[rd_name].rolling(window=5, center=True, min_periods=1).mean()
+    normalddrdmean = getSeriesFrequencyMean(normaltopdowndf[rd_name])
+    abnormalddrdmean = getSeriesFrequencyMean(abnormaltopdowndf[rd_name])
+    debugpd["normalddrdmean"] = normalddrdmean
+    debugpd["abnormalddrdmean"] = abnormalddrdmean
+    wr_name = "ddrc_wr"
+    normaltopdowndf[wr_name] = normaltopdowndf[wr_name].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    normaltopdowndf[wr_name] = normaltopdowndf[wr_name].rolling(window=5, center=True, min_periods=1).mean()
+    abnormaltopdowndf[wr_name] = abnormaltopdowndf[wr_name].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+    abnormaltopdowndf[wr_name] = abnormaltopdowndf[wr_name].rolling(window=5, center=True, min_periods=1).mean()
+    normalddwrmean = getSeriesFrequencyMean(normaltopdowndf[wr_name])
+    abnormalddwrmean = getSeriesFrequencyMean(abnormaltopdowndf[wr_name])
+    debugpd["normalddwrmean"] = normalddwrmean
+    debugpd["abnormalddwrmean"] = abnormalddwrmean
+    # 计算mflops_changes
+    mflop_change = getMflopschange(abnormaltopdowndf, normalmflopsmean, maxflopsinio)
+    debugpd["mflops_change"] = mflop_change
+    # 计算补偿之后的值
+
+    debugpd["ddrc_rd"] = abnormaltopdowndf["ddrc_rd"]
+    debugpd["ddrc_wr"] = abnormaltopdowndf["ddrc_wr"]
+    abnormaltopdowndf["ddrc_rd"] = abnormaltopdowndf["ddrc_rd"] + normalddrdmean * mflop_change
+    abnormaltopdowndf["ddrc_wr"] = abnormaltopdowndf["ddrc_wr"] + normalddwrmean * mflop_change
+    debugpd["ddrc_rd_compensation"] = abnormaltopdowndf["ddrc_rd"]
+    debugpd["ddrc_wr_compensation"] = abnormaltopdowndf["ddrc_wr"]
+
+    # 求解rd_wr_sum
+    rd_wr_cname = "ddrc_ddwr_sum"
+    normaltopdowndf[rd_wr_cname] = normaltopdowndf[rd_name] + normaltopdowndf[wr_name]
+    normaltopdowndf[rd_wr_cname] = normaltopdowndf[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
+    abnormaltopdowndf[rd_wr_cname] = abnormaltopdowndf[rd_name] + abnormaltopdowndf[wr_name]
+    abnormaltopdowndf[rd_wr_cname] = abnormaltopdowndf[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
+    debugpd["ddrc_ddwr_sum"] = abnormaltopdowndf[rd_wr_cname]
+
+    normal_rd_wr_mean = normalddrdmean + normalddwrmean
+    debugpd["ddrc_ddwr_sum_normalmean"] = normal_rd_wr_mean
+    abnoraml_rd_wr_mean = abnormalddrdmean + abnormalddwrmean
+    debugpd["ddrc_ddwr_sum_abnormalmean"] = abnoraml_rd_wr_mean
+    # 求解51 52 53 54 55 91 92 93 94 95
+    abnoraml_rd_wr_mean5090 = abstractMinMean(abnormaltopdowndf, rd_wr_cname, [51,52,53,54,55,91,92,93,94,95])
+    debugpd["ddrc_ddwr_sum_abnormal5090mean"] = abnoraml_rd_wr_mean5090
+    if modelconfigJson["debugpath"] is not None:
+        pdlists = [
+            debugpd,
+            pd.Series(name="normal_ddrd", data=normaltopdowndf[rd_name]),
+            pd.Series(name="normal_ddwr", data=normaltopdowndf[wr_name]),
+            pd.Series(name="normal_ddrc_ddwr_sum", data=normaltopdowndf[rd_wr_cname]),
+        ]
+        debugpd = pd.concat(pdlists, axis=1)
+        debugpd.fillna(-1, inplace=True)
+        tpath = os.path.join(modelconfigJson["debugpath"], "ddrc_ddwr_sum")
+        savepdfile(debugpd, tpath, "ddrc_ddwr_sum.csv")
+    return abnoraml_rd_wr_mean5090 - normal_rd_wr_mean
 
 
 
@@ -347,8 +400,10 @@ if __name__ == "__main__":
 
     normalDataDict = getAllDataFramesFromDectionJson(normalInputDict)
     abnormalDataDict = getAllDataFramesFromDectionJson(abnormalInputDict)
+    # 内存大小幅度的变化
     getMemLeakPermin(normalDataDict, abnormalDataDict, configJsonDict)
-    maxflopsinio = getMflopsChange(normalDataDict, abnormalDataDict, configJsonDict)
+    # 得到mlops的变化幅度
+    maxflopsinio = getMaxflopsinio(normalDataDict, abnormalDataDict, configJsonDict)
     getPgfreeThread(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict)
 #
     endTime1 = time.perf_counter()
