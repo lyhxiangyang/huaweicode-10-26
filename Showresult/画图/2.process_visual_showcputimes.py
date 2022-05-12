@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import plotly.graph_objs as go
 
+from hpc.l3l2utils.DataFrameOperation import smoothseries
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists
 from hpc.l3l2utils.FeatureExtraction import differenceProcess
 
@@ -66,7 +67,7 @@ def getpidcpuInfo(processpd: pd.DataFrame):
         # icorepd = icorepd.reset_index(drop=True)
         cname = "core{}_cpu".format(icore)
         cpuSeries = icorepd["usr_cpu"] + icorepd["kernel_cpu"]
-        respd[cname] = cpuSeries
+        respd[cname] = smoothseries(cpuSeries)
         respd[FAULTFLAG] = icorepd[FAULTFLAG]
     respd.fillna(-1, inplace=True)
     respd.reset_index(drop=False, inplace=True)

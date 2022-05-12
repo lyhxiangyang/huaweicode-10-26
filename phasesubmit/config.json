@@ -43,6 +43,7 @@
     "memleakpermin": 700,
     "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
+    "abnormalCpuTimeThread": 45,
 
     "normalpath": null,
 

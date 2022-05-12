@@ -78,5 +78,5 @@ def preproccessConfigfile(inputDict: Dict) -> Dict:
         changeFirstThread(modelpath, cachethread)
 
     # 对文件中的各个平均值进行处理 pgfree mflops ddrc_rd ddrc_wr
-    if inputDict["spath"] is not None:
+    if inputDict["normalpath"] is not None:
         changeNormalData(inputDict)

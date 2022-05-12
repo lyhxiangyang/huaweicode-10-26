@@ -39,7 +39,7 @@ if __name__ == "__main__":
         tpath = os.path.join(configJsonDict["debugpath"], "result")
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
     if configJsonDict["outputpath"] is not None:
-        tpath = os.path.join(configJsonDict["debugpath"], "result")
+        tpath = os.path.join(configJsonDict["outputpath"])
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
 
 

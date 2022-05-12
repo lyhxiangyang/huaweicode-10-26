@@ -520,7 +520,7 @@ def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata:
     if len(l2_serverdata) == 0:
         return []
     select_data = l2_serverdata[["cabinet_power"]]
-    freq = l2_serverdata["freq"].tolist()
+    freq = smoothseries(l2_serverdata["freq"]).tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
@@ -538,7 +538,7 @@ def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: 
     if len(l2_serverdata) == 0:
         return []
     select_data = l2_serverdata[["power"]]
-    freq = l2_serverdata["freq"].tolist()
+    freq = smoothseries(l2_serverdata["freq"]).tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
@@ -560,7 +560,7 @@ def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFr
     if len(l2_serverdata) == 0:
         return []
     select_data = l2_serverdata[["power"]]
-    freq = l2_serverdata["freq"].tolist()
+    freq = smoothseries(l2_serverdata["freq"]).tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
     for i in range(len(result)):
