@@ -73,9 +73,14 @@ def preproccessConfigfile(inputDict: Dict) -> Dict:
         changeFirstThread(modelpath, modelthread)
     if inputDict["ddrc_ddwr_sum_max"] is not None:
         modelpath = os.path.join(inputDict["cachegrab_modelpath"],
-                                 MODEL_TYPE[inputDict["cachegrab_modelpath"]] + ".pkl")
+                                 MODEL_TYPE[inputDict["cachegrab_modeltype"]] + ".pkl")
         cachethread = inputDict["ddrc_ddwr_sum_max"]
         changeFirstThread(modelpath, cachethread)
+    if inputDict["abnormalCpuTimeThread"] is not None:
+        modelpath = os.path.join(inputDict["processcpu_modelpath"],
+                                 MODEL_TYPE[inputDict["processcpu_modeltype"]] + ".pkl")
+        cputhread = inputDict["abnormalCpuTimeThread"]
+        changeFirstThread(modelpath, cputhread)
 
     # 对文件中的各个平均值进行处理 pgfree mflops ddrc_rd ddrc_wr
     if inputDict["normalpath"] is not None:

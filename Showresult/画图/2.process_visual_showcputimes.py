@@ -66,7 +66,8 @@ def getpidcpuInfo(processpd: pd.DataFrame):
     for icore, icorepd in processpd.groupby("cpu_affinity"):
         # icorepd = icorepd.reset_index(drop=True)
         cname = "core{}_cpu".format(icore)
-        cpuSeries = icorepd["usr_cpu"] + icorepd["kernel_cpu"]
+        # cpuSeries = icorepd["usr_cpu"] + icorepd["kernel_cpu"]
+        cpuSeries = icorepd["cpu"]
         respd[cname] = cpuSeries
         respd[FAULTFLAG] = icorepd[FAULTFLAG]
     respd.fillna(-1, inplace=True)
