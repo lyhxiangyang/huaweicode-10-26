@@ -52,7 +52,8 @@ def ThransferRightLabels(x: List[int]):
 
 def add_cpu_column(pds: List[pd.DataFrame]):
     for ipd in pds:
-        ipd['cpu'] = ipd["usr_cpu"] + ipd["kernel_cpu"]
+        if "cpu" not in ipd.columns():
+            ipd['cpu'] = ipd["usr_cpu"] + ipd["kernel_cpu"]
 
 
 """
