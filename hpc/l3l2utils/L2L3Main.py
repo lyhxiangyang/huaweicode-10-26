@@ -52,7 +52,7 @@ def ThransferRightLabels(x: List[int]):
 
 def add_cpu_column(pds: List[pd.DataFrame]):
     for ipd in pds:
-        if "cpu" not in ipd.columns():
+        if "cpu" not in ipd.columns.to_list():
             ipd['cpu'] = ipd["usr_cpu"] + ipd["kernel_cpu"]
 
 
@@ -267,7 +267,7 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
     inputDict["topdown_feature"] = []  # 原因是不需要对任何指标进行特征提取额
 
     # 3. 对process数据进行处理 对server数据的cpu进行处理
-    add_cpu_column(predictprocesspds)
+    # add_cpu_column(predictprocesspds)
     add_cpu_column(predictserverpds)
 
     print("对正常数据的各个指标求平均值".center(40, "*"))

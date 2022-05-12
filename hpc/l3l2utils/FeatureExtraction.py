@@ -52,6 +52,7 @@ def differenceProcess(processpds: List[pd.DataFrame], accumulateFeatures: List[s
         for ipid, ipd in iprocesspd.groupby(PID_FEATURE):
             # 先将一些不可用的数据进行清除,比如一个进程只运行了两分钟
             subtractpd = subtractLastLineFromDataFrame(ipd, columns=accumulateFeatures)
+            subtractpd['cpu'] = subtractpd["usr_cpu"] + subtractpd["kernel_cpu"]
             subtractpd["cpu"] = smoothseries(subtractpd["cpu"])
             subtractpdLists.append(subtractpd)
         allsubtractpd = mergeDataFrames(subtractpdLists)
