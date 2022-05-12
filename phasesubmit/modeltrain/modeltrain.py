@@ -38,6 +38,10 @@ if __name__ == "__main__":
     if configJsonDict["debugpath"] is not None:
         tpath = os.path.join(configJsonDict["debugpath"], "result")
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
+    if configJsonDict["outputpath"] is not None:
+        tpath = os.path.join(configJsonDict["debugpath"], "result")
+        saveDictToJson(outputJsonDict, tpath, "parameter.json")
+
 
     endTime1 = time.perf_counter()
     print('Running time: %s Seconds' % (endTime1 - startTime))
