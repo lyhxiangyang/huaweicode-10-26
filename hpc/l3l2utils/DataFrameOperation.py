@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from hpc.l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
+from hpc.l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, PID_FEATURE
 
 """
 True 表示所有的列名是相同的
@@ -181,3 +181,4 @@ def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=1
     for ifeature in features:
         tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature])
     return tseries
+
