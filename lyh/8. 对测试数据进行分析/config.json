@@ -40,10 +40,11 @@
     "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
     "topdown_accumulate_feature": [],
 
-    "memleakpermin": 700,
+    "memleakpermin": 2000,
     "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
-    "abnormalCpuTimeThread": 45,
+    "abnormalCpuTimeThread": 56.5,
+    "freqDownThresholdpercent": 50,
 
     "normalpath": null,
 
