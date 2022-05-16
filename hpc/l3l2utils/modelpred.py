@@ -301,16 +301,20 @@ def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List, inputDict: D
     debugpd["load1_thread"] = load1mean + load1thread # debug
     randomcpuList = [ 80 if iload > load1mean + load1thread else 0 for iload in serverpd["load1"]]
 
+    debugpd["predict_result_before"] = cpuabnormalList # debug
     for i in range(0, len(randomcpuList)):
         if randomcpuList[i] == 0:
             continue
         if cpuabnormalList[i] in [10, 20 , 30 , 80]:
             continue
         cpuabnormalList[i] = 80
-    debugpd["predict_result"] = cpuabnormalList # debug
+    debugpd["predict_result_after"] = cpuabnormalList # debug
     # 将cpu的debug进行存储
     if inputDict["debugpath"] is not None:
         tpath = os.path.join(inputDict["debugpath"],"abnormalInfo", "cpuabnormal")
+        savepdfile(debugpd, tpath, "randomcpu.csv")
+    if inputDict["spath"] is not None:
+        tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cpuabnormal")
         savepdfile(debugpd, tpath, "randomcpu.csv")
     return cpuabnormalList
 
