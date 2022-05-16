@@ -90,7 +90,8 @@ if __name__ == "__main__":
         R"DATA/测试数据/WRF/9KM",
         R"DATA/测试数据/Grapes/test1",
         R"DATA/测试数据/Grapes/国家超算",
-        R"D:\patent\wrf_grapes_all.zip\post",
+        # R"D:\patent\wrf_grapes_all.zip\post",
+        R""
     ]
     for idirpaths in dirpaths:
         dirs = getDirs(idirpaths)

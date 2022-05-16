@@ -88,7 +88,7 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None):
 
 if __name__ == "__main__":
     dirpathes = [
-        R"csvfiles/5.3组正常数据-1min/1/hpc_process.csv",
+        R"csvfiles/abnormals_10s_33min注入/allcpu10/1/hpc_process.csv",
     ]
     for dirpath in dirpathes:
         if not dirpath.strip().endswith(".csv"):
