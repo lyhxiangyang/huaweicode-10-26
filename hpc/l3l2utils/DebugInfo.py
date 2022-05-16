@@ -5,7 +5,7 @@ import pandas as pd
 
 from hpc.l3l2utils.DataFrameOperation import mergeProceeDF, getSeriesFrequencyMean, smoothseries
 from hpc.l3l2utils.DefineData import FAULT_FLAG
-from hpc.l3l2utils.ParsingJson import getNormalServerMean, getNormalTopdownMean
+from hpc.l3l2utils.ParsingJson import getNormalServerMean, getNormalTopdownMean, getNormalDataMean
 
 """
 函数功能：
@@ -36,7 +36,8 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         debugpd["mflops_delete"] = itopdownpd[cname]
         #2
         debugpd["mflops_mean_10"] = itopdownpd[cname].iloc[0:10].mean()
-        debugpd["mflops_mean"] = getSeriesFrequencyMean(itopdownpd[cname])
+        debugpd["mflops_mean_all"] = getSeriesFrequencyMean(itopdownpd[cname])
+        debugpd["mflops_mean"] = getNormalDataMean(inputDict, [itopdownpd], ["mflops"], "topdown")
 
         mflops_normal_iomax = 15000
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean  else 0)

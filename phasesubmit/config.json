@@ -40,22 +40,22 @@
     "topdown_feature": ["ddrc_rd", "ddrc_wr", "mflops"],
     "topdown_accumulate_feature": [],
 
-    "memleakpermin": 700,
+    "memleakpermin": 2000,
     "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
-    "abnormalCpuTimeThread": 45,
+    "abnormalCpuTimeThread": 56.5,
+    "freqDownThresholdpercent": 10,
 
     "normalpath": null,
 
-    "maxflopsinio": 1000,
-    "pgfree_thread": 2000000,
+    "maxflopsinio": 0,
+    "pgfree_thread": 5000000,
     "ddrc_ddwr_sum_max": 6000,
     "normalDataMean": {
         "server": {
-            "pgfree": 2000000
+            "freq": 2000
         },
         "compute": {
-
         },
         "process": {
 
@@ -67,9 +67,6 @@
 
         },
         "topdown": {
-            "mflops": 27000,
-            "ddrc_wr": 20000,
-            "ddrc_rd": 58000
         }
     }
 }

@@ -431,7 +431,7 @@ def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.Da
     l2cabinetpowerresult["preFlag"] = predictCabinet_PowerCapping(model_path=inputDict["power_cabinet_modelpath"],
                                                                   model_type=MODEL_TYPE[
                                                                       inputDict["power_cabinet_modeltype"]],
-                                                                  l2_serverdata=l2_serverpds)
+                                                                  l2_serverdata=l2_serverpds, inputDict=inputDict)
 
     print("3. 对L2机器封顶进行预测".center(40, "#"))
     l2machinepowerresult = pd.DataFrame()
@@ -443,7 +443,7 @@ def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.Da
                                                                  model_type=MODEL_TYPE[
                                                                      inputDict["power_machine_modeltype"]],
                                                                  l2_serverdata=l2_serverpds,
-                                                                 resultPds=[l2temperamentresult, l2cabinetpowerresult])
+                                                                 resultPds=[l2temperamentresult, l2cabinetpowerresult], inputDict=inputDict)
 
     print("4. 对CPU主频下降进行预测".center(40, "#"))
     l2cpudownresult = pd.DataFrame()
@@ -454,7 +454,7 @@ def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.Da
     l2cpudownresult["preFlag"] = predictL2_CPUDown(model_path=inputDict["cpudown_modelpath"],
                                                    model_type=MODEL_TYPE[inputDict["cpudown_modeltype"]],
                                                    l2_serverdata=l2_serverpds,
-                                                   resultPds=[l2temperamentresult, l2cabinetpowerresult])
+                                                   resultPds=[l2temperamentresult, l2cabinetpowerresult], inputDict=inputDict)
 
     print("对网络异常1进行预测 TX_Hang".center(40, "#"))
     # REPORT_TIME = "time"

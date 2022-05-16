@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import plotly.graph_objs as go
 
+from hpc.l3l2utils.DataFrameOperation import smoothseries
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists, getsametimepd
 from hpc.l3l2utils.DefineData import TIME_COLUMN_NAME
 from hpc.l3l2utils.FeatureExtraction import differenceServer, differenceProcess
@@ -34,6 +35,7 @@ def processing(filepath: str, filename: str = None):
         df["faultFlag"] = 0
     df = differenceServer([df], ["pgfree", "usr_cpu", "kernel_cpu"])[0]
     df["cpu"] = df["usr_cpu"] + df["kernel_cpu"]
+    df["freq_smooth"] = smoothseries(df["freq_smooth"])
     df = df.dropna()
     # 修改列名 去掉每个文件中的空格
     df = df.copy()

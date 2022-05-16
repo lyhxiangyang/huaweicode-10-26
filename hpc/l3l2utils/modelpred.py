@@ -39,7 +39,6 @@ def getTrainedFeatures(dfcolumns: List[str], prefixnames: List[str]):
 
 
 def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, inputConfig: Dict = None):
-
     def getcores(processpd: pd.DataFrame) -> Tuple[int, Set[int]]:
         coresSet = set(list(processpd[CPU_FEATURE]))
         coresnum = len(coresSet)
@@ -55,16 +54,16 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
 
         mergeprocesspd = mergeProceeDF(processpd, ["usr_cpu", "kernel_cpu", "cpu"])
         # 两者合并
-        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, how="inner", suffixes=("", "_y"))
+        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME,
+                        how="inner", suffixes=("", "_y"))
         #
         server_cpu = pspd["cpu"]
-        process_cpu = pspd["cpu_y"] # 肯定会和server的cpu重复，会自动加上_y后缀名
+        process_cpu = pspd["cpu_y"]  # 肯定会和server的cpu重复，会自动加上_y后缀名
 
         server_cpu_smooth = smoothseries(server_cpu)
         process_cpu_smooth = smoothseries(process_cpu)
         sub_server_process_cpu = server_cpu_smooth - process_cpu_smooth
         return sub_server_process_cpu
-
 
     spath = inputConfig["spath"]
     modelfilepath = inputConfig["processcpu_modelpath"]
@@ -93,6 +92,8 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
         serverinformationDict[FAULT_FLAG] = list(allserverpds[FAULT_FLAG])
     wrfruncoresnumber, coresSet = getcores(allprocesspds)
     cpuabnormalList = predictcpu(serverinformationDict, wrfruncoresnumber)
+    # 将server数据中load1结合检测80
+    cpuabnormalList = predictRandomCpu(allserverpds, cpuabnormalList)
     # 将字典中的数据进行保存 ==========================================================================================
     if spath is not None:
         if not os.path.exists(spath):
@@ -121,7 +122,7 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
     #     if sub_server_processcputime[i] < cputhreshold:
     #         cpuabnormalList[i] = 0
 
-    respd=pd.DataFrame()
+    respd = pd.DataFrame()
     respd[TIME_COLUMN_NAME] = timecolumns
     if inputConfig["isExistFaultFlag"]:
         respd[FAULT_FLAG] = allserverpds[FAULT_FLAG]
@@ -139,7 +140,7 @@ def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, inputDict: D
     modelfilepath = inputDict["processcpu_modelpath"]
     modeltype = inputDict["processcpu_modeltype"]
 
-    nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime] # 包含了process各个核心的值
+    nowdf = processpds[processpds[TIME_COLUMN_NAME] == nowtime]  # 包含了process各个核心的值
     # 对pid进行去重
     nowdf = nowdf.drop_duplicates(subset=CPU_FEATURE, keep="first")
     if len(nowdf) == 0:
@@ -149,20 +150,20 @@ def detectionCPUInPointTime(processpds: pd.DataFrame, nowtime: str, inputDict: D
     # 核的编号
     cores_serialnumber = list(nowdf.loc[:, CPU_FEATURE])
     # 核的cpu时间
-    cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME]) # 每个核的CPU时间
+    cores_runtimeList = list(nowdf.loc[:, PROCESS_CPUNAME])  # 每个核的CPU时间
     predictflag = select_and_pred(nowdf, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
-    predictflag = [True if i != 0 else False for i in predictflag] # 非0就是异常
+    predictflag = [True if i != 0 else False for i in predictflag]  # 非0就是异常
 
     # 在这一部分中对读写数据进行判断，判断这个核心在这个时间下是否处理大量读写中
     readcharsThread = inputDict["cpuReadCharsMax"]
     readcharsSeries = nowdf["read_chars"]
     readcharsSeries = minsmoothseries(readcharsSeries, windows=3)
-    readchars = [False if i < readcharsThread else True for i in nowdf["read_chars"] ]
+    readchars = [False if i < readcharsThread else True for i in nowdf["read_chars"]]
 
     assert len(readchars) == len(predictflag)
 
     # 只有读写较大时的一场不能当作异常
-    predictflag = [ False if readchars[i] else predictflag[i] and True for i in range(0, len(predictflag))]
+    predictflag = [False if readchars[i] else predictflag[i] and True for i in range(0, len(predictflag))]
 
     # predictflag为True代表异常， 否则代表这正常
     # 获得异常的核
@@ -193,17 +194,17 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
     ilastlist = None
     for i, ilist in enumerate(wrfnumList):
         # ===========================
-        if ilist is None: # 表明这个时间没有wrf进程在运行
+        if ilist is None:  # 表明这个时间没有wrf进程在运行
             iscpulist.append(-1)
             ilastlist = None
             continue
         # ========================
-        if len(ilist) == 0: # 表明这个时间没有核心被抢占
+        if len(ilist) == 0:  # 表明这个时间没有核心被抢占
             iscpulist.append(0)
             ilastlist = []
             continue
         # ========================
-        if len(ilist) == 1: # 只有一个核心被抢占
+        if len(ilist) == 1:  # 只有一个核心被抢占
             if ilastlist is None:
                 iscpulist.append(20)
             elif len(ilastlist) == 0:
@@ -235,17 +236,17 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
         #     ilastlist = ilist
         #     continue
         # 如果
-        if len(ilist) >= coresnumber // 2: # 现在就是全核心抢占 判断是全核心抢占还是随即抢占
-            if ilastlist is None: # 上一个cpu不存在
+        if len(ilist) >= coresnumber // 2:  # 现在就是全核心抢占 判断是全核心抢占还是随即抢占
+            if ilastlist is None:  # 上一个cpu不存在
                 iscpulist.append(10)
-            elif len(ilastlist) == 0: # 上一个是正常
+            elif len(ilastlist) == 0:  # 上一个是正常
                 iscpulist.append(10)
-            elif len(ilastlist) >= coresnumber // 2 and set(ilastlist) == set(ilist): # 上一个指标大于一半 并且和现在的列表一样
+            elif len(ilastlist) >= coresnumber // 2 and set(ilastlist) == set(ilist):  # 上一个指标大于一半 并且和现在的列表一样
                 iscpulist.append(10)
-            elif len(ilastlist) >= coresnumber // 2  and set(ilastlist) != set(ilist): # 上一个指标的数量大于一半，却和现在的列表不是一个核
+            elif len(ilastlist) >= coresnumber // 2 and set(ilastlist) != set(ilist):  # 上一个指标的数量大于一半，却和现在的列表不是一个核
                 iscpulist[-1] = 80
                 iscpulist.append(80)
-            else: # 介于1-一半之间
+            else:  # 介于1-一半之间
                 iscpulist[-1] = 80
                 iscpulist.append(80)
             ilastlist = ilist
@@ -279,6 +280,15 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 
 
 """
+函数功能：通过服务器数据中load1指标
+"""
+
+
+def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List) -> List:
+    return cpuabnormalList
+
+
+"""
 识别温度数据
 
 """
@@ -298,9 +308,9 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
         "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp",
         "pch_temp",
     ]
+
     # FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
     # TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])
-
 
     def get_extended_features(prefix):
         selected = []
@@ -338,13 +348,12 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
 """
 
 
-def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFrame, inputDict: Dict = None):
+def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame, allprocesspd: pd.DataFrame, inputDict: Dict = None):
     # 保证allserverpds和processpds按照时间顺序排列
-
 
     modelfilepath = inputDict["servermemory_modelpath"]
     modeltype = inputDict["servermemory_modeltype"]
-    memleakpermin=inputDict["memleakpermin"]
+    memleakpermin = inputDict["memleakpermin"]
 
     # 对内存的差值处理必须根据进程pid号进行处理
     # 保证内存的指标和pid号的指标长度是一样的
@@ -363,20 +372,20 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
             reslists.extend(other_mem_smooth_diff.tolist())
         return pd.Series(data=reslists)
 
-
     # 根据server和process中的memory数据得到内存的变化量
-    def getMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame)->pd.DataFrame:
+    def getMemory(serverpd: pd.DataFrame, processpd: pd.DataFrame) -> pd.DataFrame:
         mergeprocesspd = mergeProceeDF(processpd, sumFeatures=["rss"])
         # 将两者合并
-        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME, suffixes=("", "_y"))
+        pspd = pd.merge(left=serverpd, right=mergeprocesspd, left_on=TIME_COLUMN_NAME, right_on=TIME_COLUMN_NAME,
+                        suffixes=("", "_y"))
 
-        pspd.fillna(0, inplace=True) # 认为进程不在的时候其数据为0
+        pspd.fillna(0, inplace=True)  # 认为进程不在的时候其数据为0
 
         servermem = pspd["mem_used"]
         processmem = pspd["rss"]
         othermem = servermem - processmem
 
-        othermemdiff=diffmemoryseries(othermem, pspd["pid"]) / 1000000
+        othermemdiff = diffmemoryseries(othermem, pspd["pid"]) / 1000000
         # 返回将带有时间与内存
         respd = pd.DataFrame()
         respd[TIME_COLUMN_NAME] = pspd[TIME_COLUMN_NAME]
@@ -384,6 +393,7 @@ def detectL3MemLeakAbnormal(allserverpds: pd.DataFrame,allprocesspd: pd.DataFram
         if inputDict["isExistFaultFlag"]:
             respd[FAULT_FLAG] = pspd[FAULT_FLAG]
         return respd
+
     memorypd = getMemory(serverpd=allserverpds, processpd=allprocesspd)
     memleakPreFlagList = select_and_pred(memorypd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
 
@@ -405,10 +415,11 @@ def detectL3BandWidthAbnormal(allserverpds: pd.DataFrame, modelfilepath: str = N
     bandwidthPreFlagList = select_and_pred(testPd, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     return bandwidthPreFlagList
 
+
 ## 传入server和topdown数据，对其进行处理，主要处理操作是对pgfree进行补偿性操作
 # process最重要的作用是确定server的起始位置
-def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.DataFrame,allprocesspds: pd.DataFrame, inputDict: Dict = None, detectionJson: Dict = None):
-
+def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.DataFrame, allprocesspds: pd.DataFrame,
+                               inputDict: Dict = None, detectionJson: Dict = None):
     def getMflopschange(itopdownpd: pd.DataFrame) -> pd.Series:
         cname = "mflops"
         # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
@@ -428,7 +439,8 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         return mflops_change
 
     # 保证iserverpds和itodownpds时间与时间相互匹配
-    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, iprocesspd: pd.DataFrame, detectionJson: Dict, inplace=True):
+    def compensatePgfree(iserverpd: pd.DataFrame, itopdowndpd: pd.DataFrame, iprocesspd: pd.DataFrame,
+                         detectionJson: Dict, inplace=True):
         assert len(iserverpd) == len(itopdowndpd)
         if inplace:
             iserverpd = iserverpd.copy()
@@ -436,10 +448,10 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         # 对iprocess和servercpu中的
         # cpu_change = getcpuchange(iserverpd, iprocesspd)
         mflops_change = getMflopschange(itopdownpd=itopdowndpd)
-        changes=mflops_change
+        changes = mflops_change
         cname = "pgfree"
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 先将最大最小值去除
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 多去一次
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 多去一次
         iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).mean()
         # 对来自的应用进行判断
         # pgfree_mean = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]
@@ -448,7 +460,8 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         #     pgfree_mean = iserverpd["pgfree"].iloc[0:10].mean()
 
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
-        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True, min_periods=1).median() # 对pgfree得到的结果重新去掉最大值最小值
+        iserverpd[cname] = iserverpd[cname].rolling(window=5, center=True,
+                                                    min_periods=1).median()  # 对pgfree得到的结果重新去掉最大值最小值
         # pgfree 需要减去平均值
         iserverpd[cname] = iserverpd[cname] - pgfree_mean
         return iserverpd
@@ -460,8 +473,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     # alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
     # allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
     allserverpds, alltopdownpds, allprocesspds = getsametimepdList([allserverpds, alltopdownpds, allprocesspds])
-    testPd = compensatePgfree(allserverpds, alltopdownpds,allprocesspds,detectionJson)
-
+    testPd = compensatePgfree(allserverpds, alltopdownpds, allprocesspds, detectionJson)
 
     # 保存debug信息 给自己看
     debugpd = getMemoryBandwidth50Debuginfo(allserverpds, allprocesspds, alltopdownpds, inputDict, detectionJson)
@@ -494,8 +506,8 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
 def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool = True):
     if len(allnetworkpds) == 0:
         return pd.DataFrame(data={
-            TIME_COLUMN_NAME:[],
-            FAULT_FLAG:[],
+            TIME_COLUMN_NAME: [],
+            FAULT_FLAG: [],
             "preFlag": [],
         })
     threshold_avg_lat = 100
@@ -513,18 +525,24 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
     # result1.set_index(TIME_COLUMN_NAME, inplace=True)
     return result
 
+
 """
 预测机柜功率封顶导致的121异常
 """
-def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame):
+
+
+def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, inputDict: Dict):
     if len(l2_serverdata) == 0:
         return []
     select_data = smoothseries(l2_serverdata[["cabinet_power"]])
     freq = smoothseries(l2_serverdata["freq"]).tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
+    freqthreshold = 90
+    if "freqDownThresholdpercent" in inputDict.keys():
+        freqthreshold = 100 - inputDict["freqDownThresholdpercent"]
     for i in range(len(result)):
-        if freq[i] > 90:
+        if freq[i] > freqthreshold:
             result[i] = 0
     return result
 
@@ -534,15 +552,20 @@ def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata:
 需要把121 131结果作为参数传入进来
 """
 
-def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame]):
+
+def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame,
+                               resultPds: List[pd.DataFrame], inputDict: Dict):
     if len(l2_serverdata) == 0:
         return []
     select_data = smoothseries(l2_serverdata[["power"]])
     freq = smoothseries(l2_serverdata["freq"]).tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
+    freqthreshold = 90
+    if "freqDownThresholdpercent" in inputDict.keys():
+        freqthreshold = 100 - inputDict["freqDownThresholdpercent"]
     for i in range(len(result)):
-        if freq[i] > 90 or result[i] != 111:
+        if freq[i] > freqthreshold or result[i] != 111:
             result[i] = 0
     for pd in resultPds:
         res_list = pd["preFlag"].tolist()
@@ -556,15 +579,21 @@ def predictServer_PowerCapping(model_path: str, model_type: str, l2_serverdata: 
 预测CPU异常下降导致的161异常
 需要传入121 131结果
 """
-def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, resultPds: List[pd.DataFrame])-> List:
+
+
+def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFrame,
+                      resultPds: List[pd.DataFrame], inputDict: Dict) -> List:
     if len(l2_serverdata) == 0:
         return []
     select_data = smoothseries(l2_serverdata[["power"]])
     freq = smoothseries(l2_serverdata["freq"]).tolist()
     model = joblib.load(os.path.join(model_path, model_type + ".pkl"))
     result = model.predict(select_data)
+    freqthreshold = 90
+    if "freqDownThresholdpercent" in inputDict.keys():
+        freqthreshold = 100 - inputDict["freqDownThresholdpercent"]
     for i in range(len(result)):
-        if freq[i] > 90 or result[i] != 161:
+        if freq[i] > freqthreshold or result[i] != 161:
             result[i] = 0
     for pd in resultPds:
         res_list = pd["preFlag"].tolist()
@@ -573,10 +602,14 @@ def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFr
                 result[i] = 0
     return result
 
+
 """
 预测是否为Cache抢占，由于cachegrab模型的作用是用来判断是否是50和90，所以还需要将50的结果传入进来
 """
-def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, modelfilepath: str = None, modeltype=0)->List:
+
+
+def predictCacheGrab(l2_serverdata: pd.DataFrame, bandwidthResult: pd.DataFrame, modelfilepath: str = None,
+                     modeltype=0, inputDict: Dict = None) -> List:
     bandwidthrList = bandwidthResult["preFlag"].tolist()
     rd_wr_sumList = select_and_pred(l2_serverdata, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     assert len(rd_wr_sumList) == len(bandwidthrList)
@@ -587,14 +620,15 @@ def predictCacheGrab(l2_serverdata: pd.DataFrame,bandwidthResult: pd.DataFrame, 
             continue
         # 现在预测为50或90
         if bandwidthrList[i] == 50:
-            resList.append(0) # 现在是50了，那代表不是90
+            resList.append(0)  # 现在是50了，那代表不是90
             continue
         resList.append(90)
     return resList
 
-# 对数据进行处理
-def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame, bandwidthResult: pd.DataFrame,inputDict: Dict, detectJsonDict: Dict):
 
+# 对数据进行处理
+def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
+                      bandwidthResult: pd.DataFrame, inputDict: Dict, detectJsonDict: Dict):
     def getMflopschange(itopdownpd: pd.DataFrame) -> pd.Series:
         cname = "mflops"
         # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
@@ -614,8 +648,9 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
         return mflops_change
 
     # 对读写操作进行补偿措施
-     # 保证iserverpds和itodownpds时间与时间相互匹配
-    def compensateRW(itopdownpd: pd.DataFrame, iserverpd: pd.DataFrame, iprocesspd: pd.DataFrame, detectJson: Dict, inplace=True):
+    # 保证iserverpds和itodownpds时间与时间相互匹配
+    def compensateRW(itopdownpd: pd.DataFrame, iserverpd: pd.DataFrame, iprocesspd: pd.DataFrame, detectJson: Dict,
+                     inplace=True):
         if inplace:
             itopdownpd = itopdownpd.copy()
         # 对itopdownpd中的mflops进行平滑处理
@@ -650,8 +685,8 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
 
     # 先把必要的提取
     modeltype = inputDict["cachegrab_modeltype"]
-    modelfilepath =  inputDict["cachegrab_modelpath"]
-    ttopdownpd = compensateRW(alltopdownpds,allserverpds, allprocesspds, detectJsonDict)
+    modelfilepath = inputDict["cachegrab_modelpath"]
+    ttopdownpd = compensateRW(alltopdownpds, allserverpds, allprocesspds, detectJsonDict)
     if inputDict["isExistFaultFlag"]:
         ttopdownpd[FAULT_FLAG] = alltopdownpds[FAULT_FLAG]
 
@@ -668,7 +703,6 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
     if inputDict["debugpath"] is not None:
         tpath = os.path.join(inputDict["debugpath"], "abnormalInfo", "cacheGrab")
         savepdfile(tdebug, spath=tpath, filename="debug90.csv")
-
 
     resList = []
     for itime, ivalue in cacheResult.items():
