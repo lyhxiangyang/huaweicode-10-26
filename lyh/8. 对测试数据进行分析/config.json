@@ -1,6 +1,8 @@
 {
     "predictdirjsonpath": "DATA/2022-01-14新的测试数据/1.wrf_1km_cpu_64/centos11/jsonfile/alljson.json",
-    "spath": "DATA/2022-01-14新的测试数据/1.wrf_1km_cpu_64/centos11/jsonfile/中间结果文件生成",
+    "debugpath": null,
+    "resultsavepath": null,
+    "outputJsonFilename": "output.json",
     "processcpu_modelpath":"hpc/models/l3/process_cpu_model",
     "servermemory_modelpath":"hpc/models/l3/memory_leak_model",
     "serverbandwidth_modelpath":"hpc/models/l3/memory_bandwidth_model",
@@ -22,8 +24,7 @@
     "network_pfctype":0,
     "network_txhang_type":0,
     "meanNormalDataNumber": 10,
-    "resultsavepath": null,
-    "outputJsonFilename": "output.json",
+    "spath": null,
     "isExistFaultFlag": true,
     "isTimeisStr": true,
     "server_feature": ["mem_used", "pgfree", "freq", "usr_cpu", "kernel_cpu"],
@@ -42,9 +43,33 @@
     "memleakpermin": 700,
     "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
+    "abnormalCpuTimeThread": 45,
 
     "normalpath": null,
 
     "maxflopsinio": 1000,
-    "pgfree_thread": 2000000
+    "pgfree_thread": 2000000,
+    "ddrc_ddwr_sum_max": 6000,
+    "normalDataMean": {
+        "server": {
+            "pgfree": 2000000
+        },
+        "compute": {
+
+        },
+        "process": {
+
+        },
+        "nic": {
+
+        },
+        "ping": {
+
+        },
+        "topdown": {
+            "mflops": 27000,
+            "ddrc_wr": 20000,
+            "ddrc_rd": 58000
+        }
+    }
 }

@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import time
 from typing import List
@@ -34,17 +35,6 @@ def processing(filepath: str, filename: str = None):
         df["faultFlag"] = 0
 
     df = df.dropna()
-    # 修改列名 去掉每个文件中的空格
-    df = df.copy()
-    df['flag'] = df['faultFlag'].apply(lambda x: x % 10)
-    df = df.dropna()
-    return df
-
-def processingpd(df: pd.DataFrame):
-    if "time" in df.columns.array:
-        df.set_index("time", inplace=True)
-    if "faultFlag" not in df.columns:
-        df["faultFlag"] = 0
     # 修改列名 去掉每个文件中的空格
     df = df.copy()
     df['flag'] = df['faultFlag'].apply(lambda x: x % 10)

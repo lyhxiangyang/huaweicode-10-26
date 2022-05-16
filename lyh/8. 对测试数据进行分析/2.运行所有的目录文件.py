@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import sys
 import time
@@ -14,6 +15,7 @@ alldatadirs = [
     R"DATA/测试数据/Grapes/test1",
     R"DATA/测试数据/Grapes/国家超算",
     R"D:\patent\wrf_grapes_all.zip\post",
+    R"DATA/测试数据/Openfoam/input1",
 ]
 
 
@@ -47,6 +49,7 @@ if __name__ == "__main__":
         startTime1 = time.perf_counter()
         configJsonDict["predictdirjsonpath"] = os.path.join(ipath, "jsonfile", "alljson.json")
         configJsonDict["spath"] = os.path.join(ipath, "jsonfile", "中间结果生成50_80_90_again")
+        configJsonDict["debugpath"] = os.path.join(ipath, "jsonfile", "debugpath")
         # 存在中间文件就继续
         if os.path.exists(configJsonDict["spath"]):
             continue
