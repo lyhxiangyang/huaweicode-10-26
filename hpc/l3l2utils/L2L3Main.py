@@ -376,13 +376,6 @@ def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.Da
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "4.CPU异常检测中间文件")
     l3cpuresult = detectL3CPUAbnormal(allserverpds=allserverpds, allprocesspds=allprocesspds, inputConfig=inputDict)
-    # l3cpuresult = pd.DataFrame()
-    # l3cpuresult[TIME_COLUMN_NAME] = alltimepds[TIME_COLUMN_NAME]
-    # if inputDict["isExistFaultFlag"]:
-    #     l3cpuresult[FAULT_FLAG] = alltimepds[FAULT_FLAG]
-    # l3cpuresult["preFlag"] = detectL3CPUAbnormal(allserverpds=alltimepds, allprocesspds=allprocesspds, spath=tpath,
-    #                                              modelfilepath=inputDict["processcpu_modelpath"],
-    #                                              modeltype=inputDict["processcpu_modeltype"])
 
     print("对L3层内存泄露进行检测".center(40, "*"))
     l3memleakresult = detectL3MemLeakAbnormal(allserverpds=allserverpds, allprocesspd=allprocesspds,

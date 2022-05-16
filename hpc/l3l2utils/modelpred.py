@@ -93,7 +93,7 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
     wrfruncoresnumber, coresSet = getcores(allprocesspds)
     cpuabnormalList = predictcpu(serverinformationDict, wrfruncoresnumber)
     # 将server数据中load1结合检测80
-    cpuabnormalList = predictRandomCpu(allserverpds, cpuabnormalList)
+    cpuabnormalList = predictRandomCpu(allserverpds, cpuabnormalList, inputDict=inputConfig)
     # 将字典中的数据进行保存 ==========================================================================================
     if spath is not None:
         if not os.path.exists(spath):
@@ -284,7 +284,34 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 """
 
 
-def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List) -> List:
+def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List, inputDict: Dict) -> List:
+    debugpd = pd.DataFrame()
+    serverpd = serverpd.copy()
+    debugpd["time"] = serverpd[TIME_COLUMN_NAME] #debug
+    if inputDict["isExistFaultFlag"]:
+        debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG] # debug
+    assert len(serverpd) == len(cpuabnormalList)
+    debugpd["load1"] = serverpd["load1"] #debug
+    serverpd["load1"] = smoothseries(serverpd["load1"])
+    debugpd["load1_smooth"] = serverpd["load1"] # debug
+
+    load1mean = getNormalDataMean(inputDict, [serverpd], ["load1"], filetype="server")["load1"]
+    debugpd["load1_mean"] = load1mean # debug
+    load1thread = inputDict["randomcpuThreshold"]
+    debugpd["load1_thread"] = load1mean + load1thread # debug
+    randomcpuList = [ 80 if iload > load1mean + load1thread else 0 for iload in serverpd["load1"]]
+
+    for i in range(0, len(randomcpuList)):
+        if randomcpuList[i] == 0:
+            continue
+        if cpuabnormalList[i] in [10, 20 , 30 , 80]:
+            continue
+        cpuabnormalList[i] = 80
+    debugpd["predict_result"] = cpuabnormalList # debug
+    # 将cpu的debug进行存储
+    if inputDict["debugpath"] is not None:
+        tpath = os.path.join(inputDict["debugpath"],"abnormalInfo", "cpuabnormal")
+        savepdfile(debugpd, tpath, "randomcpu.csv")
     return cpuabnormalList
 
 

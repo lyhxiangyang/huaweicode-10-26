@@ -45,15 +45,15 @@
     "cpuReadCharsMax": 10000,
     "abnormalCpuTimeThread": 56.5,
     "freqDownThresholdpercent": 50,
+    "randomcpuThreshold": 5,
 
     "normalpath": null,
-
     "maxflopsinio": 1000,
     "pgfree_thread": 2000000,
     "ddrc_ddwr_sum_max": 6000,
     "normalDataMean": {
         "server": {
-            "pgfree": 2000000
+            "freq": 2000
         },
         "compute": {
 
@@ -68,9 +68,6 @@
 
         },
         "topdown": {
-            "mflops": 27000,
-            "ddrc_wr": 20000,
-            "ddrc_rd": 58000
         }
     }
 }

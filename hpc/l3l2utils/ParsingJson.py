@@ -371,6 +371,7 @@ def JoinWorkingDirPathFromConfig(workpath: str, configJsonDict: Dict) -> Dict:
             configJsonDict[ikeynames] = os.path.join(workpath, configJsonDict[ikeynames])
 
 # 从inputConfig文件中得到正常运行的稳定值
+#
 def getNormalDataMean(inputConfigjson: Dict, datapd: List[pd.DataFrame], features: List[str], filetype: str="server") -> pd.Series:
     alldatapd = mergeDataFrames(datapd)
     meanSeries = getSeriesFrequencyMeanLists(alldatapd, features, bins=10)
