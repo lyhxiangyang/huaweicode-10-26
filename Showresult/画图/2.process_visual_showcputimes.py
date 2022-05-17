@@ -68,7 +68,8 @@ def getpidcpuInfo(processpd: pd.DataFrame):
         cname = "core{}_cpu".format(icore)
         cpuSeries = pd.Series(data=icorepd["cpu"], name=cname)
         respd = pd.concat([respd, cpuSeries], axis=1)
-        respd[FAULTFLAG] = icorepd[FAULTFLAG]
+        if FAULTFLAG not in respd.columns.tolist():
+            respd[FAULTFLAG] = icorepd[FAULTFLAG]
     respd.fillna(-1, inplace=True)
     respd.reset_index(drop=False, inplace=True)
     return respd
