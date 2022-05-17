@@ -86,6 +86,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         #     pgfree_mean = iserverpd["pgfree"].iloc[15:17]
         debugpd["pgfree_mean"] = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]#debugpd
         debugpd["pgfree_mean_10"] = iserverpd[cname].iloc[0:10].mean()
+        debugpd["pgfree_mean_all"] = getSeriesFrequencyMean(iserverpd[cname])
 
         iserverpd[cname] = iserverpd[cname] + pgfree_mean * changes
 
@@ -136,7 +137,8 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         debugpd["mflops_delete"] = itopdownpd[cname]
         #2
         debugpd["mflops_mean_10"] = itopdownpd[cname].iloc[0:10].mean()
-        debugpd["mflops_mean"] = getSeriesFrequencyMean(itopdownpd[cname])
+        debugpd["mflops_mean_all"] = getSeriesFrequencyMean(itopdownpd[cname])
+        debugpd["mflops_mean"] = getNormalDataMean(inputDict, [itopdownpd], ["mflops"], "topdown")["mflops"]
 
         mflops_normal_iomax = 15000
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean  else 0)
@@ -177,6 +179,8 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[rd_cname] = itopdownpd[rd_cname].rolling(window=5, center=True, min_periods=1).mean()
         debugpd["ddrc_rd"] = itopdownpd[rd_cname]
+        debugpd["ddrc_rd_means_10"] = itopdownpd[rd_cname].iloc[0:10].mean()
+        debugpd["ddrc_rd_mean_all"] = getSeriesFrequencyMean(itopdownpd[rd_cname])
         ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
         itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * change
         debugpd["ddrc_rd_means"] = ddrc_rd_mean
@@ -186,14 +190,15 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         wr_cname = "ddrc_wr"
         itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         itopdownpd[wr_cname] = itopdownpd[wr_cname].rolling(window=5, center=True, min_periods=1).mean()
-        debugpd[wr_cname] = itopdownpd[wr_cname]
+        debugpd["ddrc_wr"] = itopdownpd[wr_cname]
+        debugpd["ddrc_wr_means_10"] = itopdownpd[rd_cname].iloc[0:10].mean()
+        debugpd["ddrc_wr_mean_all"] = getSeriesFrequencyMean(itopdownpd[rd_cname])
         ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
         itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * change
         debugpd["ddrc_wr_means"] = ddrc_rd_mean
         debugpd["ddrc_wr_mflops"] = itopdownpd[wr_cname]
 
         debugpd["ddrc_ddwr_sum_mean"] = debugpd["ddrc_rd_means"] + debugpd["ddrc_wr_means"]
-
         # 对rd_wr_sum进行结合 减去平均值  阈值与6000比较
         rd_wr_cname = "ddrc_ddwr_sum"
         itopdownpd[rd_wr_cname] = itopdownpd[rd_cname] + itopdownpd[wr_cname]
