@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import time
 from typing import List
@@ -65,6 +66,8 @@ def getpidcpuInfo(processpd: pd.DataFrame):
     processpd.set_index("time", inplace=True)
     for icore, icorepd in processpd.groupby("cpu_affinity"):
         # icorepd = icorepd.reset_index(drop=True)
+        # 去重
+        icorepd = icorepd[~icorepd.index.duplicated(keep="first")]
         cname = "core{}_cpu".format(icore)
         cpuSeries = pd.Series(data=icorepd["cpu"], name=cname)
         respd = pd.concat([respd, cpuSeries], axis=1)
