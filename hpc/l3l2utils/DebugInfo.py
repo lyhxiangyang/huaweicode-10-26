@@ -17,7 +17,6 @@ from hpc.l3l2utils.ParsingJson import getNormalServerMean, getNormalTopdownMean,
 """
 def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdownpd: pd.DataFrame, inputDict: Dict = None, detectionJson: Dict = None) -> pd.DataFrame:
     debugpd = pd.DataFrame()
-
     def getMflopschange(itopdownpd: pd.DataFrame) -> pd.Series:
         cname = "mflops"
         # itopdownpd = removeUselessDataFromTopdownList([itopdownpd])[0]
@@ -37,7 +36,7 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         #2
         debugpd["mflops_mean_10"] = itopdownpd[cname].iloc[0:10].mean()
         debugpd["mflops_mean_all"] = getSeriesFrequencyMean(itopdownpd[cname])
-        debugpd["mflops_mean"] = getNormalDataMean(inputDict, [itopdownpd], ["mflops"], "topdown")
+        debugpd["mflops_mean"] = getNormalDataMean(inputDict, [itopdownpd], ["mflops"], "topdown")["mflops"]
 
         mflops_normal_iomax = 15000
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean  else 0)

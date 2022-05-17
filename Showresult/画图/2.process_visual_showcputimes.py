@@ -74,6 +74,7 @@ def getpidcpuInfo(processpd: pd.DataFrame):
         if FAULTFLAG not in respd.columns.tolist():
             respd[FAULTFLAG] = icorepd[FAULTFLAG]
     respd.fillna(-1, inplace=True)
+    respd.index.name = "time"
     respd.reset_index(drop=False, inplace=True)
     return respd
 
