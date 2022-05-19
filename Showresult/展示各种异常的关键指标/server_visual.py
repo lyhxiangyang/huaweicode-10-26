@@ -29,11 +29,12 @@ def processing(filepath: str, filename: str = None):
     file = filepath
     if filename is not None:
         file = os.path.join(filepath, filename)
-    df = pd.read_csv(file, index_col="time")
+    df = pd.read_csv(file)
     df: pd.DataFrame
     if "faultFlag" not in df.columns:
         df["faultFlag"] = 0
     df = differenceServer([df], ["pgfree", "usr_cpu", "kernel_cpu"])[0]
+    df.set_index("time", inplace=True)
     df["cpu"] = df["usr_cpu"] + df["kernel_cpu"]
     df["freq_smooth"] = smoothseries(df["freq"])
     df = df.dropna()
