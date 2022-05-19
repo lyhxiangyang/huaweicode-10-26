@@ -23,7 +23,7 @@ from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, g
 from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
     predictTemp, \
     detectNetwork_TXHangAbnormal, predictL2_CPUDown, predictCacheGrab, predictCabinet_PowerCapping, \
-    predictServer_PowerCapping, detectL3BandWidthAbnormal1, predictCacheGrab1
+    predictServer_PowerCapping, detectL3BandWidthAbnormal1, predictCacheGrab1, setNormalPeriodTime
 
 """
 time faultFlag preFlag
@@ -361,15 +361,15 @@ def FeatureextractionData(inputDict: Dict, requestData: Dict = None):
 def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
                       alll2pds: pd.DataFrame, allnetworkpds: pd.DataFrame, allpingpds: pd.DataFrame,
                       alltopdownpds: pd.DataFrame) -> pd.DataFrame:
-    # 需要用到的特征值
-    resfeatures = [TIME_COLUMN_NAME, FAULT_FLAG, "preFlag"]
-
     # 默认条件
     defaultreslt = pd.DataFrame()
     defaultreslt[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
     defaultreslt["preFlag"] = 0
     if inputDict["isExistFaultFlag"]:
         defaultreslt[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+
+    # 将一些明显的时间点置为正常
+    normalres = setNormalPeriodTime(allserverpds, alltopdownpds, allprocesspds, inputDict, detectJsonDict)
 
     print("对L3层CPU异常进行预测".center(40, "*"))
     tpath = None
@@ -477,7 +477,7 @@ def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.Da
     #      l2temperamentresult, l2networkresult1, l2networkresult2, l2cpudownresult],
     #     isExistFlag=inputDict["isExistFaultFlag"])
     allresultspd = mergeouterPredictResult(
-        [defaultreslt, l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult, l2machinepowerresult,
+        [defaultreslt, normalres ,l3cpuresult, l3memleakresult, l3BandWidthResult, l3CacheGrabResult, l2machinepowerresult,
          l2cabinetpowerresult,
          l2temperamentresult, l2cpudownresult],
         isExistFlag=inputDict["isExistFaultFlag"])

@@ -287,31 +287,31 @@ def predictcpu(serverinformationDict: Dict, coresnumber: int = 0) -> List[int]:
 def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List, inputDict: Dict) -> List:
     debugpd = pd.DataFrame()
     serverpd = serverpd.copy()
-    debugpd["time"] = serverpd[TIME_COLUMN_NAME] #debug
+    debugpd["time"] = serverpd[TIME_COLUMN_NAME]  # debug
     if inputDict["isExistFaultFlag"]:
-        debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG] # debug
+        debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]  # debug
     assert len(serverpd) == len(cpuabnormalList)
-    debugpd["load1"] = serverpd["load1"] #debug
+    debugpd["load1"] = serverpd["load1"]  # debug
     serverpd["load1"] = smoothseries(serverpd["load1"], windows=3)
-    debugpd["load1_smooth"] = serverpd["load1"] # debug
+    debugpd["load1_smooth"] = serverpd["load1"]  # debug
 
     load1mean = getNormalDataMean(inputDict, [serverpd], ["load1"], filetype="server")["load1"]
-    debugpd["load1_mean"] = load1mean # debug
+    debugpd["load1_mean"] = load1mean  # debug
     load1thread = inputDict["randomcpuThreshold"]
-    debugpd["load1_thread"] = load1mean + load1thread # debug
-    randomcpuList = [ 80 if iload > load1mean + load1thread else 0 for iload in serverpd["load1"]]
+    debugpd["load1_thread"] = load1mean + load1thread  # debug
+    randomcpuList = [80 if iload > load1mean + load1thread else 0 for iload in serverpd["load1"]]
 
-    debugpd["predict_result_before"] = cpuabnormalList # debug
+    debugpd["predict_result_before"] = cpuabnormalList  # debug
     for i in range(0, len(randomcpuList)):
         if randomcpuList[i] == 0:
             continue
-        if cpuabnormalList[i] in [10, 20 , 30 , 80]:
+        if cpuabnormalList[i] in [10, 20, 30, 80]:
             continue
         cpuabnormalList[i] = 80
-    debugpd["predict_result_after"] = cpuabnormalList # debug
+    debugpd["predict_result_after"] = cpuabnormalList  # debug
     # 将cpu的debug进行存储
     if inputDict["debugpath"] is not None:
-        tpath = os.path.join(inputDict["debugpath"],"abnormalInfo", "cpuabnormal")
+        tpath = os.path.join(inputDict["debugpath"], "abnormalInfo", "cpuabnormal")
         savepdfile(debugpd, tpath, "randomcpu.csv")
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "abnormalInfo", "cpuabnormal")
@@ -755,3 +755,29 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
         restpd[FAULT_FLAG] = ttopdownpd[FAULT_FLAG]
     restpd["preFlag"] = resList
     return restpd
+
+
+"""
+将一些明显正常的点设置为正常数据
+即改为-1
+# 1. servercpu 下降幅度超过1/3算是正常
+"""
+
+
+def setNormalPeriodTime(allserverpds, alltopdownpds, allprocesspds, inputDict, detectionJson):
+    # defaultreslt = pd.DataFrame()
+    # defaultreslt[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
+    # defaultreslt["preFlag"] = 0
+    # if inputDict["isExistFaultFlag"]:
+    #     defaultreslt[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+
+    # 1. servercpu下降幅度超过1/3算是正常
+    allserverpds = allserverpds.copy()
+    servercpu_mean = getNormalDataMean(inputDict, allserverpds, ["cpu"])["cpu"]
+    servercputhreshold = servercpu_mean * 1 / 3
+    normalres = pd.DataFrame()
+    normalres[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
+    normalres["preFlag"] = allserverpds["cpu"].apply(lambda x: 0 if x > servercputhreshold else -1)
+    if inputDict["isExistFaultFlag"]:
+        normalres[FAULT_FLAG] = allserverpds[FAULT_FLAG]
+    return normalres

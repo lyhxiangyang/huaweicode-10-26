@@ -35,7 +35,7 @@ def processing(filepath: str, filename: str = None):
         df["faultFlag"] = 0
     df = differenceServer([df], ["pgfree", "usr_cpu", "kernel_cpu"])[0]
     df["cpu"] = df["usr_cpu"] + df["kernel_cpu"]
-    df["freq_smooth"] = smoothseries(df["freq_smooth"])
+    df["freq_smooth"] = smoothseries(df["freq"])
     df = df.dropna()
     # 修改列名 去掉每个文件中的空格
     df = df.copy()
