@@ -81,8 +81,8 @@ def preproccessConfigfile(inputDict: Dict) -> Dict:
                                  MODEL_TYPE[inputDict["processcpu_modeltype"]] + ".pkl")
         cputhread = inputDict["abnormalCpuTimeThread"]
         changeFirstThread(modelpath, cputhread)
-    modelpath1 = os.path.join(inputDict["power_cabinet_modelpath"],
-                              MODEL_TYPE[inputDict["power_cabinet_modeltype"]] + ".pkl")
+    modelpath1 = os.path.join(inputDict["power_machine_modelpath"],
+                              MODEL_TYPE[inputDict["power_machine_modeltype"]] + ".pkl")
     modelpath2 = os.path.join(inputDict["cpudown_modelpath"],
                               MODEL_TYPE[inputDict["cpudown_modeltype"]] + ".pkl")
     if "power_threshold" in inputDict.keys():
@@ -91,6 +91,9 @@ def preproccessConfigfile(inputDict: Dict) -> Dict:
         power_thres = 91.5
     changeFirstThread(modelpath1, power_thres)
     changeFirstThread(modelpath2, power_thres)
+    modelpath = os.path.join(inputDict["power_cabinet_modelpath"],
+                              MODEL_TYPE[inputDict["power_cabinet_modeltype"]] + ".pkl")
+    changeFirstThread(modelpath, 105.5)
 
     # 对文件中的各个平均值进行处理 pgfree mflops ddrc_rd ddrc_wr
     if inputDict["normalpath"] is not None:
