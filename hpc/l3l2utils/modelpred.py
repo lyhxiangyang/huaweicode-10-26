@@ -773,7 +773,7 @@ def setNormalPeriodTime(allserverpds, alltopdownpds, allprocesspds, inputDict, d
 
     # 1. servercpu下降幅度超过1/3算是正常
     allserverpds = allserverpds.copy()
-    servercpu_mean = getNormalDataMean(inputDict, allserverpds, ["cpu"])["cpu"]
+    servercpu_mean = getNormalDataMean(inputDict, [allserverpds], ["cpu"], filetype="server")["cpu"]
     servercputhreshold = servercpu_mean * 1 / 3
     normalres = pd.DataFrame()
     normalres[TIME_COLUMN_NAME] = allserverpds[TIME_COLUMN_NAME]
