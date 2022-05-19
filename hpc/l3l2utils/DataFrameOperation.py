@@ -96,8 +96,9 @@ def mergeouterPredictResult(pds: List[pd.DataFrame], isExistFlag: bool = True) -
         if -1 in xlist:
             # 如果-1在这里，说明这个时间点process中没有wrf运行，那么我们去除
             # 把server预测的结果删掉 小于100的数值去掉，然后将0去掉
-            xlist = [ilist for ilist in xlist if ilist > 100]
-            xlist.append(0)
+            # xlist = [ilist for ilist in xlist if ilist > 100]
+            # xlist.append(0)
+            xlist = [0]
         xlist = sorted(list(xlist))
         # 如果有多个preFlag，那么就显示除了之外的所有preFlag
         if len(xlist) > 1:
