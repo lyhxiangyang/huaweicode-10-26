@@ -1,12 +1,8 @@
 # coding=utf-8
-import os
-import time
-from typing import List
 
 import pandas as pd
 import plotly.graph_objs as go
 
-from hpc.l3l2utils.DataFrameOperation import smoothseries
 from hpc.l3l2utils.DataOperation import changeTimeToFromPdlists
 from hpc.l3l2utils.FeatureExtraction import differenceProcess
 

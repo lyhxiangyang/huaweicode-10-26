@@ -411,20 +411,16 @@ def detectionL2L3Data(inputDict: Dict, detectJsonDict: Dict, allserverpds: pd.Da
     if inputDict["isExistFaultFlag"]:
         l2temperamentresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     # l2temperamentresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[tempertature_modeltype], saved_model_path=temperature_modelpath))
-    l2temperamentresult["preFlag"] = ThransferRightLabels(predictTemp(model_path=inputDict["temperature_modelpath"],
-                                                                      model_type=MODEL_TYPE[
-                                                                          inputDict["tempertature_modeltype"]],
-                                                                      data=l2_serverpds))
+    l2temperamentresult["preFlag"] = ThransferRightLabels(
+        predictTemp(inputDict=inputDict, detectJsonDict=detectJsonDict, data=l2_serverpds))
+
     print("2. 对L2机柜封顶进行预测".center(40, "#"))
     l2cabinetpowerresult = pd.DataFrame()
     l2cabinetpowerresult[TIME_COLUMN_NAME] = l2_serverpds[TIME_COLUMN_NAME]
     if inputDict["isExistFaultFlag"]:
         l2cabinetpowerresult[FAULT_FLAG] = l2_serverpds[FAULT_FLAG]
     # l2cabinetpowerresult["preFlag"] = ThransferRightLabels(select_and_pred(l2_serverpds, MODEL_TYPE[inputDict["power_cabinet_modeltype"]], saved_model_path=inputDict["power_cabinet_modelpath"]))
-    l2cabinetpowerresult["preFlag"] = predictCabinet_PowerCapping(model_path=inputDict["power_cabinet_modelpath"],
-                                                                  model_type=MODEL_TYPE[
-                                                                      inputDict["power_cabinet_modeltype"]],
-                                                                  l2_serverdata=l2_serverpds, inputDict=inputDict)
+    l2cabinetpowerresult["preFlag"] = predictCabinet_PowerCapping(l2_serverdata=l2_serverpds, inputDict=inputDict)
 
     print("3. 对L2机器封顶进行预测".center(40, "#"))
     l2machinepowerresult = pd.DataFrame()

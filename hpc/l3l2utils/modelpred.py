@@ -325,7 +325,14 @@ def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List, inputDict: D
 """
 
 
-def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
+def predictTemp(inputDict: Dict, detectJsonDict: Dict, data: pd.DataFrame):
+    model_path = inputDict["temperature_modelpath"]
+    model_type = MODEL_TYPE[inputDict["tempertature_modeltype"]]
+    debugpd = pd.DataFrame()
+    debugpd["time"] = data["time"] # debug
+    if inputDict["isExistFaultFlag"] is not None:
+        debugpd[FAULT_FLAG] = data[FAULT_FLAG] #debug
+
     if len(data) == 0:
         return []
     FANSFeatures = [
@@ -339,6 +346,9 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
         "cpu1_mem_temp", "cpu2_mem_temp", "cpu3_mem_temp", "cpu4_mem_temp",
         "pch_temp",
     ]
+    #debug begin
+    for ife in TEMPERATUREFeatures:
+        debugpd[ife] = data[ife]
 
     # FANSFeatures = getTrainedFeatures(data.columns.tolist(), ["FAN"])
     # TEMPERATUREFeatures = getTrainedFeatures(data.columns.tolist(), ["CPU"])
@@ -369,6 +379,12 @@ def predictTemp(model_path: str, model_type: str, data: pd.DataFrame):
                 if v == 4:
                     if result[k] == 0 or result[k] == 3:
                         result[k] = 4
+
+    # 将debug数据保存
+    if inputDict["debugpath"] is not None:
+        tpath = os.path.join(inputDict["debugpath"], "abnormalInfo", "l2temperature")
+        savepdfile(debugpd, spath=tpath, filename="l2temperature.csv")
+
     return result
 
 
@@ -460,7 +476,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
         # mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname])[cname]
         mflops_mean = getNormalDataMean(inputDict, [itopdownpd], [cname], filetype="topdown")[cname]
         mflops_normal_iomax = inputDict["maxflopsinio"]
-        # 将小于iomax的mflops设置为平均值
+        # 将小于iomax的mflops设置为平均值, 在处理的时候会将这部分的的变化率变成0
         itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
         itopdownpd[cname] = itopdownpd[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
         mflops_change = itopdownpd[cname].apply(lambda x: (mflops_mean - x) / mflops_mean if x < mflops_mean else 0)
@@ -562,7 +578,16 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
 """
 
 
-def predictCabinet_PowerCapping(model_path: str, model_type: str, l2_serverdata: pd.DataFrame, inputDict: Dict):
+def predictCabinet_PowerCapping(l2_serverdata: pd.DataFrame, inputDict: Dict):
+    model_path = inputDict["power_cabinet_modelpath"]
+    model_type = MODEL_TYPE[inputDict["power_cabinet_modeltype"]]
+    debugpd = pd.DataFrame()
+    debugpd["time"] = l2_serverdata["time"] # debug
+    if inputDict["isExistFaultFlag"] is not None:
+        debugpd[FAULT_FLAG] = l2_serverdata[FAULT_FLAG] #debug
+    debugpd["power"] = l2_serverdata["power"]
+    debugpd["cabinet_power"] = l2_serverdata["cabinet_power"]
+
     if len(l2_serverdata) == 0:
         return []
     select_data = smoothseries(l2_serverdata[["cabinet_power"]])

@@ -150,7 +150,7 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
 
 
 def smoothseries(cseries: pd.Series, windows=5)->pd.Series:
-    mediansmooth = cseries.rolling(window=5, min_periods=1, center=True).median()
+    mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
     meanmediansmooth = mediansmooth.rolling(window=windows, min_periods=1, center=True).mean()
     return meanmediansmooth
 def mediansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
@@ -180,6 +180,133 @@ def getSeriesFrequencyMean(dataseries: pd.Series, bins=10):
 def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=10):
     tseries = pd.Series()
     for ifeature in features:
-        tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature])
+        tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature], bins=bins)
     return tseries
+# 对于传入的features, 得到labels中的最大值
+def getSeriesMaxFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[str], features: List[str], bins=10):
+    resseries = pd.Series()
+    for ilabel in labels:
+        tpd = nowpd[FAULT_FLAG == ilabel]
+        tseries = getSeriesFrequencyMeanLists(tpd, features, bins=bins)
+        for i, v in tseries.item():
+            if i not in resseries:
+                resseries[i] = v
+            else:
+                resseries[i] = max(resseries[i], v)
+    return resseries
+
+# 对于传入的features, 得到labels中的最小值
+def getSeriesMinFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], features: List[str], bins=10):
+    resseries = pd.Series()
+    for ilabel in labels:
+        if ilabel not in nowpd[FAULT_FLAG].tolist():
+            continue
+        tpd = nowpd[FAULT_FLAG == ilabel]
+        tseries = getSeriesFrequencyMeanLists(tpd, features, bins=bins)
+        for i, v in tseries.item():
+            if i not in resseries:
+                resseries[i] = v
+            else:
+                resseries[i] = min(resseries[i], v)
+    return resseries
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
