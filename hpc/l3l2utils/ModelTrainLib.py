@@ -147,13 +147,13 @@ def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
     memorypd = getMemory(serverpd=serverpd, processpd=processpd)
     # 取 61 62 63 64 65中最小值的变化值为判断依据, 最后减少100M作为
     memory60_mean = getSeriesMinFrequencyMeanLists(memorypd, labels=modelconfigJson["memleaklabels"], features=["mem_sub"])["mem_sub"]
-    memory60_meanp90 = memory60_mean * 0.9
+    memory60_meanp80 = memory60_mean * 0.8
     memorypd["memsub60_mean"] = memory60_mean
-    memorypd["memsub60_mean_p60"] = memory60_meanp90
+    memorypd["memsub60_mean_p80"] = memory60_meanp80
     if modelconfigJson["debugpath"] is not None:
         tpath = os.path.join(modelconfigJson["debugpath"], "memleak60")
         savepdfile(memorypd, tpath, "memleakdebug.csv")
-    return memory60_meanp90
+    return memory60_meanp80
 
 
 """
@@ -517,7 +517,7 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
 
     normalpowermean = getSeriesFrequencyMeanLists(normalcomputedf, [cname])[cname]
     abnormalpowermean = getSeriesFrequencyMeanLists(abnormalcomputedf, [cname])[cname]
-    abnormal_abpowermean = getSeriesMinFrequencyMeanLists(abnormalcomputedf, labels=[121], features=["freq"])["freq"]
+    abnormal_abpowermean = getSeriesMinFrequencyMeanLists(abnormalcomputedf, labels=[121], features=["power"])["power"]
     debugpd["normalpowermean"] = normalpowermean
     debugpd["abnormalpowermean"] = abnormalpowermean
     debugpd["abnormal_abpowermean"] = abnormal_abpowermean
