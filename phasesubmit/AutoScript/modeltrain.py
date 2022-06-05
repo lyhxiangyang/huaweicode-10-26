@@ -32,7 +32,7 @@ if __name__ == "__main__":
         normalDataDict = getAllDataFramesFromDectionJson(normalInputDict)
     else:
         # 如果没有指定，那么normalInputDict来自于异常类型中的数值
-        normalInputDict = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in abnormalInputDict.items()])
+        normalDataDict = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in abnormalDataDict.items()])
 
     # 保证60内存泄露异常是存在的
     if isFlagsOr(abnormalDataDict["server"], configJsonDict["memleaklabels"]):
