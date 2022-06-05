@@ -459,7 +459,7 @@ def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, mode
     if modelconfigJson["debugpath"] is not None:
         tpath = os.path.join(modelconfigJson["debugpath"], "randomcpuThreshold")
         savepdfile(debugpd, tpath, "randomcpuThreshold.csv")
-    return abnormalload1mean508090 - normalload1mean
+    return (abnormalload1mean508090 - normalload1mean) * 0.9
 
 
 """  
