@@ -1,6 +1,6 @@
 {
-    "trainAbnormalDataPath": "D:\\HuaweiMachine\\huaweicode-10-26-copy\\huaweicode-10-26\\DATA\\测试数据\\WRF\\1KM\\3.wrf_1km_multi_l3\\centos11\\jsonfile\\alljson.json",
-    "trainNormalDataPath": "D:\\HuaweiMachine\\huaweicode-10-26-copy\\huaweicode-10-26\\DATA\\测试数据\\WRF\\1KM\\4.wrf_1km_multi_normal\\centos11\\jsonfile\\alljson.json",
+    "trainAbnormalDataPath": "DATA/新测试数据/qe/qe_3km_multi_L3/centos16/jsonfile/alljson.json",
+    "trainNormalDataPath": null,
     "outputpath": null,
     "debugpath": "tmp/traindebugpath",
 
