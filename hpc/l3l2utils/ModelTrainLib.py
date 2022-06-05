@@ -450,7 +450,7 @@ def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, mode
     # 正常load1
     normalload1mean = getSeriesFrequencyMeanLists(normalserverdf, ["load1"])["load1"]
     abnormalload1mean = getSeriesFrequencyMeanLists(abnormalserverdf, ["load1"])["load1"]
-    alllabels = modelconfigJson["randomcpulabels"] + modelconfigJson["memorybandwidthlabels"] + modelconfigJson["memleaklabels"]
+    alllabels = modelconfigJson["randomcpulabels"] + modelconfigJson["memorybandwidthlabels"] + modelconfigJson["cachegrablabels"]
     abnormalload1mean508090 = getSeriesMinFrequencyMeanLists(abnormalserverdf, labels=alllabels, features=["load1"])["load1"]
 
     debugpd["nomalload1mean"] = normalload1mean
