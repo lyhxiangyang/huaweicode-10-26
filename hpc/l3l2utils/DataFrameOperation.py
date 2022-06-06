@@ -186,6 +186,8 @@ def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=1
 def getSeriesMaxFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], features: List[str], bins=10):
     resseries = pd.Series()
     for ilabel in labels:
+        if ilabel not in nowpd[FAULT_FLAG].tolist():
+            continue
         tpd = nowpd[nowpd[FAULT_FLAG] == ilabel]
         tseries = getSeriesFrequencyMeanLists(tpd, features, bins=bins)
         for i, v in tseries.items():
