@@ -524,7 +524,7 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
         tpath = os.path.join(modelconfigJson["debugpath"], "power_threshold")
         savepdfile(debugpd, tpath, "power_threshold.csv")
     # resvalue = abnormal_abpowermean / normalpowermean * 100 * 1.1
-    resvalue = 100 - (normalpowermean - abnormal_abpowermean) / normalpowermean * 100 * 0.9
+    resvalue = (normalpowermean - abnormal_abpowermean) / normalpowermean * 100 * 0.9
     return resvalue
 
 
