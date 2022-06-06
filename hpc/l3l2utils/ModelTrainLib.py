@@ -494,7 +494,7 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
         tpath = os.path.join(modelconfigJson["debugpath"], "freqDownThresholdpercent")
         savepdfile(debugpd, tpath, "freqDownThresholdpercent.csv")
 
-    resvalue = 100 - (abnormal_abfreqmean - normalfreqmean) / normalfreqmean * 100 * 0.9
+    resvalue = 100 - (normalfreqmean - abnormal_abfreqmean) / normalfreqmean * 100 * 0.9
     return resvalue
 """
 必须有121的存在
