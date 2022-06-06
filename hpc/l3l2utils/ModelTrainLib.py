@@ -431,8 +431,8 @@ def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
     debugpd["cpuabnormalmean110"] = cpuabnormalmeanp110
 
     if modelconfigJson["debugpath"] is not None:
-        tpath = os.path.join(modelconfigJson["debugpath"], "judgeCPUthread")
-        savepdfile(debugpd, tpath, "judgeCPUthread.csv")
+        tpath = os.path.join(modelconfigJson["debugpath"], "abnormalCpuTimeThread")
+        savepdfile(debugpd, tpath, "abnormalCpuTimeThread.csv")
     return cpuabnormalmeanp110
 
 """
@@ -456,6 +456,7 @@ def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, mode
     debugpd["nomalload1mean"] = normalload1mean
     debugpd["abnormalddrdmean"] = abnormalload1mean
     debugpd["abnormalload1mean508090"] = abnormalload1mean508090
+    debugpd["abnormalload1mean508090p90"] = normalload1mean + (abnormalload1mean508090 - normalload1mean) * 0.9
     if modelconfigJson["debugpath"] is not None:
         tpath = os.path.join(modelconfigJson["debugpath"], "randomcpuThreshold")
         savepdfile(debugpd, tpath, "randomcpuThreshold.csv")
@@ -485,7 +486,7 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
 
     normalfreqmean = getSeriesFrequencyMeanLists(normalserverdf, [cname])[cname]
     abnormalfreqmean = getSeriesFrequencyMeanLists(abnormalserverdf, [cname])[cname]
-    abnormal_abfreqmean = getSeriesMinFrequencyMeanLists(abnormalserverdf, labels=[111,121,131,141,151,161], features=["freq"])["freq"]
+    abnormal_abfreqmean = getSeriesMaxFrequencyMeanLists(abnormalserverdf, labels=[111,121,131,141,151,161], features=["freq"])["freq"]
     debugpd["normalfreqmean"] = normalfreqmean
     debugpd["abnormalfreqmean"] = abnormalfreqmean
     debugpd["abnormal_abfreqmean"] = abnormal_abfreqmean
@@ -516,7 +517,7 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
 
     normalpowermean = getSeriesFrequencyMeanLists(normalcomputedf, [cname])[cname]
     abnormalpowermean = getSeriesFrequencyMeanLists(abnormalcomputedf, [cname])[cname]
-    abnormal_abpowermean = getSeriesMinFrequencyMeanLists(abnormalcomputedf, labels=[121], features=["power"])["power"]
+    abnormal_abpowermean = getSeriesMaxFrequencyMeanLists(abnormalcomputedf, labels=[121], features=["power"])["power"]
     debugpd["normalpowermean"] = normalpowermean
     debugpd["abnormalpowermean"] = abnormalpowermean
     debugpd["abnormal_abpowermean"] = abnormal_abpowermean

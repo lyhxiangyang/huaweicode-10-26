@@ -183,7 +183,7 @@ def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=1
         tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature], bins=bins)
     return tseries
 # 对于传入的features, 得到labels中的最大值
-def getSeriesMaxFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[str], features: List[str], bins=10):
+def getSeriesMaxFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], features: List[str], bins=10):
     resseries = pd.Series()
     for ilabel in labels:
         tpd = nowpd[nowpd[FAULT_FLAG] == ilabel]
