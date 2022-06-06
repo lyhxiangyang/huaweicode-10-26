@@ -274,10 +274,9 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     # 提取52 53 54 55的最小值
     # pgfree_abnorma50_mean = abstractMinMean(abnormalcpgfreedf, "pgfree", [52, 53, 54, 55])
     pgfree_abnorma50_mean =  getSeriesMinFrequencyMeanLists(abnormalcpgfreedf, labels=modelconfigJson["memorybandwidthlabels"], features=["pgfree"])["pgfree"]
-    pgfree_abnorma50_meanp90 = pgfree_abnorma50_mean * 0.9
     debugpd["abnormal_abnormalpgfree_mean"] = pgfree_abnorma50_mean
-    debugpd["abnormal_abnormalpgfree_meanp90"] = pgfree_abnorma50_meanp90
-    pgfreescope = pgfree_abnorma50_meanp90 - normalpgfreemean
+    pgfreescope = (pgfree_abnorma50_mean - normalpgfreemean) * 0.9
+    debugpd["abnormal_abnormalpgfree_addmean"] = normalmflopsmean + pgfreescope
 
     if modelconfigJson["debugpath"] is not None:
         debugpd = pd.concat([debugpd, pd.Series(name="normal_pgfree", data=normalserverdf["pgfree"])], axis=1)
