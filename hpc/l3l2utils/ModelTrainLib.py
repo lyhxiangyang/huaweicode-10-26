@@ -367,9 +367,9 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
     # 求解51 52 53 54 55 91 92 93 94 95
     # abnoraml_rd_wr_mean5090 = abstractMinMean(abnormaltopdowndf, rd_wr_cname, [51,52,53,54,55,91,92,93,94,95])
     abnoraml_rd_wr_mean5090 = getSeriesMinFrequencyMeanLists(abnormaltopdowndf, labels=modelconfigJson["memorybandwidthlabels"] + modelconfigJson["cachegrablabels"], features=["ddrc_ddwr_sum"])["ddrc_ddwr_sum"]
-    abnoraml_rd_wr_mean5090p90 = abnoraml_rd_wr_mean5090 * 0.9
     debugpd["ddrc_ddwr_sum_abnormal5090mean"] = abnoraml_rd_wr_mean5090
-    debugpd["ddrc_ddwr_sum_abnormal5090meanp90"] = abnoraml_rd_wr_mean5090p90
+    rd_wr_scope = (abnoraml_rd_wr_mean5090 - normal_rd_wr_mean) * 0.9
+    debugpd["ddrc_ddwr_sum_abnormal5090meanaddp90"] = normal_rd_wr_mean + rd_wr_scope
     if modelconfigJson["debugpath"] is not None:
         pdlists = [
             debugpd,
@@ -381,7 +381,7 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
         debugpd.fillna(-1, inplace=True)
         tpath = os.path.join(modelconfigJson["debugpath"], "ddrc_ddwr_sum")
         savepdfile(debugpd, tpath, "ddrc_ddwr_sum.csv")
-    return abnoraml_rd_wr_mean5090p90 - normal_rd_wr_mean
+    return rd_wr_scope
 
 def changeModel(configJsonDict: Dict, outputJsonDict: Dict):
     # 修改内存泄漏模型
