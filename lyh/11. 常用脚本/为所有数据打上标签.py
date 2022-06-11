@@ -74,7 +74,7 @@ def getOneDirPd(dirpath: str):
 def changeDataFrame(serverpd: pd.DataFrame, addflagpd: pd.DataFrame) -> pd.DataFrame:
     addflagpd = addflagpd.copy()
     if FAULT_FLAG in addflagpd.columns.array:
-        return pd.DataFrame()
+        return addflagpd
     serverTimesList = serverpd[TIME_COLUMN_NAME].tolist()
     serverFlagsList = serverpd[FAULT_FLAG].tolist()
     addflagpdTimeList = addflagpd[TIME_COLUMN_NAME].tolist()
@@ -112,6 +112,8 @@ if __name__ == "__main__":
     for idirpaths in dirpaths:
         for idir in getDirs(idirpaths): # 得到数据样例
             for inode in getDirs(idir):
+                if os.path.exists(os.path.join(inode, "server")):
+                    continue
                 # 得到server目录 process文件 topdown路径
                 print(inode)
                 fileDict = getServerProcessTopdownPath(inode)
