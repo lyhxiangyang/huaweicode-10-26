@@ -9,5 +9,6 @@
     "memorybandwidthlabels": [53,54,55],
     "cachegrablabels": [93, 94, 95],
     "allcpulabels": [13,14,15],
-    "randomcpulabels": [83, 84, 85]
+    "randomcpulabels": [83, 84, 85],
+    "l2labels": [111, 121, 131, 141, 151, 161]
 }

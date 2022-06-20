@@ -60,7 +60,7 @@ if __name__ == "__main__":
         # 得到randomcpu
         randomcpuThreshold = getRandomcpuThreshold(normalDataDict, abnormalDataDict, configJsonDict)
         outputJsonDict["randomcpuThreshold"] = randomcpuThreshold
-    if isFlagsOr(abnormalDataDict["server"], [111, 121]):
+    if isFlagsOr(abnormalDataDict["server"], configJsonDict["l2labels"]):
         # 得到freqDownThresholdpercent
         freqDownThresholdpercent = getFreqDownThresholdpercent(normalDataDict, abnormalDataDict, configJsonDict)
         outputJsonDict["freqDownThresholdpercent"] = freqDownThresholdpercent
