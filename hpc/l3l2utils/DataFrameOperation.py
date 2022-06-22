@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple, Any
 
 import pandas as pd
 
@@ -8,6 +8,8 @@ from hpc.l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME, PID_FEATURE
 True 表示所有的列名是相同的
 False 表示列名不相同
 """
+
+
 def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
     lcolumns = [list(i.columns.array) for i in lpds]
     # 长度为0的时候可以返回True
@@ -22,6 +24,7 @@ def judgeSameFrames(lpds: List[pd.DataFrame]) -> bool:
             c = lright - a
             return False
     return True
+
 
 """
 函数功能：合并多个DataFrame 返回值是一个合并之后的DataFrame 上下合并
@@ -48,7 +51,6 @@ def mergeDataFrames(lpds: List[pd.DataFrame], nullpd=pd.DataFrame()):
     # 将列表中的数据全都合并
     dfres = pd.concat(lpds, ignore_index=True)
     return dfres
-
 
 
 """
@@ -107,6 +109,7 @@ def mergeouterPredictResult(pds: List[pd.DataFrame], isExistFlag: bool = True) -
             if -1 in xlist:
                 xlist.remove(-1)
         return xlist
+
     if not judgeSameFrames(pds):
         print("mergeouterPredictResult 列名不相同")
         exit(1)
@@ -144,27 +147,37 @@ def mergeProceeDF(processpd: pd.DataFrame, sumFeatures=None, inplace=True):
     respd = mergeinnerTwoDataFrame(lpd=tpd, rpd=tpd1)
     return respd
 
+
 """
 对一个series进行中位数平滑，然后平均数平滑
 """
 
 
-def smoothseries(cseries: pd.Series, windows=5)->pd.Series:
+def smoothseries(cseries: pd.Series, windows=5) -> pd.Series:
     mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
     meanmediansmooth = mediansmooth.rolling(window=windows, min_periods=1, center=True).mean()
     return meanmediansmooth
-def mediansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+
+
+def mediansmoothseries(cseries: pd.Series, windows=5) -> pd.Series:
     mediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).median()
     return mediansmooth
-def meansmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+
+
+def meansmoothseries(cseries: pd.Series, windows=5) -> pd.Series:
     meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).mean()
     return meanmediansmooth
-def maxsmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+
+
+def maxsmoothseries(cseries: pd.Series, windows=5) -> pd.Series:
     meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).max()
     return meanmediansmooth
-def minsmoothseries(cseries: pd.Series, windows=5)->pd.Series:
+
+
+def minsmoothseries(cseries: pd.Series, windows=5) -> pd.Series:
     meanmediansmooth = cseries.rolling(window=windows, min_periods=1, center=True).min()
     return meanmediansmooth
+
 
 # 函数功能：将Series按照数值大小分为10份，取分布最广泛的那一份，然后取这一份的平均值
 def getSeriesFrequencyMean(dataseries: pd.Series, bins=10):
@@ -174,14 +187,18 @@ def getSeriesFrequencyMean(dataseries: pd.Series, bins=10):
     })
     tpd["cutdata"] = pd.cut(tpd["origindata"], bins=bins)
     # 得到最大值对应的索引，也就是分组
-    maxvaluecut=pd.value_counts(tpd["cutdata"]).idxmax()
+    maxvaluecut = pd.value_counts(tpd["cutdata"]).idxmax()
     meanvalues = tpd.groupby("cutdata").get_group(maxvaluecut)["origindata"].mean()
     return meanvalues
+
+
 def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=10):
     tseries = pd.Series()
     for ifeature in features:
         tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature], bins=bins)
     return tseries
+
+
 # 对于传入的features, 得到labels中的最大值
 def getSeriesMaxFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], features: List[str], bins=10):
     resseries = pd.Series()
@@ -196,6 +213,7 @@ def getSeriesMaxFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], featu
             else:
                 resseries[i] = max(resseries[i], v)
     return resseries
+
 
 # 对于传入的features, 得到labels中的最小值
 def getSeriesMinFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], features: List[str], bins=10):
@@ -213,102 +231,27 @@ def getSeriesMinFrequencyMeanLists(nowpd: pd.DataFrame, labels: List[int], featu
     return resseries
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# 对这个数据进行平滑之后，找到频率出现最多的那一点，波动最高的那一点， 波动最低的那一点
+def getSeiresMeanMaxMin(dataseries: pd.Series, bins: int = 10) -> Tuple[Any, Any, Any]:
+    dataseries = smoothseries(dataseries)
+    lendata = len(dataseries)
+    tpd = pd.DataFrame(data={
+        "origindata": dataseries
+    })
+    tpd["cutdata"] = pd.cut(tpd["origindata"], bins=bins)
+    vcountSeries = pd.value_counts(tpd["cutdata"]).sort_values(ascending=True)
+    # 去除一些特别少的点 少表示10%
+    vcountPercent = 0.1
+    vcountSeries = vcountSeries[vcountSeries > lendata * vcountPercent]
+    assert len(vcountSeries) != 0
+    maxvalueIndex = vcountSeries.sort_index(ascending=True).index[0]
+    minvalueIndex = vcountSeries.sort_index(ascending=True).index[-1]
+    maxfreqvalueIndex = vcountSeries.sort_values(ascending=True).index[-1]
+    tpdgroup = tpd.groupby("cutdata")
+    maxvaluecut = tpdgroup.get_group(maxvalueIndex)["origindata"].mean()
+    minvaluecut = tpdgroup.get_group(minvalueIndex)["origindata"].mean()
+    maxfreqvaluecut = tpdgroup.get_group(maxfreqvalueIndex)["origindata"].mean()
+    return maxfreqvaluecut, maxvaluecut, minvaluecut
 
 
 

@@ -102,12 +102,11 @@ def getDigitalListDir():
 # changedigitrange = list(range(28,29))
 if __name__ == "__main__":
     dirpaths = [
-        R"DATA/测试数据/WRF/1KM",
-        R"DATA/测试数据/WRF/3KM",
-        R"DATA/测试数据/WRF/9KM",
-        R"DATA/测试数据/Grapes/test1",
-        R"DATA/测试数据/Grapes/国家超算",
-        R"DATA/测试数据/Openfoam/input1",
+        R"DATA/对老数据重新分类/WRF/1KM"
+        R"DATA/对老数据重新分类/WRF/3KM"
+        R"DATA/对老数据重新分类/WRF/9KM"
+        R"DATA/对老数据重新分类/WRF/RST"
+        R"DATA/对老数据重新分类/GRAPES/input1"
     ]
     for idirpaths in dirpaths:
         for idir in getDirs(idirpaths): # 得到数据样例
