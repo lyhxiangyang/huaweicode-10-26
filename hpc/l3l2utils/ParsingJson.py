@@ -65,6 +65,8 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
         "used": "mem_used",
         "freq": "freq",
         "pgfree": "pgfree",
+        "user": "usr_cpu",
+        "system": "kernel_cpu",
     }
     processnameDict = {
         "user": "usr_cpu",
