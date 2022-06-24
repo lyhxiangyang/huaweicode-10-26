@@ -62,16 +62,36 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
 
     print("将数据关键名字进行改名操作".center(40, "*"))
     servernameDict = {
-        "mem_used": "mem_used",
+        "used": "mem_used",
         "freq": "freq",
         "pgfree": "pgfree",
     }
     processnameDict = {
-        "usr_cpu": "usr_cpu",
-        "kernel_cpu": "kernel_cpu",
+        "user": "usr_cpu",
+        "system": "kernel_cpu",
         "pid": "pid",
     }
+    topdownnameDict = {
+        "ddrc_rd_bandwidth_total": "ddrc_rd",
+        "ddrc_wr_bandwidth_total": "ddrc_wr",
+    }
     l2nameDict = {
+        "cpu_power": "CPU_Powewr",
+        "power": "Power",
+        "cabinet_power": "Cabinet_Power",
+        "fan1_speed": "FAN1_F_Speed",
+        "fan2_speed": "FAN2_F_Speed",
+        "fan3_speed": "FAN3_F_Speed",
+        "fan4_speed": "FAN4_F_Speed",
+        "cpu1_core_rem": "CPU1_Core_Rem",
+        "cpu2_core_rem": "CPU2_Core_Rem",
+        "cpu3_core_rem": "CPU3_Core_Rem",
+        "cpu4_core_rem": "CPU4_Core_Rem",
+        "cpu1_mem_temp": "CPU1_MEM_Temp",
+        "cpu2_mem_temp": "CPU2_MEM_Temp",
+        "cpu3_mem_temp": "CPU3_MEM_Temp",
+        "cpu4_mem_temp": "CPU4_MEM_Temp",
+        "pch_temp": "PCH_Temp",
         "cpu_power": "cpu_power",
         "power": "power",
         "cabinet_power": "cabinet_power",
@@ -96,11 +116,12 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
     pingnameDict = {
         "avg_lat": "avg_lat",
     }
-    # serverpds = renamePds(serverpds, servernameDict)
-    # processpds = renamePds(processpds, processnameDict)
-    # l2pds = renamePds(l2pds, l2nameDict)
-    # networkpds = renamePds(networkpds, networknameDict)
-    # pingpds = renamePds(pingpds, pingnameDict)
+    serverpds = renamePds(serverpds, servernameDict)
+    processpds = renamePds(processpds, processnameDict)
+    l2pds = renamePds(l2pds, l2nameDict)
+    networkpds = renamePds(networkpds, networknameDict)
+    pingpds = renamePds(pingpds, pingnameDict)
+    topdownpds = renamePds(topdownpds, topdownnameDict)
 
     serverallpd = mergeDataFrames(serverpds)
     processallpd = mergeDataFrames(processpds)
