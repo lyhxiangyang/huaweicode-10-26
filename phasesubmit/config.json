@@ -41,7 +41,6 @@
     "topdown_accumulate_feature": [],
 
     "memleakpermin": 2000,
-    "judgeCPUthread": 30,
     "cpuReadCharsMax": 10000,
     "abnormalCpuTimeThread": 56.5,
     "freqDownThresholdpercent": 10,
