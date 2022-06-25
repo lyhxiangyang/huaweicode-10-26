@@ -579,6 +579,8 @@ def detectNetwork_TXHangAbnormal(allnetworkpds: pd.DataFrame, isExistFlag: bool 
 
 
 def predictCabinet_PowerCapping(l2_serverdata: pd.DataFrame, inputDict: Dict):
+    if len(l2_serverdata) == 0:
+        return []
     model_path = inputDict["power_cabinet_modelpath"]
     model_type = MODEL_TYPE[inputDict["power_cabinet_modeltype"]]
     debugpd = pd.DataFrame()
@@ -666,6 +668,8 @@ def predictL2_CPUDown(model_path: str, model_type: str, l2_serverdata: pd.DataFr
 
 def predictCacheGrab(l2_serverdata: pd.DataFrame, bandwidthResult: pd.DataFrame, modelfilepath: str = None,
                      modeltype=0, inputDict: Dict = None) -> List:
+    if len(l2_serverdata) == 0:
+        return []
     bandwidthrList = bandwidthResult["preFlag"].tolist()
     rd_wr_sumList = select_and_pred(l2_serverdata, MODEL_TYPE[modeltype], saved_model_path=modelfilepath)
     assert len(rd_wr_sumList) == len(bandwidthrList)

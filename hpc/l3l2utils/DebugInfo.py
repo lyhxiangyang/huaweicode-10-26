@@ -211,7 +211,7 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         debugpd[rd_wr_cname] = itopdownpd[rd_wr_cname]
 
         # rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
-        rd_wr_sum_mean = getNormalDataMean(inputDict, [topdownpd], [rd_wr_cname], "topdown")[rd_wr_cname]
+        rd_wr_sum_mean = getNormalDataMean(inputDict, [itopdownpd], [rd_wr_cname], "topdown")[rd_wr_cname]
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
         # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
         return itopdownpd
