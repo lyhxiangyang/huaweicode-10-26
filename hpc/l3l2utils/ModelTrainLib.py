@@ -424,10 +424,12 @@ def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
     debugpd = getpidcpuInfo(abnormalprocessdf)
 
     # 得到CPU异常类型的最小变化
+    cpunormalmean = getSeriesFrequencyMeanLists(normalprocessdf, ["cpu"])["cpu"]
     cpuabnormalmean = getSeriesMaxFrequencyMeanLists(abnormalprocessdf, labels=modelconfigJson["allcpulabels"], features=["cpu"])["cpu"]
     cpuabnormalmeanp110 = cpuabnormalmean * 1.1
+    debugpd["cpunormalmean"] = cpunormalmean
     debugpd["cpuabnormalmean"] = cpuabnormalmean
-    debugpd["cpuabnormalmean110"] = cpuabnormalmeanp110
+    debugpd["cpuabnormalmean_use"] = cpunormalmean - (cpunormalmean - cpuabnormalmean) * 0.9
 
     if modelconfigJson["debugpath"] is not None:
         tpath = os.path.join(modelconfigJson["debugpath"], "abnormalCpuTimeThread")
