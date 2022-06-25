@@ -76,6 +76,7 @@ def covertCSVToJsonDict(predictdir: str, server_feature=None,
     topdownnameDict = {
         "ddrc_rd_bandwidth_total": "ddrc_rd",
         "ddrc_wr_bandwidth_total": "ddrc_wr",
+        "MFLOPS": "mflops"
     }
     l2nameDict = {
         "cpu_power": "CPU_Powewr",
