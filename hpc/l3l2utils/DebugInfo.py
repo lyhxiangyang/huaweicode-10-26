@@ -26,7 +26,8 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         debugpd["mflops"] = itopdownpd[cname]
 
         # 获得平均值
-        mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname])[cname]
+        # mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname])[cname]
+        mflops_mean = getNormalDataMean(inputDict, [itopdownpd], [cname], "topdown")[cname]
 
         mflops_normal_iomax = inputDict["maxflopsinio"]
         itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
@@ -129,7 +130,8 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         debugpd["mflops"] = itopdownpd[cname]
 
         # 获得平均值
-        mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname])[cname]
+        # mflops_mean = getNormalTopdownMean(detectionJson, [itopdownpd], [cname])[cname]
+        mflops_mean = getNormalDataMean(inputDict, [itopdownpd], [cname], "topdown")[cname]
 
         mflops_normal_iomax = inputDict["maxflopsinio"]
         itopdownpd[cname] = itopdownpd[cname].apply(lambda x: mflops_mean if x < mflops_normal_iomax else x)
@@ -182,7 +184,8 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         debugpd["ddrc_rd"] = itopdownpd[rd_cname]
         debugpd["ddrc_rd_means_10"] = itopdownpd[rd_cname].iloc[0:10].mean()
         debugpd["ddrc_rd_mean_all"] = getSeriesFrequencyMean(itopdownpd[rd_cname])
-        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
+        # ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_cname], datanumber=10)[rd_cname]
+        ddrc_rd_mean = getNormalDataMean(inputDict, [itopdownpd], [rd_cname], "topdown")[rd_cname]
         itopdownpd[rd_cname] = itopdownpd[rd_cname] + ddrc_rd_mean * change
         debugpd["ddrc_rd_means"] = ddrc_rd_mean
         debugpd["ddrc_rd_mflops"] = itopdownpd[rd_cname]
@@ -194,7 +197,8 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         debugpd["ddrc_wr"] = itopdownpd[wr_cname]
         debugpd["ddrc_wr_means_10"] = itopdownpd[rd_cname].iloc[0:10].mean()
         debugpd["ddrc_wr_mean_all"] = getSeriesFrequencyMean(itopdownpd[rd_cname])
-        ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
+        # ddrc_rd_mean = getNormalTopdownMean(detectJson, [itopdownpd], [wr_cname], datanumber=10)[wr_cname]
+        ddrc_rd_mean = getNormalDataMean(inputDict, [itopdownpd], [wr_cname], "topdown")[wr_cname]
         itopdownpd[wr_cname] = itopdownpd[wr_cname] + ddrc_rd_mean * change
         debugpd["ddrc_wr_means"] = ddrc_rd_mean
         debugpd["ddrc_wr_mflops"] = itopdownpd[wr_cname]
@@ -206,7 +210,8 @@ def getCache90Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFrame, topdown
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
         debugpd[rd_wr_cname] = itopdownpd[rd_wr_cname]
 
-        rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
+        # rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
+        rd_wr_sum_mean = getNormalDataMean(inputDict, [topdownpd], [rd_wr_cname], "topdown")[rd_wr_cname]
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
         # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
         return itopdownpd
