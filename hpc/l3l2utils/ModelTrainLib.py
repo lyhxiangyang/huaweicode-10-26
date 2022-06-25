@@ -423,6 +423,9 @@ def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
     abnormalprocessdf = abnormalfilepdDict["process"].copy()
     debugpd = getpidcpuInfo(abnormalprocessdf)
 
+    # 将abnormalprocessdf变成第0个核心为主的 保证第0个核心是有所注入的
+    abnormalprocessdf = abnormalprocessdf[abnormalprocessdf["cpu_affinity"] == 0]
+
     # 得到CPU异常类型的最小变化
     cpunormalmean = getSeriesFrequencyMeanLists(normalprocessdf, ["cpu"])["cpu"]
     cpuabnormalmean = getSeriesMaxFrequencyMeanLists(abnormalprocessdf, labels=modelconfigJson["allcpulabels"], features=["cpu"])["cpu"]
