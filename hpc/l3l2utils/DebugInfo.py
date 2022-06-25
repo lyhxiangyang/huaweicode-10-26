@@ -84,7 +84,8 @@ def getMemoryBandwidth50Debuginfo(serverpd: pd.DataFrame, processpd: pd.DataFram
         pgfree_mean = getSeriesFrequencyMean(iserverpd["pgfree"])
         # if detectionJson["RequestData"]["type"] == "grapes":
         #     pgfree_mean = iserverpd["pgfree"].iloc[15:17]
-        debugpd["pgfree_mean"] = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]#debugpd
+        # debugpd["pgfree_mean"] = getNormalServerMean(detectionJson, [iserverpd], [cname], datanumber=10)[cname]#debugpd
+        debugpd["pgfree_mean"] = getNormalDataMean(inputDict, [iserverpd], [cname], "server")
         debugpd["pgfree_mean_10"] = iserverpd[cname].iloc[0:10].mean()
         debugpd["pgfree_mean_all"] = getSeriesFrequencyMean(iserverpd[cname])
 
