@@ -195,7 +195,8 @@ def getSeriesFrequencyMean(dataseries: pd.Series, bins=10):
 def getSeriesFrequencyMeanLists(nowpd: pd.DataFrame, features: List[str], bins=10):
     tseries = pd.Series()
     for ifeature in features:
-        tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature], bins=bins)
+        if ifeature in nowpd.columns.array():
+            tseries[ifeature] = getSeriesFrequencyMean(nowpd[ifeature], bins=bins)
     return tseries
 
 
