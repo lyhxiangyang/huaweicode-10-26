@@ -139,7 +139,7 @@ def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
         respd["server_mem_used"] = servermem
         respd["process_mem_used"] = processmem
         respd["mem_sub"] = othermemdiff
-        respd[FAULT_FLAG] = serverpd[FAULT_FLAG]
+        respd[FAULT_FLAG] = pspd[FAULT_FLAG]
         return respd
     # memleak从abnormalleak得到
     processpd = abnormalfilepdDict["process"].copy()
