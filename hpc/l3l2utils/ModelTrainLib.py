@@ -101,7 +101,7 @@ def abstractMinMean(datadf: pd.DataFrame,featurename: str, abnormalType: List[in
 """
 得到内存泄露是内存的变化大小
 """
-def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, )->int:
+def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, )->float:
     # 对内存的差值处理必须根据进程pid号进行处理
     # 保证内存的指标和pid号的指标长度是一样的
     def diffmemoryseries(memseries: pd.Series, pidseries: pd.Series):
@@ -147,13 +147,15 @@ def getMemLeakPermin(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
     memorypd = getMemory(serverpd=serverpd, processpd=processpd)
     # 取 61 62 63 64 65中最小值的变化值为判断依据, 最后减少100M作为
     memory60_mean = getSeriesMinFrequencyMeanLists(memorypd, labels=modelconfigJson["memleaklabels"], features=["mem_sub"])["mem_sub"]
+    memory60_mean_1 = get_series_boundary_in_labels(memorypd, modelconfigJson['memleaklabels'], 'mem_sub', 'min')
     memory60_meanp80 = memory60_mean * 0.8
     memorypd["memsub60_mean"] = memory60_mean
+    memorypd["memsub60_mean_1"] = memory60_mean_1
     memorypd["memsub60_mean_p80"] = memory60_meanp80
     if modelconfigJson["debugpath"] is not None:
         tpath = os.path.join(modelconfigJson["debugpath"], "memleak60")
         savepdfile(memorypd, tpath, "memleakdebug.csv")
-    return memory60_meanp80
+    return memory60_mean_1
 
 
 """
@@ -179,6 +181,7 @@ def getMaxflopsinio(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
     abnormaltopdowndfmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
     # 获得50,90标签中的最小值
     abnormaltopdowndf5090mean = getSeriesMinFrequencyMeanLists(abnormaltopdowndf, labels=modelconfigJson["memorybandwidthlabels"] + modelconfigJson["cachegrablabels"], features=[cname])[cname]
+
     abnormaltopdowndf5090meanp90 = abnormaltopdowndf5090mean * 0.9
     if modelconfigJson["debugpath"] is not None:
         # 保存为debugpd
@@ -275,6 +278,7 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     # pgfree_abnorma50_mean = abstractMinMean(abnormalcpgfreedf, "pgfree", [52, 53, 54, 55])
     pgfree_abnorma50_mean =  getSeriesMinFrequencyMeanLists(abnormalcpgfreedf, labels=modelconfigJson["memorybandwidthlabels"], features=["pgfree"])["pgfree"]
     debugpd["abnormal_abnormalpgfree_mean"] = pgfree_abnorma50_mean
+
     pgfreescope = (pgfree_abnorma50_mean - normalpgfreemean) * 0.9
     debugpd["abnormal_abnormalpgfree_addmean"] = normalmflopsmean + pgfreescope
 
@@ -491,6 +495,7 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
     normalfreqmean = getSeriesFrequencyMeanLists(normalserverdf, [cname])[cname]
     abnormalfreqmean = getSeriesFrequencyMeanLists(abnormalserverdf, [cname])[cname]
     abnormal_abfreqmean = getSeriesMaxFrequencyMeanLists(abnormalserverdf, labels=modelconfigJson["l2labels"], features=["freq"])["freq"]
+
     debugpd["normalfreqmean"] = normalfreqmean
     debugpd["abnormalfreqmean"] = abnormalfreqmean
     debugpd["abnormal_abfreqmean"] = abnormal_abfreqmean
@@ -532,7 +537,35 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
     resvalue = 100 - (normalpowermean - abnormal_abpowermean) / normalpowermean * 100 * 0.9
     return resvalue
 
+# jinxing write
 
+def get_series_boundary(data_series: pd.Series, min_or_max: str):
+    from collections import Counter
+    from sklearn.mixture import BayesianGaussianMixture
+    data = pd.DataFrame(data_series)
+    tags = BayesianGaussianMixture(n_components=3, random_state=0).fit_predict(data)
+    most_tag = Counter(tags).most_common(1)[0][0]
+    if min_or_max == 'min':
+        boundary = data.iloc[tags == most_tag].min()
+    else:
+        boundary = data.iloc[tags == most_tag].max()
+    return float(boundary)
+
+
+def get_series_boundary_in_labels(data: pd.DataFrame, labels: List[int], feature: str, min_or_max: str):
+    boundaries = []
+    # 计算每个标签中feature的边界值
+    for label in labels:
+        if label not in data[FAULT_FLAG].tolist():
+            continue
+        label_data = data[data[FAULT_FLAG] == label]
+        boundaries.append(get_series_boundary(label_data[feature], min_or_max))
+    # 计算所有边界值中的最小/大值
+    if min_or_max == 'min':
+        boundary = min(boundaries)
+    else:
+        boundary = max(boundaries)
+    return boundary
 
 
 
