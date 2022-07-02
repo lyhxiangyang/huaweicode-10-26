@@ -19,7 +19,7 @@ from hpc.l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, g
     getMeanFromNumberDataFrom, getNormalDataMean
 from hpc.l3l2utils.l3l2detection import fixFaultFlag, fixIsolatedPointPreFlag, getDetectionProbability, \
     getTimePeriodInfo, \
-    analysePredictResult
+    analysePredictResult, analysePredictResult_High
 from hpc.l3l2utils.modelpred import detectL3CPUAbnormal, detectL3MemLeakAbnormal, detectL3BandWidthAbnormal, \
     predictTemp, \
     detectNetwork_TXHangAbnormal, predictL2_CPUDown, predictCacheGrab, predictCabinet_PowerCapping, \
@@ -557,8 +557,10 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
         analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
     if inputDict["debugpath"] is not None and inputDict["isExistFaultFlag"] is not None:
         print("对预测结果进行准确率及其他分析".center(40, "*"))
-        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result")
+        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result_all")
         analysePredictResult(l2l3predetectresultpd, spath=tpath, windowsize=3)
+        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result_high")
+        analysePredictResult_High(l2l3predetectresultpd, spath=tpath, windowsize=3)
 
     print("对预测结果进行时间段分析，输出时间文件".center(40, "*"))
     outputDict = outputJsonFromDetection(l2l3predetectresultpd)

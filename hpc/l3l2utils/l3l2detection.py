@@ -79,7 +79,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     # 如果没有随机CPU异常，那么就删除50
     [removeBandwidthIfnotCpu(i) for i in preflagList]
     # 如果50和60同时存在就删除60
-    [remove60if50and60exist(i) for i in preflagList]
+    # [remove60if50and60exist(i) for i in preflagList]
 
     # 滑动窗口为7 平滑 preFlagList
 
@@ -553,6 +553,78 @@ def analysePredictResult(predictpd: pd.DataFrame, spath: str, windowsize: int = 
                                              preflags=predictpd["preFlag"].tolist(), excludeflags={0})
     accuracy_nonormal_fuzzy = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
                                                    preflags=predictpd["preFlag"].tolist(), excludeflags={0},
+                                                   isFuzzy=True)
+
+    # ===================================== 将信息进行保存
+    if spath is not None:
+        tpd = pd.DataFrame(data=analyseDict).T
+        savepdfile(tpd, spath, "每个异常统计数据.csv", index=True)
+        # 写入准确率信息
+        wrfteinfo = [
+            "1. 包含正常准确率: {:.2%}\n".format(accuracy_normal),
+            "2. 去除正常准确率: {:.2%}\n".format(accuracy_nonormal),
+            "3. 去除正常模糊准确率: {:.2%}\n".format(accuracy_nonormal_fuzzy),
+        ]
+        with open(os.path.join(spath, "4.准确率.txt"), "w", encoding="utf-8") as f:
+            f.writelines(wrfteinfo)
+
+# 只分析高强度的信息 不包含90
+def analysePredictResult_High(predictpd: pd.DataFrame, spath: str, windowsize: int = 3):
+    predictpd = predictpd.copy()
+    # 首先去除某些不需要的
+    # predictpd = remove_Abnormal_Head_Tail(predictpd, windowsize=windowsize, abnormals={
+    #     41, 42, 43, 44, 45,
+    #     71, 72, 73, 74, 75,
+    #     91, 92, 93, 94, 95, 99,
+    # }
+    # 去除每个异常的首尾
+    predictpd = removeAllHeadTail(predictPd=predictpd, windowsize=windowsize)
+    analyseDict = {}
+    analyseDict[0] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {0})
+    analyseDict[10] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {13, 14, 15})
+    analyseDict[20] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {23, 24, 25})
+    analyseDict[30] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {33, 34, 35})
+    analyseDict[50] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {53, 54, 55})
+    analyseDict[60] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {63, 64, 65})
+    analyseDict[80] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                  {83, 84, 85})
+    # analyseDict[90] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+    #                                               {91, 92, 93, 94, 95})
+    analyseDict["cpu"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(), {
+        13, 14, 15,
+        23, 24, 25,
+        33, 34, 35,
+        83, 84, 85,
+    })
+    analyseDict["memory"] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                        {
+                                                            53, 54, 55,
+                                                            63, 64, 65,
+                                                        })
+    analyseDict[111] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {111})
+    analyseDict[121] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {121})
+    analyseDict[131] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {131})
+    analyseDict[132] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {132})
+    analyseDict[141] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {141})
+    analyseDict[161] = getDetectionRecallPrecision(predictpd["faultFlag"].tolist(), predictpd["preFlag"].tolist(),
+                                                   {161})
+
+    accuracy_normal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                           preflags=predictpd["preFlag"].tolist(), excludeflags=[11, 12, 21, 22, 31, 32, 51, 52, 61, 62, 81, 82, 91, 92, 93, 94, 95])
+    accuracy_nonormal = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                             preflags=predictpd["preFlag"].tolist(), excludeflags=[0, 11, 12, 21, 22, 31, 32, 51, 52, 61, 62, 81, 82, 91, 92, 93, 94, 95])
+    accuracy_nonormal_fuzzy = getDetectionAccuract(realflags=predictpd["faultFlag"].tolist(),
+                                                   preflags=predictpd["preFlag"].tolist(), excludeflags=[0, 11, 12, 21, 22, 31, 32, 51, 52, 61, 62, 81, 82, 91, 92, 93, 94, 95],
                                                    isFuzzy=True)
 
     # ===================================== 将信息进行保存
