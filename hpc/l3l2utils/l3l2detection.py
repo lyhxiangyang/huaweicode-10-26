@@ -71,6 +71,50 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
         if 50 in ilist and 60 in ilist:
             ilist.remove(60)
 
+    def changeCPUpreList(preflagList: List[List[int]], percentage: float) -> List:
+        # 判断是否包含cpu异常
+        def includecpu(ifault):
+            if len(set([10, 20 , 30, 80] & ifault)) == 0:
+                return False
+            return True
+        def changecpuasrandowm(preflagList :List[List[int]], i, j):
+            while i < j:
+                # 先去除其他CPU
+                if 10 in preflagList[i]:
+                    preflagList[i].remove(10)
+                if 20 in preflagList[i]:
+                    preflagList[i].remove(20)
+                if 30 in preflagList[i]:
+                    preflagList[i].remove(20)
+                if 80 in preflagList[i]:
+                    preflagList[i].remove(20)
+                preflagList[i].append(80)
+            return
+
+        i = 0
+        while i < len(preflagList):
+            # 如果不包含cpu
+            if not includecpu(ifault[i]):
+                continue
+            # 当前i是包含的cpu的位置
+            j = i + 1 # 找到第一个不包含CPU的位置或者末尾
+            randomcpulen = 0
+            while j < len(preflagList) and includecpu(ifault[j]):
+                if 80 in preflagList[j]:
+                    randomcpulen += 1
+                j += 1
+            # 现在j指向的是末尾或者不是CPU了，将从i到j的数字重新梳理一遍
+            lencpu = j - i
+            if lencpu * percentage <= randomcpulen:
+                changecpuasrandowm(preflagList, i, j)
+            i = j
+
+
+
+
+
+        return preflagList
+
     # run
     preflagList = list(l2l3predetectresultpd["preFlag"])
 
@@ -81,7 +125,8 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     # 如果50和60同时存在就删除60
     # [remove60if50and60exist(i) for i in preflagList]
 
-    # 滑动窗口为7 平滑 preFlagList
+    # 如果CPU连续出现，并且80超过了40% 那么将这一串CPU都置为80
+    changeCPUpreList(preflagList, 0.35)
 
     allPreFlags = sorted(list(set(chain.from_iterable(preflagList))))  # 得到所有的错误
     if 0 in allPreFlags:
