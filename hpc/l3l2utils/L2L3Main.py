@@ -571,7 +571,9 @@ def detectionFromInputDict(inputDict: Dict, requestData: Dict = None) -> Dict:
         savepdfile(l2l3predetectresultpd, tpath, "总预测结果.csv")
         saveDictToJson(outputDict, tpath, "output.json")
     if inputDict["debugpath"] is not None:
-        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result")
+        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result_all")
+        savepdfile(l2l3predetectresultpd, tpath, "eachTimePointTestResults.csv")
+        tpath = os.path.join(inputDict["debugpath"], "Accuracy_result_high")
         savepdfile(l2l3predetectresultpd, tpath, "eachTimePointTestResults.csv")
         # saveDictToJson(outputDict, tpath, "output.json")
 
