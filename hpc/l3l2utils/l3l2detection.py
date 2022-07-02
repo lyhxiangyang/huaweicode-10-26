@@ -74,7 +74,7 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     def changeCPUpreList(preflagList: List[List[int]], percentage: float) -> List:
         # 判断是否包含cpu异常
         def includecpu(ifault):
-            if len(set([10, 20 , 30, 80] & ifault)) == 0:
+            if len({10, 20, 30, 80} & set(ifault)) == 0:
                 return False
             return True
         def changecpuasrandowm(preflagList :List[List[int]], i, j):
@@ -85,21 +85,23 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
                 if 20 in preflagList[i]:
                     preflagList[i].remove(20)
                 if 30 in preflagList[i]:
-                    preflagList[i].remove(20)
+                    preflagList[i].remove(30)
                 if 80 in preflagList[i]:
-                    preflagList[i].remove(20)
+                    preflagList[i].remove(80)
                 preflagList[i].append(80)
+                i += 1
             return
 
         i = 0
         while i < len(preflagList):
             # 如果不包含cpu
-            if not includecpu(ifault[i]):
+            if not includecpu(preflagList[i]):
+                i += 1
                 continue
             # 当前i是包含的cpu的位置
             j = i + 1 # 找到第一个不包含CPU的位置或者末尾
             randomcpulen = 0
-            while j < len(preflagList) and includecpu(ifault[j]):
+            while j < len(preflagList) and includecpu(preflagList[j]):
                 if 80 in preflagList[j]:
                     randomcpulen += 1
                 j += 1
@@ -108,11 +110,6 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
             if lencpu * percentage <= randomcpulen:
                 changecpuasrandowm(preflagList, i, j)
             i = j
-
-
-
-
-
         return preflagList
 
     # run

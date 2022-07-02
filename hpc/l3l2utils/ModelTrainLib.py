@@ -543,8 +543,11 @@ def get_series_boundary(data_series: pd.Series, min_or_max: str):
     from collections import Counter
     from sklearn.mixture import BayesianGaussianMixture
     data = pd.DataFrame(data_series)
-    tags = BayesianGaussianMixture(n_components=3, random_state=0).fit_predict(data)
-    most_tag = Counter(tags).most_common(1)[0][0]
+    # tags = BayesianGaussianMixture(n_components=3, random_state=0).fit_predict(data)
+    # most_tag = Counter(tags).most_common(1)[0][0]
+    from sklearn.ensemble import IsolationForest
+    tags = IsolationForest(random_state=0).fit_predict(data)
+    most_tag = 1
     if min_or_max == 'min':
         boundary = data.iloc[tags == most_tag].min()
     else:
