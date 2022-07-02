@@ -70,19 +70,9 @@ def fixIsolatedPointPreFlag(l2l3predetectresultpd: pd.DataFrame):
     def remove60if50and60exist(ilist: List):
         if 50 in ilist and 60 in ilist:
             ilist.remove(60)
-    # # windows为奇数代表中间，必须为奇数
-    # def smoothPreFlagFault(preLists, ipos, ifault, windows: int = 7):
-    #     beginpos = ipos - windows // 2
-    #     endpos = ipos + windows // 2 + 1
-    #     for i in range(beginpos, endpos):
-
-
-
-
 
     # run
     preflagList = list(l2l3predetectresultpd["preFlag"])
-
 
     # 如果没有CPU异常就删除50 90
     # [removeMemoryIfnotCpu(i) for i in preflagList]
