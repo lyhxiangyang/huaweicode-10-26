@@ -280,7 +280,7 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     debugpd["abnormal_abnormalpgfree_mean"] = pgfree_abnorma50_mean
 
     pgfreescope = (pgfree_abnorma50_mean - normalpgfreemean) * 0.9
-    debugpd["abnormal_abnormalpgfree_addmean"] = normalmflopsmean + pgfreescope
+    debugpd["abnormal_abnormalpgfree_addmean"] = normalpgfreemean + pgfreescope
 
     if modelconfigJson["debugpath"] is not None:
         debugpd = pd.concat([debugpd, pd.Series(name="normal_pgfree", data=normalserverdf["pgfree"])], axis=1)
@@ -460,15 +460,18 @@ def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, mode
     abnormalload1mean = getSeriesFrequencyMeanLists(abnormalserverdf, ["load1"])["load1"]
     alllabels = modelconfigJson["randomcpulabels"] + modelconfigJson["memorybandwidthlabels"] + modelconfigJson["cachegrablabels"]
     abnormalload1mean508090 = getSeriesMinFrequencyMeanLists(abnormalserverdf, labels=alllabels, features=["load1"])["load1"]
+    abnormalload1mean508090_1 = get_series_boundary_in_labels(abnormalserverdf, alllabels, 'load1', 'min')
 
     debugpd["nomalload1mean"] = normalload1mean
     debugpd["abnormalddrdmean"] = abnormalload1mean
     debugpd["abnormalload1mean508090"] = abnormalload1mean508090
+    debugpd["abnormalload1mean508090_1"] = abnormalload1mean508090_1
     debugpd["abnormalload1mean508090p90"] = normalload1mean + (abnormalload1mean508090 - normalload1mean) * 0.9
     if modelconfigJson["debugpath"] is not None:
         tpath = os.path.join(modelconfigJson["debugpath"], "randomcpuThreshold")
         savepdfile(debugpd, tpath, "randomcpuThreshold.csv")
-    return (abnormalload1mean508090 - normalload1mean) * 0.9
+    return abnormalload1mean508090_1 - normalload1mean
+    # return (abnormalload1mean508090 - normalload1mean) * 0.9
 
 
 """  

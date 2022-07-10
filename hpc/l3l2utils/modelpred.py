@@ -64,6 +64,8 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
         process_cpu_smooth = smoothseries(process_cpu)
         sub_server_process_cpu = server_cpu_smooth - process_cpu_smooth
         return sub_server_process_cpu
+    def smoothreadchars(allprocesspd: pd.DataFrame):
+        pass
 
     spath = inputConfig["spath"]
     modelfilepath = inputConfig["processcpu_modelpath"]
@@ -73,6 +75,8 @@ def detectL3CPUAbnormal(allserverpds: pd.DataFrame, allprocesspds: pd.DataFrame,
     # 将allserverpds里面所有的时间搜集起来
     # 第一步取两者时间的交集
     allserverpds, allprocesspds = getsametimepd(allserverpds, allprocesspds)
+    # 需要对allprocesspds的readchars进行平滑处理
+
     # 获得cpu检测的异常列表
     timecolumns = allserverpds[TIME_COLUMN_NAME]
     serverinformationDict = defaultdict(list)
@@ -494,6 +498,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
             itopdowndpd = itopdowndpd.copy()
         # 对iprocess和servercpu中的
         # cpu_change = getcpuchange(iserverpd, iprocesspd)
+        # 得到mflops的变化
         mflops_change = getMflopschange(itopdownpd=itopdowndpd)
         changes = mflops_change
         cname = "pgfree"
@@ -520,6 +525,7 @@ def detectL3BandWidthAbnormal1(allserverpds: pd.DataFrame, alltopdownpds: pd.Dat
     # alltopdownpds = getRunHPCTimepdsFromProcess([alltopdownpds], [allprocesspds])[0]
     # allserverpds, alltopdownpds = getsametimepd(allserverpds, alltopdownpds)
     allserverpds, alltopdownpds, allprocesspds = getsametimepdList([allserverpds, alltopdownpds, allprocesspds])
+    # 补偿pgfree
     testPd = compensatePgfree(allserverpds, alltopdownpds, allprocesspds, detectionJson)
 
     # 保存debug信息 给自己看
