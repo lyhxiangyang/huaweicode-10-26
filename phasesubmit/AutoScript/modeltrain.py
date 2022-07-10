@@ -28,6 +28,10 @@ if __name__ == "__main__":
     abnormalInputDict = getTrainDectionJson(configJsonDict)
     abnormalDataDict = getAllDataFramesFromDectionJson(abnormalInputDict)
     outputJsonDict = {}
+    dataMeanDict = {}
+    dataMeanDict["normalDataMean"] = {}
+    dataMeanDict["normalDataMean"]["server"] = {}
+    dataMeanDict["normalDataMean"]["topdown"] = {}
     if normalInputDict is not None:
         normalDataDict = getAllDataFramesFromDectionJson(normalInputDict)
     else:
@@ -44,36 +48,38 @@ if __name__ == "__main__":
     if isFlagsOr(abnormalDataDict["server"], configJsonDict["memorybandwidthlabels"] + configJsonDict["cachegrablabels"]):
         # 得到mlops的变化幅度 主要是根据50 和 90的最大变化 - ok
         maxflopsinio = getMaxflopsinio(normalDataDict, abnormalDataDict, configJsonDict)
-        outputJsonDict["maxflopsinio"] = maxflopsinio
+        outputJsonDict["maxflopsinio"] = 0
         # 得到pgfree的变化幅度 - model - ok
-        pgfree_thread = getPgfreeThread(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict)
+        pgfree_thread = getPgfreeThread(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict, dataMeanDict)
         outputJsonDict["pgfree_thread"] = pgfree_thread
         # 得到读写指标的变化幅度 - model - ok
-        ddrc_ddwr_sum_max = getddrc_ddwr_sumscope(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict)
+        ddrc_ddwr_sum_max = getddrc_ddwr_sumscope(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict, dataMeanDict)
         outputJsonDict["ddrc_ddwr_sum_max"] = ddrc_ddwr_sum_max
     # 保证全CPU是存在的
     if isFlagsOr(abnormalDataDict["server"], configJsonDict["allcpulabels"]):
         # 得到judgeCPUthread 主要是依据全CPU中判断的依据 - ok
-        cpuTimeThread = getCPUTimeThread(normalDataDict, abnormalDataDict, configJsonDict)
+        cpuTimeThread = getCPUTimeThread(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
         outputJsonDict["abnormalCpuTimeThread"] = cpuTimeThread
     if isFlagsOr(abnormalDataDict["server"], configJsonDict["randomcpulabels"] + configJsonDict["memorybandwidthlabels"] + configJsonDict["cachegrablabels"]):
         # 得到randomcpu
-        randomcpuThreshold = getRandomcpuThreshold(normalDataDict, abnormalDataDict, configJsonDict)
+        randomcpuThreshold = getRandomcpuThreshold(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
         outputJsonDict["randomcpuThreshold"] = randomcpuThreshold
     if isFlagsOr(abnormalDataDict["server"], configJsonDict["l2labels"]):
         # 得到freqDownThresholdpercent
-        freqDownThresholdpercent = getFreqDownThresholdpercent(normalDataDict, abnormalDataDict, configJsonDict)
+        freqDownThresholdpercent = getFreqDownThresholdpercent(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
         outputJsonDict["freqDownThresholdpercent"] = freqDownThresholdpercent
         # 得到 power_threshold 通过111导致的power变化来改变
-        power_threshold = getPowerThreshold(normalDataDict, abnormalDataDict, configJsonDict)
+        power_threshold = getPowerThreshold(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
         outputJsonDict["power_threshold"] = power_threshold
 
     if configJsonDict["debugpath"] is not None:
         tpath = os.path.join(configJsonDict["debugpath"], "result")
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
+        saveDictToJson(outputJsonDict, tpath, "datamean.json")
     if configJsonDict["outputpath"] is not None:
         tpath = os.path.join(configJsonDict["outputpath"])
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
+        saveDictToJson(outputJsonDict, tpath, "datamean.json")
 
 
     endTime1 = time.perf_counter()

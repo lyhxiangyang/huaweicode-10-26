@@ -745,6 +745,9 @@ def predictCacheGrab1(alltopdownpds: pd.DataFrame, allserverpds: pd.DataFrame, a
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname].rolling(window=5, center=True, min_periods=1).median()
         # rd_wr_sum_mean = getNormalTopdownMean(detectJson, [itopdownpd], [rd_wr_cname], datanumber=10)[rd_wr_cname]
         rd_wr_sum_mean = ddrc_rd_mean + ddrc_wr_mean
+        if rd_wr_cname in inputDict["normalDataMean"]["topdown"].keys():
+            rd_wr_sum_mean = inputDict["normalDataMean"]["topdown"][rd_wr_cname]
+
         itopdownpd[rd_wr_cname] = itopdownpd[rd_wr_cname] - rd_wr_sum_mean
         # 重点是mflops、ddrc_rd、ddrc_ddwr_sum
         return itopdownpd

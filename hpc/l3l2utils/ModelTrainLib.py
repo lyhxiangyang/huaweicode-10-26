@@ -204,7 +204,7 @@ def getMaxflopsinio(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfi
 """
 函数功能：补偿pgfree之后
 """
-def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsinio: float ,modelconfigJson: Dict=None, )->int:
+def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsinio: float ,modelconfigJson: Dict=None, debugDict: Dict=None)->int:
     # mflops_change normal_mflops_mean
     debugpd = pd.DataFrame()
     def getMflopschange(itopdownpd: pd.DataFrame, mflops_mean: float, maxflopsinio: float) -> pd.Series:
@@ -252,6 +252,10 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
     normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
+    # 存储mflops的平均值
+    debugDict["normalDataMean"]["server"]["mflops"] = normalmflopsmean
+    debugDict["normalDataMean"]["server"]["pg_mflops"] = normalmflopsmean
+
     debugpd["normal_mflops_mean"] = normalmflopsmean
     cname = "pgfree"
     normalserverdf[cname] = normalserverdf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
@@ -259,6 +263,9 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     normalserverdf[cname] = normalserverdf[cname].rolling(window=5, center=True, min_periods=1).mean()
     normalpgfreemean = getSeriesFrequencyMean(normalserverdf[cname])
     debugpd["normal_pgfree_mean"] = normalpgfreemean
+    # 存储mflops的平均值
+    debugDict["normalDataMean"]["server"]["pgfree"] = normalpgfreemean
+
     cname = "mflops"
     abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
     abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
@@ -292,7 +299,7 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
 """
 得到ddrc_ddwr_sum变化的幅度
 """
-def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsinio: float ,modelconfigJson: Dict=None, )->int:
+def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsinio: float ,modelconfigJson: Dict=None, debugDict: Dict=None)->int:
     debugpd = pd.DataFrame()
     def getMflopschange(itopdownpd: pd.DataFrame, mflops_mean: float, maxflopsinio: float) -> pd.Series:
         cname = "mflops"
@@ -324,6 +331,9 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
     abnormaltopdowndf[cname] = abnormaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
     abnormalmflopsmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
+    # 存储mflops的平均值
+    debugDict["normalDataMean"]["topdown"]["d_mflops"] = normalmflopsmean
+
     debugpd["normal_mlops_mean"] = normalmflopsmean
     debugpd["abnormal_allmflops_mean"] = abnormalmflopsmean
     rd_name = "ddrc_rd"
@@ -335,6 +345,9 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
     abnormalddrdmean = getSeriesFrequencyMean(abnormaltopdowndf[rd_name])
     debugpd["normalddrdmean"] = normalddrdmean
     debugpd["abnormalddrdmean"] = abnormalddrdmean
+    # 存储ddrc_rd的平均值
+    debugDict["normalDataMean"]["topdown"]["ddrc_rd"] = normalddrdmean
+
     wr_name = "ddrc_wr"
     normaltopdowndf[wr_name] = normaltopdowndf[wr_name].rolling(window=5, center=True, min_periods=1).median()  # 先将最大最小值去除
     normaltopdowndf[wr_name] = normaltopdowndf[wr_name].rolling(window=5, center=True, min_periods=1).mean()
@@ -344,6 +357,9 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
     abnormalddwrmean = getSeriesFrequencyMean(abnormaltopdowndf[wr_name])
     debugpd["normalddwrmean"] = normalddwrmean
     debugpd["abnormalddwrmean"] = abnormalddwrmean
+    # 存储ddrc_wr的平均值
+    debugDict["normalDataMean"]["topdown"]["ddrc_wr"] = normalddwrmean
+
     # 计算mflops_changes
     mflop_change = getMflopschange(abnormaltopdowndf, normalmflopsmean, maxflopsinio)
     debugpd["mflops_change"] = mflop_change
@@ -365,6 +381,9 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
     debugpd["ddrc_ddwr_sum"] = abnormaltopdowndf[rd_wr_cname]
 
     normal_rd_wr_mean = normalddrdmean + normalddwrmean
+    # 存储ddrc_rd的平均值
+    debugDict["normalDataMean"]["topdown"]["ddrc_ddwr_sum"] = normal_rd_wr_mean
+
     debugpd["normal_ddrc_ddwr_sum_mean"] = normal_rd_wr_mean
     abnoraml_rd_wr_mean = abnormalddrdmean + abnormalddwrmean
     debugpd["abnormal_ddrc_ddwr_sum_mean"] = abnoraml_rd_wr_mean
@@ -405,7 +424,7 @@ def changeModel(configJsonDict: Dict, outputJsonDict: Dict):
 """
 根据全CPU得到CPU下降的时间
 """
-def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None) -> float:
+def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, debugDict: Dict=None) -> float:
     def getpidcpuInfo(processpd: pd.DataFrame):
         respd = pd.DataFrame(index=processpd["time"].drop_duplicates())
         processpd.set_index("time", inplace=True)
@@ -432,6 +451,9 @@ def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
 
     # 得到CPU异常类型的最小变化
     cpunormalmean = getSeriesFrequencyMeanLists(normalprocessdf, ["cpu"])["cpu"]
+    # 存储cpunormalmean的平均值
+    debugDict["normalDataMean"]["server"]["cpu"] = cpunormalmean
+
     cpuabnormalmean = getSeriesMaxFrequencyMeanLists(abnormalprocessdf, labels=modelconfigJson["allcpulabels"], features=["cpu"])["cpu"]
     cpuabnormalmean_use = cpunormalmean - (cpunormalmean - cpuabnormalmean) * 0.9
     debugpd["cpunormalmean"] = cpunormalmean
@@ -446,7 +468,7 @@ def getCPUTimeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconf
 """
 通过load1来判断
 """
-def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None) -> float:
+def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, debugDict: Dict=None) -> float:
     normalserverdf = normalfilepdDict["server"].copy()
     abnormalserverdf = abnormalfilepdDict["server"].copy()
     debugpd = pd.DataFrame()
@@ -457,6 +479,9 @@ def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, mode
     debugpd["load1"] = abnormalserverdf["load1"]
     # 正常load1
     normalload1mean = getSeriesFrequencyMeanLists(normalserverdf, ["load1"])["load1"]
+    # 存储load1的平均值
+    debugDict["normalDataMean"]["server"]["load1"] = normalload1mean
+
     abnormalload1mean = getSeriesFrequencyMeanLists(abnormalserverdf, ["load1"])["load1"]
     alllabels = modelconfigJson["randomcpulabels"] + modelconfigJson["memorybandwidthlabels"] + modelconfigJson["cachegrablabels"]
     abnormalload1mean508090 = getSeriesMinFrequencyMeanLists(abnormalserverdf, labels=alllabels, features=["load1"])["load1"]
@@ -480,7 +505,7 @@ def getRandomcpuThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, mode
 针对L2异常导致的频率freq下降，判断下降的比例
 如果无法判断，那么返回None
 """
-def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None) -> float:
+def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, debugDict: Dict=None) -> float:
     normalserverdf = normalfilepdDict["server"].copy()
     abnormalserverdf = abnormalfilepdDict["server"].copy()
 
@@ -496,6 +521,9 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
     abnormalserverdf[cname] = smoothseries(abnormalserverdf[cname])
 
     normalfreqmean = getSeriesFrequencyMeanLists(normalserverdf, [cname])[cname]
+    # 存储freq的平均值
+    debugDict["normalDataMean"]["compute"]["freq"] = normalfreqmean
+
     abnormalfreqmean = getSeriesFrequencyMeanLists(abnormalserverdf, [cname])[cname]
     abnormal_abfreqmean = getSeriesMaxFrequencyMeanLists(abnormalserverdf, labels=modelconfigJson["l2labels"], features=["freq"])["freq"]
 
@@ -513,7 +541,7 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
 必须有121的存在
 通过121 得到power的变化情况
 """
-def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None) -> float:
+def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelconfigJson: Dict=None, debugDict: Dict=None) -> float:
     normalcomputedf = normalfilepdDict["compute"].copy()
     abnormalcomputedf = abnormalfilepdDict["compute"].copy()
     # 存储时间
@@ -528,6 +556,9 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
     abnormalcomputedf[cname] = smoothseries(abnormalcomputedf[cname])
 
     normalpowermean = getSeriesFrequencyMeanLists(normalcomputedf, [cname])[cname]
+    # 存储power的平均值
+    debugDict["normalDataMean"]["compute"]["power"] = normalpowermean
+
     abnormalpowermean = getSeriesFrequencyMeanLists(abnormalcomputedf, [cname])[cname]
     abnormal_abpowermean = getSeriesMaxFrequencyMeanLists(abnormalcomputedf, labels=modelconfigJson["l2labels"], features=["power"])["power"]
     debugpd["normalpowermean"] = normalpowermean

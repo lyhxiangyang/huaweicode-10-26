@@ -143,3 +143,19 @@ def savepdfile(ds, spath, filename, index: bool = False):
         os.makedirs(spath)
     pathfilename = os.path.join(spath, filename)
     ds.to_csv(pathfilename, index=index)
+
+"""
+指定一个文件，再文件中写入一个字符串
+"""
+
+def writeFile(filepath: str, filename: str, writestr: str):
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
+    with open(os.path.join(os.path.join(filepath, filename)), "w", encoding="utf-8") as f:
+        f.writelines(writestr)
+
+
+
+
+
+
