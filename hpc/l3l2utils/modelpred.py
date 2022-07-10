@@ -296,7 +296,7 @@ def predictRandomCpu(serverpd: pd.DataFrame, cpuabnormalList: List, inputDict: D
         debugpd[FAULT_FLAG] = serverpd[FAULT_FLAG]  # debug
     assert len(serverpd) == len(cpuabnormalList)
     debugpd["load1"] = serverpd["load1"]  # debug
-    serverpd["load1"] = smoothseries(serverpd["load1"], windows=3)
+    # serverpd["load1"] = smoothseries(serverpd["load1"], windows=3)
     debugpd["load1_smooth"] = serverpd["load1"]  # debug
 
     load1mean = getNormalDataMean(inputDict, [serverpd], ["load1"], filetype="server")["load1"]
