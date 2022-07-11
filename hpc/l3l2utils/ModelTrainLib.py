@@ -253,8 +253,8 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     normaltopdowndf[cname] = normaltopdowndf[cname].rolling(window=5, center=True, min_periods=1).mean()
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
     # 存储mflops的平均值
-    debugDict["normalDataMean"]["server"]["mflops"] = normalmflopsmean
-    debugDict["normalDataMean"]["server"]["pg_mflops"] = normalmflopsmean
+    debugDict["normalDataMean"]["topdown"]["mflops"] = normalmflopsmean
+    debugDict["normalDataMean"]["topdown"]["pg_mflops"] = normalmflopsmean
 
     debugpd["normal_mflops_mean"] = normalmflopsmean
     cname = "pgfree"

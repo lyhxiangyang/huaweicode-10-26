@@ -75,11 +75,11 @@ if __name__ == "__main__":
     if configJsonDict["debugpath"] is not None:
         tpath = os.path.join(configJsonDict["debugpath"], "result")
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
-        saveDictToJson(outputJsonDict, tpath, "datamean.json")
+        saveDictToJson(dataMeanDict, tpath, "datamean.json")
     if configJsonDict["outputpath"] is not None:
         tpath = os.path.join(configJsonDict["outputpath"])
         saveDictToJson(outputJsonDict, tpath, "parameter.json")
-        saveDictToJson(outputJsonDict, tpath, "datamean.json")
+        saveDictToJson(dataMeanDict, tpath, "datamean.json")
 
 
     endTime1 = time.perf_counter()
