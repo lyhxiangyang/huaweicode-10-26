@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional, Any
 
 import pandas as pd
 
@@ -21,7 +21,7 @@ from hpc.l3l2utils.ParsingJson import readJsonToDict, getServerPdFromJsonDict, g
 """
 
 """
-函数功能：将modeltrain的config中的正常训练数据和异常训练数据取得
+函数功能：将modeltrain的config中的正常训练数据和异常训练数据取得, 这个时候训练数据只有一个, 是字符串类型
 """
 def getNormalDectionJson(modeltrainconfig: Dict, normalDectionjson: Dict = None) -> Dict:
     if normalDectionjson is None and modeltrainconfig["trainNormalDataPath"] is not None:
@@ -34,6 +34,23 @@ def getTrainDectionJson(modeltrainconfig: Dict, abnormalDectionjson: Dict = None
     if abnormalDectionjson is None:
         abnormalDectionjson=readJsonToDict(*(os.path.split(modeltrainconfig["trainAbnormalDataPath"])))
     return abnormalDectionjson
+"""
+函数功能：模仿上面的函数从config中得到根据trainAbnormalL3DataPath得到一个json格式的列表
+abnormalDectionjsonList, 这个参数没其他目的，就是说我们可以从外面传入这个列表直接返回
+"""
+def getTrainL3DectionJsonList(modeltrainconfig: Dict, abnormalDectionjsonList=None) -> Optional[List[Any]]:
+    if abnormalDectionjsonList is None:
+        abnormalDectionjsonList = []
+    if abnormalDectionjsonList is not None:
+        abnormalDectionjsonList = [ readJsonToDict(*(os.path.split(ipath))) for ipath in modeltrainconfig["trainAbnormalL3DataPath"]]
+    return abnormalDectionjsonList
+def getTrainL2DectionJsonList(modeltrainconfig: Dict, abnormalDectionjsonList=None) -> Optional[List[Any]]:
+    if abnormalDectionjsonList is None:
+        abnormalDectionjsonList = []
+    if abnormalDectionjsonList is not None:
+        abnormalDectionjsonList = [ readJsonToDict(*(os.path.split(ipath))) for ipath in modeltrainconfig["trainAbnormalL2DataPath"]]
+    return abnormalDectionjsonList
+
 """
 函数功能：从DectionJson中获得需要的数据并且进行简单的时间和差分处理
 """
@@ -79,6 +96,13 @@ def getAllDataFramesFromDectionJson(dataDectionJson: Dict, isTimeisStr: bool=Tru
         "topdown": mergeDataFrames(predicttopdwnpds)
     }
     return resDict
+"""
+函数功能：合并一个列表，列表中的元素是上面这个函数getAllDataFramesFromDectionJson的返回值 是一个Dict
+"""
+def mergeDataFrameDictList(dfDictList: Dict)->Dict:
+    pass
+
+
 
 """
 函数功能：从表格中提取标签为abnormalType的异常值

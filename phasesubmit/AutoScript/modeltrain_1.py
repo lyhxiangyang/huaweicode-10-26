@@ -8,7 +8,8 @@ import pandas as pd
 from hpc.l3l2utils.DefineData import FAULT_FLAG
 from hpc.l3l2utils.ModelTrainLib import getNormalDectionJson, getTrainDectionJson, getAllDataFramesFromDectionJson, \
     getMemLeakPermin, getMaxflopsinio, getPgfreeThread, getddrc_ddwr_sumscope, changeModel, \
-    getCPUTimeThread, getRandomcpuThreshold, getFreqDownThresholdpercent, getPowerThreshold
+    getCPUTimeThread, getRandomcpuThreshold, getFreqDownThresholdpercent, getPowerThreshold, getTrainL3DectionJsonList, \
+    getTrainL2DectionJsonList, mergeDataFrameDictList
 from hpc.l3l2utils.ParsingJson import readJsonToDict, saveDictToJson
 
 def isFlagsAnd(df: pd.DataFrame, labels: List[int]) -> bool:
@@ -22,11 +23,35 @@ def isFlagsOr(df: pd.DataFrame, labels: List[int]) -> bool:
 
 if __name__ == "__main__":
     startTime = time.perf_counter()
+    # 读取训练配置文件
     modelconfigfilepath = os.path.join(sys.path[0], "modeltrainconfig.json")
     configJsonDict = readJsonToDict(*(os.path.split(modelconfigfilepath)))
+    # 得到正常数据的json文件, 如果正常路径是null，那么返回None
     normalInputDict = getNormalDectionJson(configJsonDict)
-    abnormalInputDict = getTrainDectionJson(configJsonDict)
-    abnormalDataDict = getAllDataFramesFromDectionJson(abnormalInputDict)
+    # 得到L3异常和L2异常数据的json文件列表 这是一个列表 如果路径是空，则返回[]
+    L3abnormalInputDictList = getTrainL3DectionJsonList(configJsonDict)
+    L2abnormalInputDictList = getTrainL2DectionJsonList(configJsonDict)
+
+    # 得到L3异常和L2异常数据的DataFrame结构
+    L3AllDataFrameDictList = [getAllDataFramesFromDectionJson(ijson) for ijson in L3abnormalInputDictList]
+    L2AllDataFrameDictList = [getAllDataFramesFromDectionJson(ijson) for ijson in L2abnormalInputDictList]
+
+    # 得到L3和L2对应的正常数据，默认情况下取第一个数据的faultFlag=0的数据作为正常数据, 如果列表长度为0 正常就是None
+    L3NormalDataFrameDict = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in L3AllDataFrameDictList[0].items() if len(v) != 0]) if len(L3AllDataFrameDictList) != 0 else None
+    L2NormalDataFrameDict = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in L2AllDataFrameDictList[0].items() if len(v) != 0]) if len(L2AllDataFrameDictList) != 0 else None
+    if normalInputDict is not None: # 有正常路径的情况下,进行替换
+        L3NormalDataFrameDict = getAllDataFramesFromDectionJson(normalInputDict)
+        L2NormalDataFrameDict = getAllDataFramesFromDectionJson(normalInputDict)
+
+    # 我们现在有L2的正常数据，L2的异常数据列表 需要将异常合并之后然后判断
+    # 我们现在有L3的正常数据，L3的异常数据列表 需要将异常合并之后然后判断
+    # 现在需要将L3AllDataFrameDictList和L2AllDataFrameDictList里面的数据进行合并，假如存在的话 todo
+    L3AllDataFrameDict = mergeDataFrameDictList(L3AllDataFrameDictList)
+    L2AllDataFrameDict = mergeDataFrameDictList(L2AllDataFrameDictList)
+
+
+
+
     outputJsonDict = {}
     dataMeanDict = {}
     dataMeanDict["normalDataMean"] = {}
