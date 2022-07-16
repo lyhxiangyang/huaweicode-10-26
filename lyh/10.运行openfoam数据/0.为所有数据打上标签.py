@@ -96,6 +96,18 @@ if __name__ == "__main__":
         R"csvfile_huawei/huawei_memory_bandwidth50/intensity1_2",
         R"csvfile_huawei/huawei_memory_bandwidth50/intensity2",
         R"csvfile_huawei/huawei_memory_bandwidth50/intensity3",
+        R"csvfile_huawei/allcpu10/intensity1",
+        R"csvfile_huawei/allcpu10/intensity2",
+        R"csvfile_huawei/allcpu10/intensity3",
+        R"csvfile_huawei/multicpu30/intensity1",
+        R"csvfile_huawei/multicpu30/intensity2",
+        R"csvfile_huawei/multicpu30/intensity3",
+        R"csvfile_huawei/singlecpu20/intensity1",
+        R"csvfile_huawei/singlecpu20/intensity2",
+        R"csvfile_huawei/singlecpu20/intensity3",
+        R"csvfile_huawei/randomcpu80/intensity1",
+        R"csvfile_huawei/randomcpu80/intensity2",
+        R"csvfile_huawei/randomcpu80/intensity3",
     ]
     for idirpaths in dirpaths:
         dirs = getDirs(idirpaths)

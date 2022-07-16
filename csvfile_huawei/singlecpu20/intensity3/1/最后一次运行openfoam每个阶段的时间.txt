@@ -1,0 +1,13 @@
+Running blockMesh on /sharedata/motorBike64
+Running decomposePar on /sharedata/motorBike64
+2022-05-05 12:45:02 snappyHexMesh 程序运行
+Running snappyHexMesh (128 processes) on /sharedata/motorBike64 
+Restore 0/ from 0.orig/ for processor directories
+2022-05-05 12:49:00 renumberMesh 程序运行
+Running renumberMesh (128 processes) on /sharedata/motorBike64 
+2022-05-05 12:49:20 potentialFoam 程序运行
+Running potentialFoam (128 processes) on /sharedata/motorBike64 
+2022-05-05 12:49:40 checkMesh 程序运行
+Running checkMesh (128 processes) on /sharedata/motorBike64 
+2022-05-05 12:49:48 simpleFoam 程序运行
+Running simpleFoam (128 processes) on /sharedata/motorBike64 

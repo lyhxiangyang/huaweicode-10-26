@@ -80,11 +80,13 @@ if __name__ == "__main__":
         maxflopsinio = getMaxflopsinio(normalDataDictL3, L3AllDataFrameDict, configJsonDict)
         outputJsonDict["maxflopsinio"] = 0
         # 得到pgfree的变化幅度 - model - ok
-        pgfree_thread = getPgfreeThread(normalDataDictL3, L3AllDataFrameDict, maxflopsinio, configJsonDict, dataMeanDict)
-        outputJsonDict["pgfree_thread"] = pgfree_thread
-        # 得到读写指标的变化幅度 - model - ok
-        ddrc_ddwr_sum_max = getddrc_ddwr_sumscope(normalDataDictL3, L3AllDataFrameDict, maxflopsinio, configJsonDict, dataMeanDict)
-        outputJsonDict["ddrc_ddwr_sum_max"] = ddrc_ddwr_sum_max
+        if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["memorybandwidthlabels"]):
+            pgfree_thread = getPgfreeThread(normalDataDictL3, L3AllDataFrameDict, maxflopsinio, configJsonDict, dataMeanDict)
+            outputJsonDict["pgfree_thread"] = pgfree_thread
+        if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["cachegrablabels"]):
+            # 得到读写指标的变化幅度 - model - ok
+            ddrc_ddwr_sum_max = getddrc_ddwr_sumscope(normalDataDictL3, L3AllDataFrameDict, maxflopsinio, configJsonDict, dataMeanDict)
+            outputJsonDict["ddrc_ddwr_sum_max"] = ddrc_ddwr_sum_max
     # 保证全CPU是存在的
     if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["allcpulabels"]):
         # 得到judgeCPUthread 主要是依据全CPU中判断的依据 - ok
