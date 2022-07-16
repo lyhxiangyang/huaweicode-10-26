@@ -14,15 +14,13 @@ if __name__ == "__main__":
     # 其中单个server文件我默认是连续的
 
     dirpaths = [
-        R"csvfiles/normals_tmp",
-        R"csvfiles/abnormals/allcpu10",
-        R"csvfiles/abnormals/bandwidth50_t0",
-        R"csvfiles/abnormals/bandwidth50_t1",
-        R"csvfiles/abnormals/bandwidth50_t2",
-        R"csvfiles/abnormals/cacheGrab90",
-        R"csvfiles/abnormals/cpuGrab80",
-        R"csvfiles/abnormals/memleak60",
-        R"csvfiles/abnormals/singlecpu20",
+        R"csvfile_huawei/huawei_cachegrab90/intensity1",
+        R"csvfile_huawei/huawei_cachegrab90/intensity2",
+        R"csvfile_huawei/huawei_cachegrab90/intensity3",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity1",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity1_2",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity2",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity3",
     ]
 
     alldatapath = []
@@ -30,8 +28,6 @@ if __name__ == "__main__":
         alldatapath.extend(getDirs(i))
 
     for predictdirpath in alldatapath:
-        if "notrun" in predictdirpath:
-            continue
         spath = os.path.join(predictdirpath, "jsonfile") # 将结果和文件生成到一起
         jsonfilename = "alljson.json"
         # 如果存在就不重新生成

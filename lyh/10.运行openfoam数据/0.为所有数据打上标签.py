@@ -1,11 +1,10 @@
 import os
-from pathlib import Path
 from typing import List, Dict
 
 import pandas as pd
 
 from hpc.l3l2utils.DataFrameSaveRead import getfilepd, savepdfile
-from hpc.l3l2utils.DataOperation import changeTimeFromOnepd
+from hpc.l3l2utils.DataOperation import changeTimeFromOnepd, getsametimepd
 from hpc.l3l2utils.DefineData import FAULT_FLAG, TIME_COLUMN_NAME
 
 """
@@ -20,12 +19,6 @@ F = {
     "ping": "ping.csv",
     "topdown": "hpc_topdown.csv",
 }
-addFlagDir = [
-    R"DATA/2022-01-14新的测试数据/25.未知异常错误找原因/centos11",
-    R"DATA/2022-01-14新的测试数据/25.未知异常错误找原因/centos16",
-    R"DATA/2022-01-14新的测试数据/25.未知异常错误找原因/centos21",
-    R"DATA/2022-01-14新的测试数据/25.未知异常错误找原因/centos26",
-]
 
 
 def getDirs(dirpaths) -> List[str]:
@@ -51,10 +44,27 @@ def getOneDirPd(dirpath: str):
 """
 
 
+def saveDirPdFromDict(spath, PDDict: Dict):
+    for keypath, valuepd in PDDict.items():
+        if valuepd is None:
+            continue
+        if len(valuepd) == 0:
+            continue
+        tpath = os.path.join(spath, keypath)
+        filename = F[keypath]
+        savepdfile(valuepd, tpath, filename)
+
+
+"""
+根据server文件中的时间和addflag的时间进行比较然后返回一个新的addflagpd的DataFrame
+只比较分钟
+这个是用来将addflagpd的标签根据serverpd来更改
+"""
+
 def changeDataFrame(serverpd: pd.DataFrame, addflagpd: pd.DataFrame) -> pd.DataFrame:
     addflagpd = addflagpd.copy()
     if FAULT_FLAG in addflagpd.columns.array:
-        return pd.DataFrame()
+        return addflagpd
     serverTimesList = serverpd[TIME_COLUMN_NAME].tolist()
     serverFlagsList = serverpd[FAULT_FLAG].tolist()
     addflagpdTimeList = addflagpd[TIME_COLUMN_NAME].tolist()
@@ -69,52 +79,39 @@ def changeDataFrame(serverpd: pd.DataFrame, addflagpd: pd.DataFrame) -> pd.DataF
     return addflagpd
 
 
-def saveDirPdFromDict(spath, PDDict: Dict):
-    for keypath, valuepd in PDDict.items():
-        if valuepd is None:
-            continue
-        if len(valuepd) == 0:
-            continue
-        tpath = os.path.join(spath, keypath)
-        filename = F[keypath]
-        savepdfile(valuepd, tpath, filename)
 
-def getDigitalListDir():
-    pass
-# changedigitrange = list(range(28,29))
+"""
+分析process数据，只取其中一部分
+"""
+def getrightProcesspd(processpd: pd.DataFrame):
+    tpd = processpd[processpd["pname"] == "simpleFoam"]
+    return tpd
+
 if __name__ == "__main__":
     dirpaths = [
-        R"csvfiles/normals_tmp",
-        R"csvfiles/abnormals/allcpu10",
-        R"csvfiles/abnormals/bandwidth50_t0",
-        R"csvfiles/abnormals/bandwidth50_t1",
-        R"csvfiles/abnormals/bandwidth50_t2",
-        R"csvfiles/abnormals/cacheGrab90",
-        R"csvfiles/abnormals/cpuGrab80",
-        R"csvfiles/abnormals/memleak60",
-        R"csvfiles/abnormals/singlecpu20",
+        R"csvfile_huawei/huawei_cachegrab90/intensity1",
+        R"csvfile_huawei/huawei_cachegrab90/intensity2",
+        R"csvfile_huawei/huawei_cachegrab90/intensity3",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity1",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity1_2",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity2",
+        R"csvfile_huawei/huawei_memory_bandwidth50/intensity3",
     ]
     for idirpaths in dirpaths:
         dirs = getDirs(idirpaths)
         for idir in dirs:
-            if "notrun" in idir:
-                continue
-            # 存在就continue 不进行生成
+            # 存在 server 就continue 不进行生成
             if os.path.exists(os.path.join(idir, "server")):
                 continue
             # 有server目录就不进行下去
             print(idir)
-            iidir = Path(idir).parent.name
-            # dirnumber = int(iidir.split(".")[0])
-            # if not dirnumber in changedigitrange:
-            # continue
-            print(idir)
             PD = getOneDirPd(dirpath=idir)
             savePD = {}
-            savePD["server"] = PD["server"]
-            savePD["process"] = PD["process"]
-            savePD["compute"] = PD["compute"]
-            savePD["nic"] = PD["nic"]
-            savePD["ping"] = PD["ping"]
-            savePD["topdown"] = PD["topdown"]
+            # 获得正确的process文件
+            savePD["process"] = getrightProcesspd(PD["process"])
+            savePD["server"], _ = getsametimepd(PD["server"], savePD["process"])
+            savePD["compute"] = None
+            savePD["nic"] = None
+            savePD["ping"] = None
+            savePD["topdown"], _ = getsametimepd(PD["topdown"], savePD["process"])
             saveDirPdFromDict(idir, savePD)
