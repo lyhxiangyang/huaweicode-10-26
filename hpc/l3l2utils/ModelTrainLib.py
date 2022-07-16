@@ -99,8 +99,18 @@ def getAllDataFramesFromDectionJson(dataDectionJson: Dict, isTimeisStr: bool=Tru
 """
 函数功能：合并一个列表，列表中的元素是上面这个函数getAllDataFramesFromDectionJson的返回值 是一个Dict
 """
-def mergeDataFrameDictList(dfDictList: Dict)->Dict:
-    pass
+def mergeDataFrameDictList(dfDictList: List)->Dict:
+    if len(dfDictList) == 0:
+        return None
+    data = {
+        'server': mergeDataFrames([i['server'] for i in dfDictList]),
+        'process': mergeDataFrames([i['process'] for i in dfDictList]),
+        'network': mergeDataFrames([i['network'] for i in dfDictList]),
+        'compute': mergeDataFrames([i['compute'] for i in dfDictList]),
+        # 'ping': mergeDataFrames([i['ping'] for i in dfDictList]),
+        'topdown': mergeDataFrames([i['topdown'] for i in dfDictList])
+    }
+    return data
 
 
 
@@ -278,7 +288,7 @@ def getPgfreeThread(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxflopsini
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
     # 存储mflops的平均值
     debugDict["normalDataMean"]["topdown"]["mflops"] = normalmflopsmean
-    debugDict["normalDataMean"]["topdown"]["pg_mflops"] = normalmflopsmean
+    # debugDict["normalDataMean"]["topdown"]["pg_mflops"] = normalmflopsmean
 
     debugpd["normal_mflops_mean"] = normalmflopsmean
     cname = "pgfree"
@@ -356,7 +366,7 @@ def getddrc_ddwr_sumscope(normalfilepdDict: Dict, abnormalfilepdDict: Dict,maxfl
     normalmflopsmean = getSeriesFrequencyMean(normaltopdowndf[cname])
     abnormalmflopsmean = getSeriesFrequencyMean(abnormaltopdowndf[cname])
     # 存储mflops的平均值
-    debugDict["normalDataMean"]["topdown"]["d_mflops"] = normalmflopsmean
+    # debugDict["normalDataMean"]["topdown"]["d_mflops"] = normalmflopsmean
 
     debugpd["normal_mlops_mean"] = normalmflopsmean
     debugpd["abnormal_allmflops_mean"] = abnormalmflopsmean
@@ -546,7 +556,7 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
 
     normalfreqmean = getSeriesFrequencyMeanLists(normalserverdf, [cname])[cname]
     # 存储freq的平均值
-    debugDict["normalDataMean"]["compute"]["freq"] = normalfreqmean
+    debugDict["normalDataMean"]["server"]["freq"] = normalfreqmean
 
     abnormalfreqmean = getSeriesFrequencyMeanLists(abnormalserverdf, [cname])[cname]
     abnormal_abfreqmean = getSeriesMaxFrequencyMeanLists(abnormalserverdf, labels=modelconfigJson["l2labels"], features=["freq"])["freq"]
@@ -559,7 +569,7 @@ def getFreqDownThresholdpercent(normalfilepdDict: Dict, abnormalfilepdDict: Dict
         tpath = os.path.join(modelconfigJson["debugpath"], "freqDownThresholdpercent")
         savepdfile(debugpd, tpath, "freqDownThresholdpercent.csv")
 
-    resvalue = (normalfreqmean - abnormal_abfreqmean) / normalfreqmean * 100 * 0.9
+    resvalue = (normalfreqmean - abnormal_abfreqmean) / normalfreqmean * 100 * 0.8
     return resvalue
 """
 必须有121的存在
@@ -583,8 +593,12 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
     # 存储power的平均值
     debugDict["normalDataMean"]["compute"]["power"] = normalpowermean
 
+    normalcabinetpowermean = getSeriesFrequencyMeanLists(normalcomputedf, ["cabinet_power"])["cabinet_power"]
+    # 存储cabinet_power的平均值
+    debugDict["normalDataMean"]["compute"]["cabinet_power"] = normalcabinetpowermean
+
     abnormalpowermean = getSeriesFrequencyMeanLists(abnormalcomputedf, [cname])[cname]
-    abnormal_abpowermean = getSeriesMaxFrequencyMeanLists(abnormalcomputedf, labels=modelconfigJson["l2labels"], features=["power"])["power"]
+    abnormal_abpowermean = getSeriesMaxFrequencyMeanLists(abnormalcomputedf, labels=[161], features=["power"])["power"]
     debugpd["normalpowermean"] = normalpowermean
     debugpd["abnormalpowermean"] = abnormalpowermean
     debugpd["abnormal_abpowermean"] = abnormal_abpowermean
@@ -592,7 +606,7 @@ def getPowerThreshold(normalfilepdDict: Dict, abnormalfilepdDict: Dict, modelcon
         tpath = os.path.join(modelconfigJson["debugpath"], "power_threshold")
         savepdfile(debugpd, tpath, "power_threshold.csv")
     # resvalue = abnormal_abpowermean / normalpowermean * 100 * 1.1
-    resvalue = 100 - (normalpowermean - abnormal_abpowermean) / normalpowermean * 100 * 0.9
+    resvalue = 100 - (normalpowermean - abnormal_abpowermean) / normalpowermean * 100 * 0.8
     return resvalue
 
 # jinxing write

@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import time
@@ -45,12 +46,9 @@ if __name__ == "__main__":
 
     # 我们现在有L2的正常数据，L2的异常数据列表 需要将异常合并之后然后判断
     # 我们现在有L3的正常数据，L3的异常数据列表 需要将异常合并之后然后判断
-    # 现在需要将L3AllDataFrameDictList和L2AllDataFrameDictList里面的数据进行合并，假如存在的话 todo
+    # 现在需要将L3AllDataFrameDictList和L2AllDataFrameDictList里面的数据进行合并，假如存在的话
     L3AllDataFrameDict = mergeDataFrameDictList(L3AllDataFrameDictList)
     L2AllDataFrameDict = mergeDataFrameDictList(L2AllDataFrameDictList)
-
-
-
 
     outputJsonDict = {}
     dataMeanDict = {}
@@ -60,44 +58,66 @@ if __name__ == "__main__":
     dataMeanDict["normalDataMean"]["compute"] = {}
 
     if normalInputDict is not None:
-        normalDataDict = getAllDataFramesFromDectionJson(normalInputDict)
+        normalDataDictL3 = getAllDataFramesFromDectionJson(normalInputDict)
+        normalDataDictL2 = getAllDataFramesFromDectionJson(normalInputDict)
     else:
         # 如果没有指定，那么normalInputDict来自于异常类型中的数值
-        normalDataDict = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in abnormalDataDict.items() if len(v) != 0])
+        normalDataDictL3 = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in L3AllDataFrameDictList[0].items() if FAULT_FLAG in v.columns])
+        normalDataDictL2 = normalDataDictL3.copy()
+        # if len(L2AllDataFrameDictList) > 0:
+        #     normalDataDictL2 = dict([(i, v[v[FAULT_FLAG] == 0]) for i, v in L3AllDataFrameDictList[0].items()])
+
 
     # 保证60内存泄露异常是存在的
-    if isFlagsOr(abnormalDataDict["server"], configJsonDict["memleaklabels"]):
+    if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["memleaklabels"]):
         # 内存大小幅度的变化 - model -- ok
-        memleakpermin = getMemLeakPermin(normalDataDict, abnormalDataDict, configJsonDict)
+        memleakpermin = getMemLeakPermin(normalDataDictL3, L3AllDataFrameDict, configJsonDict)
         outputJsonDict["memleakpermin"] = memleakpermin
 
     # 保证50和90某个出现一个就行
-    if isFlagsOr(abnormalDataDict["server"], configJsonDict["memorybandwidthlabels"] + configJsonDict["cachegrablabels"]):
+    if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["memorybandwidthlabels"] + configJsonDict["cachegrablabels"]):
         # 得到mlops的变化幅度 主要是根据50 和 90的最大变化 - ok
-        maxflopsinio = getMaxflopsinio(normalDataDict, abnormalDataDict, configJsonDict)
+        maxflopsinio = getMaxflopsinio(normalDataDictL3, L3AllDataFrameDict, configJsonDict)
         outputJsonDict["maxflopsinio"] = 0
         # 得到pgfree的变化幅度 - model - ok
-        pgfree_thread = getPgfreeThread(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict, dataMeanDict)
+        pgfree_thread = getPgfreeThread(normalDataDictL3, L3AllDataFrameDict, maxflopsinio, configJsonDict, dataMeanDict)
         outputJsonDict["pgfree_thread"] = pgfree_thread
         # 得到读写指标的变化幅度 - model - ok
-        ddrc_ddwr_sum_max = getddrc_ddwr_sumscope(normalDataDict, abnormalDataDict, maxflopsinio, configJsonDict, dataMeanDict)
+        ddrc_ddwr_sum_max = getddrc_ddwr_sumscope(normalDataDictL3, L3AllDataFrameDict, maxflopsinio, configJsonDict, dataMeanDict)
         outputJsonDict["ddrc_ddwr_sum_max"] = ddrc_ddwr_sum_max
     # 保证全CPU是存在的
-    if isFlagsOr(abnormalDataDict["server"], configJsonDict["allcpulabels"]):
+    if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["allcpulabels"]):
         # 得到judgeCPUthread 主要是依据全CPU中判断的依据 - ok
-        cpuTimeThread = getCPUTimeThread(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
+        cpuTimeThread = getCPUTimeThread(normalDataDictL3, L3AllDataFrameDict, configJsonDict, dataMeanDict)
         outputJsonDict["abnormalCpuTimeThread"] = cpuTimeThread
-    if isFlagsOr(abnormalDataDict["server"], configJsonDict["randomcpulabels"] + configJsonDict["memorybandwidthlabels"] + configJsonDict["cachegrablabels"]):
+    if isFlagsOr(L3AllDataFrameDict["server"], configJsonDict["randomcpulabels"] + configJsonDict["memorybandwidthlabels"] + configJsonDict["cachegrablabels"]):
         # 得到randomcpu
-        randomcpuThreshold = getRandomcpuThreshold(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
+        randomcpuThreshold = getRandomcpuThreshold(normalDataDictL3, L3AllDataFrameDict, configJsonDict, dataMeanDict)
         outputJsonDict["randomcpuThreshold"] = randomcpuThreshold
-    if isFlagsOr(abnormalDataDict["server"], configJsonDict["l2labels"]):
-        # 得到freqDownThresholdpercent
-        freqDownThresholdpercent = getFreqDownThresholdpercent(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
-        outputJsonDict["freqDownThresholdpercent"] = freqDownThresholdpercent
+    if L2AllDataFrameDict is not None:
+        if isFlagsOr(L2AllDataFrameDict["server"], configJsonDict["l2labels"]):
+            # 得到freqDownThresholdpercent
+            freqDownThresholdpercent = getFreqDownThresholdpercent(normalDataDictL2, L2AllDataFrameDict, configJsonDict, dataMeanDict)
+            outputJsonDict["freqDownThresholdpercent"] = freqDownThresholdpercent
         # 得到 power_threshold 通过111导致的power变化来改变
-        power_threshold = getPowerThreshold(normalDataDict, abnormalDataDict, configJsonDict, dataMeanDict)
-        outputJsonDict["power_threshold"] = power_threshold
+        outputJsonDict["power_threshold"] = 90
+        if isFlagsOr(L2AllDataFrameDict["server"], [161]):
+            power_threshold = getPowerThreshold(normalDataDictL2, L2AllDataFrameDict, configJsonDict, dataMeanDict)
+            outputJsonDict["power_threshold"] = power_threshold
+
+    if configJsonDict["testConfigPath"] is not None:
+        testConfigDict = readJsonToDict(*(os.path.split(configJsonDict["testConfigPath"])))
+        thresholds = ["memleakpermin", "maxflopsinio", "pgfree_thread", "ddrc_ddwr_sum_max",
+                      "abnormalCpuTimeThread", "randomcpuThreshold", "freqDownThresholdpercent", "power_threshold"]
+        for threshold in thresholds:
+            if threshold in outputJsonDict.keys():
+                testConfigDict[threshold] = outputJsonDict[thresholds]
+        data_means = ["server", "compute", "process", "nic", "ping", "topdown"]
+        for mean in data_means:
+            if mean in dataMeanDict["normalDataMean"].keys():
+                testConfigDict["normalDataMean"][mean] = dataMeanDict["normalDataMean"][mean]
+        with open(configJsonDict["testConfigPath"], 'w', encoding='utf8') as f:
+            json.dump(testConfigDict, f, indent=4, ensure_ascii=False)
 
     if configJsonDict["debugpath"] is not None:
         tpath = os.path.join(configJsonDict["debugpath"], "result")

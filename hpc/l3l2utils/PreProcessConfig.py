@@ -24,7 +24,7 @@ def changeNormalData(inputDict: Dict) -> Dict:
         [alldatapdDicts["server"], alldatapdDicts["topdown"]])
     debugpd[TIME_COLUMN_NAME] = alldatapdDicts["server"][TIME_COLUMN_NAME]
     debugpd[FAULT_FLAG] = alldatapdDicts["server"][FAULT_FLAG]
-    serverfeatures = ["pgfree"]
+    serverfeatures = ["pgfree", "freq"]
     for ife in serverfeatures:
         alldatapdDicts["server"][ife] = smoothseries(alldatapdDicts["server"][ife])
         inputDict["normalDataMean"]["server"][ife] = getSeriesFrequencyMean(alldatapdDicts["server"][ife])
@@ -36,6 +36,12 @@ def changeNormalData(inputDict: Dict) -> Dict:
         inputDict["normalDataMean"]["topdown"][ife] = getSeriesFrequencyMean(alldatapdDicts["topdown"][ife])
         debugpd["topdown_{}".format(ife)] = alldatapdDicts["topdown"][ife]
         debugpd["topdown_{}_mean".format(ife)] = inputDict["normalDataMean"]["topdown"][ife]
+    computefeatures = ["power", "cabinet_power"]
+    for ife in computefeatures:
+        alldatapdDicts["compute"][ife] = smoothseries(alldatapdDicts["compute"][ife])
+        inputDict["normalDataMean"]["compute"][ife] = getSeriesFrequencyMean(alldatapdDicts["compute"][ife])
+        debugpd["compute_{}".format(ife)] = alldatapdDicts["compute"][ife]
+        debugpd["compute_{}_mean".format(ife)] = inputDict["normalDataMean"]["compute"][ife]
 
     if inputDict["spath"] is not None:
         tpath = os.path.join(inputDict["spath"], "meanvalues")
